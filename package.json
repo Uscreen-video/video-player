@@ -1,0 +1,32 @@
+{
+  "name": "video-player",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "generate": "hygen component new"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@storybook/addon-essentials": "^7.0.0-beta.26",
+    "@storybook/addon-links": "^7.0.0-beta.26",
+    "@storybook/blocks": "^7.0.0-beta.26",
+    "@storybook/web-components": "^7.0.0-beta.26",
+    "@storybook/web-components-vite": "^7.0.0-beta.26",
+    "@types/node": "^18.11.18",
+    "hygen": "^6.2.11",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "storybook": "^7.0.0-beta.26",
+    "vite": "^4.0.4"
+  },
+  "dependencies": {
+    "lit": "^2.6.1",
+    "lit-html": "^2.6.1"
+  }
+}
