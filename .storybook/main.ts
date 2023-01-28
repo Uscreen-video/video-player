@@ -9,9 +9,8 @@ module.exports = {
   ],
   "framework": {
     "name": "@storybook/web-components-vite",
-    "options": {}
   },
   "docs": {
-    "autodocs": "tag"
+    autodocs: true,
   }
 }

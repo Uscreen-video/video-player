@@ -1,3 +1,12 @@
 :host {
+  display: block;
+  position: relative;
+}
 
+::slotted(video) {
+  width: 100%;
+  object-fit: contain;
+  outline: none;
+  background: black;
+  aspect-ratio: 16 / 9;
 }
