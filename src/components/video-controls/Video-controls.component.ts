@@ -1,8 +1,7 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, state } from 'lit/decorators.js'
+import { customElement } from 'lit/decorators.js'
 import styles from './Video-controls.styles.css?inline'
-import { connect, dispatch, listen } from '../../state'
-import { Action, Command, Event } from '../../state/types'
+import { connect } from '../../state'
 
 /**
  * @slot - Video-controls main content
@@ -16,7 +15,7 @@ export class VideoControls extends LitElement {
 
   render() {
     return html`
-      <div>time is: ${this.state}</div>
+      <div>counter is: ${this.state}</div>
       <slot></slot>
     `
   }

@@ -1,11 +1,23 @@
 
 import { ContextProvider } from '@lit-labs/context';
 import { context } from './index'
-import { StateAction } from './emitter';
-import { mapState } from './events';
-import { Event } from './types';
+import { StateAction } from './dispatcher';
+import { stateMapper } from './mapper';
+import { Action, Event, State } from './types';
 
 type Context = typeof context
+
+export const mapState = (
+  action: Action,
+  state: State,
+  value: any
+): State => {
+  if (!stateMapper[action]) {
+    console.warn(`${action} not found`)
+    return state
+  }
+  return stateMapper[action](state, value)
+}
 
 export class StateController extends ContextProvider<Context> {
   hostConnected() {
@@ -24,7 +36,6 @@ export class StateController extends ContextProvider<Context> {
   }
 
   handleRootRegistration = (e: CustomEvent) => {
-    console.log('registered')
     e.stopPropagation()
     e.detail.callback?.(this.host)
   }

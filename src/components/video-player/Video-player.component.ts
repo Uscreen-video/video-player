@@ -1,36 +1,35 @@
+import { createState, listen, dispatch, createCommand, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
-import { customElement, property, queryAssignedElements, queryAssignedNodes, state } from 'lit/decorators.js'
-import { createState, listen, dispatch } from '../../state'
+import { customElement, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
 import '../video-controls'
 import '../video-play-button'
-import { Action, Command } from '../../state/types'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
   static styles?: CSSResultGroup = unsafeCSS(styles)
-
   public state = createState(this)
+  public command = createCommand(this)
   
   @queryAssignedElements({ selector: 'video', slot: 'video' })
   video: HTMLVideoElement[]
 
-  @listen(Command.play)
+  @listen(Types.Command.play)
   playVideo() {
     return this.video[0].play()
   }
 
-  @listen(Command.pause)
+  @listen(Types.Command.pause)
   pauseVideo() {
     return this.video[0].pause()
   }
 
   handlePlay = () => {
-    dispatch(this, Action.play)
+    dispatch(this, Types.Action.play)
   }
 
   handlePause = () => {
-    dispatch(this, Action.pause)
+    dispatch(this, Types.Action.pause)
   }
 
   connectedCallback(): void {

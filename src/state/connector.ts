@@ -61,9 +61,7 @@ export class ContextConsumer<
             return
           }
 
-          // schedule an update in case this value is used in a template
           this.host.requestUpdate();
-
           this.unsubscribe = unsubscribe;
         },
         true

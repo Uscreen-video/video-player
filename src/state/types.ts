@@ -11,6 +11,12 @@ export enum Action {
 
 export enum Event {
   state = 'video-state-update',
+  bulk = 'video-bulk-state-update',
   command = 'video-command',
   register = 'video-register-root',
+}
+
+export type State = {
+  value: number,
+  isPlaying: boolean,
 }

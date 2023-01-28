@@ -44,21 +44,8 @@ export class EventListener implements ReactiveController {
   }
 }
 
-
-export class Commander {
-  constructor(
-    private host: ReactiveElement,
-  ) {
-    this.host.addController(this);
-  }
-
-  hostConnected() {
-  }
-
-  hostDisconnected(): void {
-  }
-
-  command = (
+export function createCommand(host: ReactiveElement) {
+  return (
     action: Command,
     params?: Record<string, any>
   ) => new Promise((resolve, reject) => {
@@ -73,7 +60,7 @@ export class Commander {
         reject
       },
     })
-    this.host.dispatchEvent(event);
+    host.dispatchEvent(event);
   })
 }
 

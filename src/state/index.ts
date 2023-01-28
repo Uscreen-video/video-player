@@ -3,13 +3,10 @@ import { ReactiveElement } from 'lit'
 import { connectConsumer } from './connector'
 import { StateController } from './controller'
 import { createCommandListener } from './commander'
-import { Command } from './types'
-export { dispatch } from './emitter'
-
-export type State = {
-  value: number,
-  isPlaying: boolean,
-}
+import { Command, State } from './types'
+export { dispatch } from './dispatcher'
+export { createCommand } from './commander'
+export * as Types from './types'
 
 const initialValue: State = {
   value: 0,

@@ -1,9 +1,7 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './Video-play-button.styles.css?inline'
-import { connect, dispatch } from '../../state'
-import { Commander } from '../../state/commander'
-import { Action, Command } from '../../state/types'
+import { connect, createCommand, Types } from '../../state'
 
 /**
  * @slot - Video-play-button main content
@@ -11,14 +9,13 @@ import { Action, Command } from '../../state/types'
 @customElement('video-play-button')
 export class VideoPlayButton extends LitElement {
   static styles = unsafeCSS(styles)
+  public command = createCommand(this)
 
   @connect('isPlaying')
   isPlaying = false
 
-  commander = new Commander(this)
-
   handleClick() {
-    this.commander.command(this.isPlaying ? Command.pause : Command.play)
+    this.command(this.isPlaying ? Types.Command.pause : Types.Command.play)
   }
 
   render() {
