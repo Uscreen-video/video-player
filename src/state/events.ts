@@ -1,30 +1,29 @@
 import { State } from "."
+import { Action } from './types'
 
-type Actions = {
-  click: {
-    isPlaying: boolean
-  }
-}
-
-export type ActionsType = keyof Actions
-type ResultType = State & Partial<Actions[ActionsType]>
-type MapperType = (s: State, v: any) => ResultType
-
-const mappers: Record<ActionsType, MapperType> = {
-  click: (state) => ({
+export const stateMapper: Record<Action, (s: State, v: any) => State> = {
+  [Action.toggle]: (state) => ({
     ...state,
     isPlaying: !state.isPlaying
+  }),
+  [Action.play]: (state) => ({
+    ...state,
+    isPlaying: true
+  }),
+  [Action.pause]: (state) => ({
+    ...state,
+    isPlaying: false
   })
 }
 
 export const mapState = (
-  action: ActionsType,
+  action: Action,
   state: State,
   value: any
-): ResultType => {
-  if (!mappers[action]) {
+): State => {
+  if (!stateMapper[action]) {
     console.warn(`${action} not found`)
     return state
   }
-  return mappers[action](state, value)
+  return stateMapper[action](state, value)
 }

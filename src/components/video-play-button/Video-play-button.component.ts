@@ -1,10 +1,9 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement } from 'lit/decorators.js'
 import styles from './Video-play-button.styles.css?inline'
-import { connect } from '../../state'
-import { emit } from '../../state/emitter'
+import { connect, dispatch } from '../../state'
 import { Commander } from '../../state/commander'
+import { Action, Command } from '../../state/types'
 
 /**
  * @slot - Video-play-button main content
@@ -19,8 +18,7 @@ export class VideoPlayButton extends LitElement {
   commander = new Commander(this)
 
   handleClick() {
-    this.commander.command('play')
-    // emit(this, 'click').then(() => console.log('click resolved'))
+    this.commander.command(this.isPlaying ? Command.pause : Command.play)
   }
 
   render() {

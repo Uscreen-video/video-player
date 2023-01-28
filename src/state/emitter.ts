@@ -1,11 +1,11 @@
 import { ReactiveElement } from "lit";
-import { ActionsType } from "./events";
+import { Event, Action } from "./types";
 
 export const UPDATE_STATE = 'update-video-state'
 export const COMMAND = 'video-command'
 
 export type StateAction = {
-  action: ActionsType;
+  action: Action;
   params: Record<string, any>;
   resolve: (value: unknown) => void;
   reject: (reason?: any) => void;
@@ -13,10 +13,10 @@ export type StateAction = {
 
 export const dispatch = (
   host: ReactiveElement,
-  action: ActionsType,
+  action: Action,
   params?: Record<string, any>
 ) => new Promise((resolve, reject) => {
-  const event = new CustomEvent<StateAction>(UPDATE_STATE, {
+  const event = new CustomEvent<StateAction>(Event.state, {
     bubbles: true,
     cancelable: true,
     composed: true,
