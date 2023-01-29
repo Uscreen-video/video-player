@@ -1,5 +1,5 @@
 import { Types } from "."
-import { PromiseLike, State } from "./types"
+import { PromiseLike, State } from "../types"
 
 export class CommandRegisterEvent extends Event {
   constructor(

@@ -1,10 +1,10 @@
 
 import { ContextProvider } from '@lit-labs/context';
-import { context } from './index'
-import { StateAction } from './dispatcher';
-import { stateMapper } from './mapper';
-import { Action, Command, Event, State } from './types';
-import { CommandEvent, CommandRegisterEvent } from './events';
+import { context } from '../state'
+import { StateAction } from '../state/dispatcher';
+import { stateMapper } from '../state/mapper';
+import { CommandEvent, CommandRegisterEvent } from '../state/events';
+import { Action, Command, Event, PromiseLike, State } from '../types';
 
 type Context = typeof context
 
@@ -20,9 +20,10 @@ export const mapState = (
   return stateMapper[action](state, value)
 }
 
+
 class CachedCommand {
   private _params: unknown
-  private _promise: PromiseConstructor
+  private _promise: PromiseLike
 
   constructor(
     public readonly cache: Set<CachedCommand>,
@@ -30,7 +31,7 @@ class CachedCommand {
     public readonly dependencies: State | undefined,
     public readonly callback: (
       params: unknown,
-      promise: PromiseConstructor,
+      promise: PromiseLike,
       unsubscribe: () => void
     ) => void,
   ) { }
@@ -41,13 +42,13 @@ class CachedCommand {
       .every((k: keyof State) => this.dependencies[k] === s[k])
   }
 
-  setParams(promise: PromiseConstructor, params: unknown) {
+  setParams(promise = this._promise, params: unknown) {
     this._params = params
     this._promise = promise
     return this
   }
 
-  exec(promise: PromiseConstructor = this._promise, params = this._params) {
+  exec(promise = this._promise, params = this._params) {
     this.callback(params, promise, () => this.cache.delete(this))
   }
 }

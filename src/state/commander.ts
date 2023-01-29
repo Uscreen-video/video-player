@@ -1,17 +1,17 @@
 import { ReactiveController, ReactiveElement } from "lit";
 import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
-import { Command, Event, State } from "./types";
+import { Command, Event, State } from "../types";
 import { CommandEvent, CommandRegisterEvent } from "./events";
 
-export class EventListener implements ReactiveController {
-  root: ReactiveElement
-  unsubscribe?: () => void
+export class CommandListener implements ReactiveController {
+  private _unsubscribe?: () => void
+  private callbacks = new Set<(params: any) => void>()
 
   constructor(
     protected host: ReactiveElement,
     private event: Command,
-    private name: PropertyKey,
-    private dependencies?: State
+    private dependencies?: State,
+    private name?: PropertyKey,
   ) {
     this.host.addController(this);
   }
@@ -22,16 +22,37 @@ export class EventListener implements ReactiveController {
         this.event,
         this.dependencies,
         (params, [resolve, reject], unsubscribe) => {
-          const fx = (this.host as any)[this.name](params)
-          if (fx instanceof Promise) fx.then(resolve).catch(reject)
-          this.unsubscribe = unsubscribe
+          this._unsubscribe = unsubscribe
+          if (this.name) {
+            const fx = (this.host as any)[this.name](params)
+            if (fx instanceof Promise) fx.then(resolve).catch(reject)
+          } else {
+            this.resolveCallbacks(params)
+          }
         }
       )
     )
   }
 
+  listen(callback: () => void) {
+    this.callbacks.add(callback)
+    return this
+  }
+
+  resolveCallbacks(params: unknown) {
+    for (const callback of this.callbacks) {
+      callback(params)
+    }
+  }
+
   hostDisconnected(): void {
-    this.unsubscribe?.()
+    this.callbacks = undefined
+    this._unsubscribe?.()
+  }
+
+  public unsubscribe() {
+    this.callbacks = undefined
+    this._unsubscribe()
   }
 }
 
@@ -60,11 +81,11 @@ export function createCommandListener(event: Command, requirements?: State): <K 
   return decorateProperty({
     finisher: (ctor: typeof ReactiveElement, name: PropertyKey) => {
       ctor.addInitializer((element: ReactiveElement): void => {
-        new EventListener(
+        new CommandListener(
           element,
           event,
+          requirements,
           name,
-          requirements
         );
       });
     },

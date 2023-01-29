@@ -7,7 +7,7 @@ export enum Command {
 export enum Action {
   play,
   pause,
-  updateSource,
+  update,
   toggleMuted
 }
 

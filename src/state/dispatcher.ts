@@ -1,5 +1,5 @@
 import { ReactiveElement } from "lit";
-import { Event, Action, State } from "./types";
+import { Event, Action, State } from "../types";
 
 export type StateAction = {
   action: Action;

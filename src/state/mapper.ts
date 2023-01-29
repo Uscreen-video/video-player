@@ -1,4 +1,4 @@
-import { Action, State } from './types'
+import { Action, State } from '../types'
 
 export const stateMapper: Record<Action, (s: State, v: any) => State> = {
   [Action.toggleMuted]: (state) => ({
@@ -13,7 +13,7 @@ export const stateMapper: Record<Action, (s: State, v: any) => State> = {
     ...state,
     isPlaying: false
   }),
-  [Action.updateSource]: (state, params) => ({
+  [Action.update]: (state, params) => ({
     ...state,
     ...params
   })

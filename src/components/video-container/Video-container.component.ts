@@ -2,8 +2,8 @@ import { connect, createCommand, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
-import { State } from '../../state/types'
-import type { Hls } from 'hls.js'
+import { State } from '../../types'
+import { HlsController } from '../../controllers/hls'
 /**
  * @slot - Video-container main content
  * */
@@ -11,8 +11,7 @@ import type { Hls } from 'hls.js'
 export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
-
-  hls: Hls
+  private hls = new HlsController(this)
 
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
@@ -24,27 +23,6 @@ export class VideoContainer extends LitElement {
   playVideo() {
     console.log('"play" fired', this.state)
     return this.videos[0].play()
-  }
-
-  @listen(Types.Command.init, { isNativeHLS: false })
-  async handleHLSInit() {
-    const HLS = (await import('hls.js')).default
-    if (!HLS.isSupported()) return
-
-    this.hls?.destroy()
-  
-    this.hls = new HLS({
-      maxMaxBufferLength: 30,
-      enableWorker: false,
-      initialLiveManifestSize: 2,
-      liveSyncDurationCount: 5,
-      fragLoadingMaxRetry: 10,
-      manifestLoadingMaxRetry: 2,
-      levelLoadingMaxRetry: 4,
-    })
-
-    this.hls.loadSource(this.videoSource);
-    this.hls.attachMedia(this.videos[0]);
   }
 
   @listen(Types.Command.pause)
@@ -66,7 +44,7 @@ export class VideoContainer extends LitElement {
 
   initVideo() {
     const [{ autoplay, muted, poster, }] = this.videos
-    dispatch(this, Types.Action.updateSource, {
+    dispatch(this, Types.Action.update, {
       poster,
       src: this.videoSource,
       isAutoplay: !!autoplay,
