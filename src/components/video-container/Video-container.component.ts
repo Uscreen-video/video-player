@@ -64,10 +64,26 @@ export class VideoContainer extends LitElement {
     dispatch(this, Types.Action.pause)
   }
 
+  @eventOptions({ capture: true })
+  handleTimeUpdate(e: { target: HTMLVideoElement}) {
+    dispatch(this, Types.Action.update, {
+      currentTime: e.target.currentTime
+    })
+  }
+
+  @eventOptions({ capture: true })
+  handleLoadedData(e: { target: HTMLVideoElement}) {
+    dispatch(this, Types.Action.update, {
+      duration: e.target.duration
+    })
+  }
+
   initVideo() {
-    const [{ autoplay, muted, poster, }] = this.videos
-    dispatch(this, Types.Action.updateSource, {
+    const [{ autoplay, muted, poster, duration, currentTime }] = this.videos
+    dispatch(this, Types.Action.update, {
       poster,
+      duration,
+      currentTime,
       src: this.videoSource,
       isAutoplay: !!autoplay,
       isMuted: !!muted,
@@ -83,6 +99,8 @@ export class VideoContainer extends LitElement {
         @slotchange=${this.initVideo}
         @play=${this.handlePlay}
         @pause=${this.handlePause}
+        @timeupdate=${this.handleTimeUpdate}
+        @loadeddata=${this.handleLoadedData}
       ></slot>
     `
   }

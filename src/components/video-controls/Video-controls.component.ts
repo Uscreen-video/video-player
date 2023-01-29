@@ -15,7 +15,6 @@ export class VideoControls extends LitElement {
 
   render() {
     return html`
-      <div>counter is: ${this.state}</div>
       <slot></slot>
     `
   }

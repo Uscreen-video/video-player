@@ -1,6 +1,7 @@
 import { html } from 'lit'
 import './Video-player.component'
 import '../video-play-button'
+import '../video-timeline'
 
 export default {
   title: 'Video Player',
@@ -18,9 +19,10 @@ export default {
           type="application/x-mpegURL"
         />
       </video>
-      <video-play-button slot="controls">
-    
-      </video-play-button>
+      <div slot="controls" style="width: 100%;">
+        <video-play-button></video-play-button>
+        <video-timeline></video-timeline>
+      </div>
     </video-player>
   `
   ,

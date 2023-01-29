@@ -20,6 +20,8 @@ export enum Event {
 
 export type State = Partial<{
   value: number,
+  duration: number,
+  currentTime: number,
   src: string,
   poster: string,
   isPlaying: boolean,
