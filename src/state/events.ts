@@ -1,29 +1,12 @@
-import { State } from "."
-import { Action } from './types'
+import { Types } from "."
+import { State } from "./types"
 
-export const stateMapper: Record<Action, (s: State, v: any) => State> = {
-  [Action.toggle]: (state) => ({
-    ...state,
-    isPlaying: !state.isPlaying
-  }),
-  [Action.play]: (state) => ({
-    ...state,
-    isPlaying: true
-  }),
-  [Action.pause]: (state) => ({
-    ...state,
-    isPlaying: false
-  })
-}
-
-export const mapState = (
-  action: Action,
-  state: State,
-  value: any
-): State => {
-  if (!stateMapper[action]) {
-    console.warn(`${action} not found`)
-    return state
+export class CommandEvent extends Event {
+  constructor(
+    public readonly command: Types.Command,
+    public readonly dependencies: State,
+    public readonly callback: (unsubscribe: () => void) => void,
+  ) {
+    super(Types.Event.registerCommand, { bubbles: true, composed: true })
   }
-  return stateMapper[action](state, value)
 }

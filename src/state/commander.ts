@@ -1,47 +1,39 @@
 import { ReactiveController, ReactiveElement } from "lit";
 import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
-import { Command, Event } from "./types";
+import { Command, Event, State } from "./types";
 import { VideoPlayer } from "../components/video-player";
+import { CommandEvent } from "./events";
 
 export class EventListener implements ReactiveController {
   root: ReactiveElement
+  unsubscribe: () => void
 
   constructor(
     protected host: ReactiveElement,
     private event: Command,
-    private name: PropertyKey
+    private name: PropertyKey,
+    private dependencies?: State
   ) {
     this.host.addController(this);
   }
 
   hostConnected() {
-    if (this.host instanceof VideoPlayer) {
-      this.hostDiscovered(this.host)
-      return
-    }
-    this.host.dispatchEvent(new CustomEvent(Event.register, {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      detail: {
-        callback: this.hostDiscovered
-      }
-    }))
+    this.host.dispatchEvent(
+      new CommandEvent(
+        this.event,
+        this.dependencies,
+        (unsubscribe) => {
+          (this.host as any)[this.name]()
+          this.unsubscribe = unsubscribe
+        }
+      )
+    )
   }
 
-  hostDisconnected(): void {
-    this.root?.removeEventListener(Event.command, this.handleCommand)
-  }
-
-  hostDiscovered = (root: ReactiveElement) => {
-    (this.root = root).addEventListener(Event.command, this.handleCommand)
-  }
-
-  handleCommand = ({ detail }: any) => {
-    if (detail.action !== this.event) return
-    const fx = (this.host as any)[this.name](detail.props)
-    if (fx instanceof Promise) fx.then(detail.resolve).catch(detail.reject)
-  }
+  // handleCommand = () => {
+  //   const fx = (this.host as any)[this.name](detail.props)
+  //   if (fx instanceof Promise) fx.then(detail.resolve).catch(detail.reject)
+  // }
 }
 
 export function createCommand(host: ReactiveElement) {
@@ -64,7 +56,7 @@ export function createCommand(host: ReactiveElement) {
   })
 }
 
-export function createCommandListener(event: Command): <K extends PropertyKey>(
+export function createCommandListener(event: Command, requirements?: State): <K extends PropertyKey>(
   protoOrDescriptor: ReactiveElement,
   name?: K
 ) => void | any {
@@ -74,7 +66,8 @@ export function createCommandListener(event: Command): <K extends PropertyKey>(
         new EventListener(
           element,
           event,
-          name
+          name,
+          requirements
         );
       });
     },

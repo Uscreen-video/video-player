@@ -79,7 +79,7 @@ export function connectConsumer<ValueType>({
   field?: keyof ValueType;
 }): <K extends PropertyKey>(
   // Partial<> allows for providing the value to an optional field
-  protoOrDescriptor: ReactiveElement & Partial<Record<K, ValueType[typeof field]>>,
+  protoOrDescriptor: ReactiveElement & Partial<Record<K, ValueType[typeof field]> | ValueType>,
   name?: K
   // Note TypeScript requires the return type to be `void|any`
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

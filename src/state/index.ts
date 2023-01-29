@@ -15,5 +15,5 @@ const initialValue: State = {
 
 export const context = createContext<State>('video-state')
 export const connect = (field?: keyof State) => connectConsumer<State>({ context, field })
-export const listen = (event: Command) => createCommandListener(event)
+export const listen = (event: Command, dependencies?: State) => createCommandListener(event, dependencies)
 export const createState = (host: ReactiveElement) => new StateController(host, context, initialValue)

@@ -1,29 +1,16 @@
-import { createState, listen, dispatch, createCommand, Types } from '../../state'
+import { createState, dispatch, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
-import { customElement, queryAssignedElements } from 'lit/decorators.js'
+import { customElement } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
+
 import '../video-controls'
-import '../video-play-button'
+import '../video-container'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
   static styles?: CSSResultGroup = unsafeCSS(styles)
   public state = createState(this)
-  public command = createCommand(this)
   
-  @queryAssignedElements({ selector: 'video', slot: 'video' })
-  video: HTMLVideoElement[]
-
-  @listen(Types.Command.play)
-  playVideo() {
-    return this.video[0].play()
-  }
-
-  @listen(Types.Command.pause)
-  pauseVideo() {
-    return this.video[0].pause()
-  }
-
   handlePlay = () => {
     dispatch(this, Types.Action.play)
   }
@@ -41,16 +28,13 @@ export class VideoPlayer extends LitElement {
     }, 1000)
   }
 
-  addVideoListeners = () => {
-    this.video[0].addEventListener('play', this.handlePlay)
-    this.video[0].addEventListener('pause', this.handlePause)
-  }
-
   render() {
     return html`
-      <slot name="video" @slotchange=${this.addVideoListeners}></slot>
+      <video-container>
+        <slot name="video"></slot>
+      </video-container>
       <video-controls>
-        <slot></slot>
+        <slot name="controls"></slot>
       </video-controls>
     `
   }

@@ -1,7 +1,7 @@
+import { connect } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './Video-controls.styles.css?inline'
-import { connect } from '../../state'
 
 /**
  * @slot - Video-controls main content
@@ -11,7 +11,7 @@ export class VideoControls extends LitElement {
   static styles = unsafeCSS(styles)
 
   @connect('value')
-  state: number
+  state = 0
 
   render() {
     return html`

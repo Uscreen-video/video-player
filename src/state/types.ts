@@ -4,19 +4,24 @@ export enum Command {
 }
 
 export enum Action {
-  toggle,
   play,
-  pause
+  pause,
+  updateSource,
+  toggleMuted
 }
 
 export enum Event {
   state = 'video-state-update',
   bulk = 'video-bulk-state-update',
   command = 'video-command',
-  register = 'video-register-root',
+  registerCommand = 'video-register-command',
 }
 
-export type State = {
+export type State = Partial<{
   value: number,
+  src: string,
+  poster: string,
   isPlaying: boolean,
-}
+  isMuted: boolean,
+  isAutoplay: boolean
+}>

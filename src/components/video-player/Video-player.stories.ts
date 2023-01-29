@@ -18,8 +18,8 @@ export default {
           type="application/x-mpegURL"
         />
       </video>
-      <video-play-button>
-
+      <video-play-button slot="controls">
+    
       </video-play-button>
     </video-player>
   `

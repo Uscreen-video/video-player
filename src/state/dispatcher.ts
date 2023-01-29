@@ -1,5 +1,5 @@
 import { ReactiveElement } from "lit";
-import { Event, Action } from "./types";
+import { Event, Action, State } from "./types";
 
 export type StateAction = {
   action: Action;
@@ -11,7 +11,7 @@ export type StateAction = {
 export const dispatch = (
   host: ReactiveElement,
   action: Action,
-  params?: Record<string, any>
+  params?: Partial<State>
 ) => new Promise((resolve, reject) =>
   host.dispatchEvent(
     new CustomEvent<StateAction>(Event.state, {
