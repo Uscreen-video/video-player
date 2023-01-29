@@ -1,6 +1,7 @@
 export enum Command {
   play,
   pause,
+  init,
 }
 
 export enum Action {
@@ -24,4 +25,11 @@ export type State = Partial<{
   isPlaying: boolean,
   isMuted: boolean,
   isAutoplay: boolean
+  isNativeHLS: boolean
 }>
+
+
+export type PromiseLike = [
+  resolve: (value: unknown) => void,
+  reject: (value: unknown) => void
+]

@@ -1,15 +1,18 @@
-import { connect, dispatch, listen, Types } from '../../state'
+import { connect, createCommand, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import { State } from '../../state/types'
-
+import type { Hls } from 'hls.js'
 /**
  * @slot - Video-container main content
  * */
 @customElement('video-container')
 export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
+  public command = createCommand(this)
+
+  hls: Hls
 
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
@@ -21,6 +24,27 @@ export class VideoContainer extends LitElement {
   playVideo() {
     console.log('"play" fired', this.state)
     return this.videos[0].play()
+  }
+
+  @listen(Types.Command.init, { isNativeHLS: false })
+  async handleHLSInit() {
+    const HLS = (await import('hls.js')).default
+    if (!HLS.isSupported()) return
+
+    this.hls?.destroy()
+  
+    this.hls = new HLS({
+      maxMaxBufferLength: 30,
+      enableWorker: false,
+      initialLiveManifestSize: 2,
+      liveSyncDurationCount: 5,
+      fragLoadingMaxRetry: 10,
+      manifestLoadingMaxRetry: 2,
+      levelLoadingMaxRetry: 4,
+    })
+
+    this.hls.loadSource(this.videoSource);
+    this.hls.attachMedia(this.videos[0]);
   }
 
   @listen(Types.Command.pause)
@@ -41,13 +65,16 @@ export class VideoContainer extends LitElement {
   }
 
   initVideo() {
-    const [{ autoplay, muted, poster }] = this.videos
+    const [{ autoplay, muted, poster, }] = this.videos
     dispatch(this, Types.Action.updateSource, {
       poster,
       src: this.videoSource,
       isAutoplay: !!autoplay,
-      isMuted: !!muted
+      isMuted: !!muted,
+      isNativeHLS: this.supportsHLS
     })
+
+    this.command(Types.Command.init)
   }
 
   render() {
@@ -62,5 +89,11 @@ export class VideoContainer extends LitElement {
 
   get videoSource() {
     return this.videos[0].currentSrc || this.videos[0].querySelector('source')?.src
+  }
+
+  get supportsHLS() {
+    const [video] = this.videos
+    const types = Array.from(video.querySelectorAll('source')).map(s => s.type)
+    return !!types.find(t => video.canPlayType(t))
   }
 }
