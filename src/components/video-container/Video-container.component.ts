@@ -19,7 +19,7 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.play, { isMuted: true })
   playVideo() {
-    console.log('resolve play command', this.state)
+    console.log('"play" fired', this.state)
     return this.videos[0].play()
   }
 
@@ -30,7 +30,14 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handlePlay() {
-    console.log('play')
+    console.log('video started')
+    dispatch(this, Types.Action.play)
+  }
+
+  @eventOptions({ capture: true })
+  handlePause() {
+    console.log('video paused')
+    dispatch(this, Types.Action.pause)
   }
 
   initVideo() {
@@ -48,6 +55,7 @@ export class VideoContainer extends LitElement {
       <slot
         @slotchange=${this.initVideo}
         @play=${this.handlePlay}
+        @pause=${this.handlePause}
       ></slot>
     `
   }

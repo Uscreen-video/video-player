@@ -4,7 +4,7 @@ import { context } from './index'
 import { StateAction } from './dispatcher';
 import { stateMapper } from './mapper';
 import { Action, Command, Event, State } from './types';
-import { CommandEvent } from './events';
+import { CommandEvent, CommandRegisterEvent } from './events';
 
 type Context = typeof context
 
@@ -20,16 +20,41 @@ export const mapState = (
   return stateMapper[action](state, value)
 }
 
-type RegisteredCommand = [
-  command: Command,
-  dependencies: State | undefined,
-  callback: (callback: () => void) => void,
-  params?: any
-]
+class CachedCommand {
+  private _params: unknown
+  private _promise: PromiseConstructor
+
+  constructor(
+    public readonly cache: Set<CachedCommand>,
+    public readonly command: Command,
+    public readonly dependencies: State | undefined,
+    public readonly callback: (
+      params: unknown,
+      promise: PromiseConstructor,
+      unsubscribe: () => void
+    ) => void,
+  ) { }
+  
+  isMatchingState(s: State) {
+    if (!this.dependencies) return true
+    return Object.keys(this.dependencies)
+      .every((k: keyof State) => this.dependencies[k] === s[k])
+  }
+
+  setParams(promise: PromiseConstructor, params: unknown) {
+    this._params = params
+    this._promise = promise
+    return this
+  }
+
+  exec(promise: PromiseConstructor = this._promise, params = this._params) {
+    this.callback(params, promise, () => this.cache.delete(this))
+  }
+}
 
 export class StateController extends ContextProvider<Context> {
-  private _pending = new Set<RegisteredCommand>()
-  private _commands = new Set<RegisteredCommand>()
+  private _pending = new Set<CachedCommand>()
+  private _commands = new Set<CachedCommand>()
 
   hostConnected() {
     this.host.addEventListener(Event.state, this.handleEvent)
@@ -48,36 +73,35 @@ export class StateController extends ContextProvider<Context> {
     Promise.resolve().then(() => this.resolvePendingCommands())
   }
 
-  commandDepsMatchesState(deps?: State) {
-    if (!deps) return true
-    return Object.keys(deps).every((k: keyof State) => deps[k] === this.value[k])
-  }
-
-  execCommand(cmd: RegisteredCommand) {
-    cmd[2](() => this._commands.delete(cmd))
-  }
-
   resolvePendingCommands() {
     for (const cmd of this._pending) {
-      if (!this.commandDepsMatchesState(cmd[1])) continue
-      this.execCommand(cmd)
+      if (!cmd.isMatchingState(this.value)) continue
+      cmd.exec()
       this._pending.delete(cmd)
     }
   }
 
-  callCommand = (e?: CustomEvent) => {
+  callCommand = (event?: CommandEvent) => {
+    event.stopPropagation()
     for (const cmd of this._commands) {
-      if (cmd[0] !== e.detail.action) continue
-      if (this.commandDepsMatchesState(cmd[1])) {
-        this.execCommand(cmd)
+      if (cmd.command !== event.command) continue
+      if (cmd.isMatchingState(this.value)) {
+        cmd.exec(event.promise, event.params)
       } else {
-        this._pending.add([...cmd])
+        this._pending.add(cmd.setParams(event.promise, event.params))
       }
     }
   }
 
-  registerCommand = (e: CommandEvent) => {
-    e.stopPropagation()
-    this._commands.add([e.command, e.dependencies, e.callback])
+  registerCommand = (event: CommandRegisterEvent) => {
+    event.stopPropagation()
+    this._commands.add(
+      new CachedCommand(
+        this._commands,
+        event.command,
+        event.dependencies,
+        event.callback
+      )
+    )
   }
 }
