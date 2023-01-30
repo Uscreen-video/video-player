@@ -1,8 +1,7 @@
-import { connect, createCommand, dispatch, listen, Types } from '../../state'
+import { createCommand, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
-import { Action, Command, State } from '../../types'
 import type { Hls } from 'hls.js'
 
 /**
@@ -18,15 +17,12 @@ export class VideoContainer extends LitElement {
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
 
-  @connect()
-  state: State
-
   @listen(Types.Command.play, { canPlay: true })
   async onPlayCommand() {
     try {
       await this.videos[0].play()
     } catch (e) {
-      dispatch(this, Action.update, { canPlay: false })
+      dispatch(this, Types.Action.update, { canPlay: false })
       this.command(Types.Command.initCustomHLS)
       throw e
     }
@@ -35,6 +31,16 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.seek, { canPlay: true })
   async onSeekCommand({ time }: { time: number }) {
     this.videos[0].currentTime = time
+  }
+
+  @listen(Types.Command.mute)
+  async onMuteCommand() {
+    this.videos[0].muted = true
+  }
+
+  @listen(Types.Command.unmute)
+  async onUnMuteCommand() {
+    this.videos[0].muted = false
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -57,7 +63,7 @@ export class VideoContainer extends LitElement {
 
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
-    dispatch(this, Action.update, { canPlay: true })
+    dispatch(this, Types.Action.update, { canPlay: true })
   }
 
   @listen(Types.Command.pause)
@@ -89,15 +95,24 @@ export class VideoContainer extends LitElement {
     })
   }
 
+  @eventOptions({ capture: true })
+  handleVolumeChange(e: { target: HTMLVideoElement }) {
+    dispatch(this, Types.Action.volumeChange, {
+      value: e.target.volume,
+      isMuted: e.target.muted
+    })
+  }
+
   initVideo() {
-    const [{ autoplay, muted, poster, duration, currentTime }] = this.videos
+    const [{ autoplay, muted, poster, volume, duration, currentTime }] = this.videos
     dispatch(this, Types.Action.init, {
       poster,
       duration,
       currentTime,
+      volume,
       src: this.videoSource,
-      isAutoplay: !!autoplay,
-      isMuted: !!muted,
+      isAutoplay: autoplay,
+      isMuted: muted,
       isNativeHLS: this.supportsHLS,
     })
 
@@ -112,6 +127,7 @@ export class VideoContainer extends LitElement {
         @pause=${this.handlePause}
         @timeupdate=${this.handleTimeUpdate}
         @loadeddata=${this.handleLoadedData}
+        @volumechange=${this.handleVolumeChange}
       ></slot>
     `
   }

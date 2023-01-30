@@ -1,11 +1,11 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
 import { connect, createCommand, dispatch } from '../../state'
 import { Action, Command } from '../../types'
 import {styleMap} from 'lit/directives/style-map.js';
-import { watch } from '../../decorators/watch'
+import { when } from 'lit/directives/when.js';
+import '../video-timer'
 
 /**
  * @slot - Video-timeline main content
@@ -14,6 +14,9 @@ import { watch } from '../../decorators/watch'
 export class VideoTimeline extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
+
+  @property({ type: Boolean })
+  timer: false
 
   @connect('duration')
   duration: number
@@ -36,11 +39,11 @@ export class VideoTimeline extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback()
-    document.addEventListener('mousemove', this.handlePointerMove, { passive: true })
-    document.addEventListener('touchmove', this.handlePointerMove, { passive: true })
+    document.addEventListener('mousemove', this.handlePointerMove)
+    document.addEventListener('touchmove', this.handlePointerMove)
     document.addEventListener('mouseup', this.handlePointerRelease)
     document.addEventListener('touchend', this.handlePointerRelease)
-    document.addEventListener('mouseleave', this.handlePointerLeave, { passive: true })
+    document.addEventListener('mouseleave', this.handlePointerLeave)
   }
 
   disconnectedCallback(): void {
@@ -145,6 +148,7 @@ export class VideoTimeline extends LitElement {
         @click=${this.handleLineClick}
       >
         <div class="line-container">
+
           <div class="line">
             <div 
               class="progress"
@@ -153,14 +157,19 @@ export class VideoTimeline extends LitElement {
               })}
             ></div>
           </div>
+  
           <button
             class="handler"
             style=${styleMap({
               left: this.progressPosition * 100 + '%'
             })}
           ></button>
+
         </div>
       </div>
+      ${when(this.timer, () => html`
+        <video-timer></video-timer>
+      `)}
     `
   }
 

@@ -4,6 +4,8 @@ export enum Command {
   init,
   seek,
   initCustomHLS,
+  mute,
+  unmute
 }
 
 export enum Action {
@@ -16,7 +18,8 @@ export enum Action {
   canPlay,
   updateDuration,
   updateTime,
-  init
+  init,
+  volumeChange
 }
 
 export enum Event {
@@ -32,6 +35,7 @@ export type State = Partial<{
   currentTime: number,
   src: string,
   poster: string,
+  volume: number,
   canPlay: boolean,
   isPlaying: boolean,
   isMuted: boolean,

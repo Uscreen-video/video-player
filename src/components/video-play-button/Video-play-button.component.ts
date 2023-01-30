@@ -27,7 +27,11 @@ export class VideoPlayButton extends LitElement {
   }
 
   handleMutedState() {
-    dispatch(this, Action.toggleMuted)
+    this.command(
+      this.isMuted
+        ? Types.Command.unmute
+        : Types.Command.mute
+    )
   }
 
   render() {

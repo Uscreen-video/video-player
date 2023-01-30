@@ -22,7 +22,7 @@ export default {
       </video>
       <div slot="controls" style="width: 100%;">
         <video-play-button></video-play-button>
-        <video-timeline></video-timeline>
+        <video-timeline timer></video-timeline>
       </div>
     </video-player>
   `
