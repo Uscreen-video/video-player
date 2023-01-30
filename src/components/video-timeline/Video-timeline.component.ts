@@ -3,7 +3,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
 import { connect, createCommand, dispatch } from '../../state'
-import { Action, Command } from '../../state/types'
+import { Action, Command } from '../../types'
 import {styleMap} from 'lit/directives/style-map.js';
 import { watch } from '../../decorators/watch'
 
@@ -147,7 +147,7 @@ export class VideoTimeline extends LitElement {
         <div class="line-container">
           <div class="line">
             <div 
-              class="active"
+              class="progress"
               style=${styleMap({
                 transform: `scaleX(${this.progressPosition})`
               })}

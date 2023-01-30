@@ -2,7 +2,7 @@ import { connect, createCommand, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
-import { Action, Command, State } from '../../state/types'
+import { Action, Command, State } from '../../types'
 import type { Hls } from 'hls.js'
 
 /**
@@ -67,33 +67,31 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handlePlay() {
-    console.log('video started')
     dispatch(this, Types.Action.play)
   }
 
   @eventOptions({ capture: true })
   handlePause() {
-    console.log('video paused')
     dispatch(this, Types.Action.pause)
   }
 
   @eventOptions({ capture: true })
   handleTimeUpdate(e: { target: HTMLVideoElement }) {
-    dispatch(this, Types.Action.update, {
+    dispatch(this, Types.Action.updateTime, {
       currentTime: e.target.currentTime
     })
   }
 
   @eventOptions({ capture: true })
   handleLoadedData(e: { target: HTMLVideoElement}) {
-    dispatch(this, Types.Action.update, {
+    dispatch(this, Types.Action.updateDuration, {
       duration: e.target.duration
     })
   }
 
   initVideo() {
     const [{ autoplay, muted, poster, duration, currentTime }] = this.videos
-    dispatch(this, Types.Action.update, {
+    dispatch(this, Types.Action.init, {
       poster,
       duration,
       currentTime,

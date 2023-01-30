@@ -3,8 +3,12 @@ import { ContextProvider } from '@lit-labs/context';
 import { context } from './index'
 import { StateAction } from './dispatcher';
 import { stateMapper } from './mapper';
-import { Action, Command, Event, State } from './types';
+import { Action, Command, Event, State } from '../types';
 import { CommandEvent, CommandRegisterEvent } from './events';
+import _debug from 'debug'
+
+const commandDebug = _debug('player:commands')
+const stateDebug = _debug('player:state')
 
 type Context = typeof context
 
@@ -14,10 +18,10 @@ export const mapState = (
   value: any
 ): State => {
   if (!stateMapper[action]) {
-    console.warn(`${action} not found`)
+    stateDebug(`[${Action[action]}] mapper not found"`)
     return state
   }
-  return stateMapper[action](state, value)
+  return (stateMapper[action] || stateMapper[Action.update])(state, value)
 }
 
 class CachedCommand {
@@ -50,12 +54,18 @@ class CachedCommand {
   exec(params = this._params) {
     this.callback(
       params,
-      () => this.cache.delete(this), // unsubscribe
-      () => this.pending.delete(this), // resolve
-      () => {
-        console.log('Rejected')
+       // unsubscribe
+      () => this.cache.delete(this),
+      // resolve
+      (res) => {
+        commandDebug(`[${Command[this.command]}] resolved`, res)
+        this.pending.delete(this)
+      },
+      // reject
+      (e) => {
+        commandDebug(`[${Command[this.command]}] rejected`, e)
         this.pending.add(this)
-      } // reject
+      }
     )
   }
 }
@@ -77,7 +87,9 @@ export class StateController extends ContextProvider<Context> {
 
   handleEvent = (e: CustomEvent<StateAction>) => {
     e.stopPropagation()
+    const prevState = this.value
     this.setValue(mapState(e.detail.action, this.value, e.detail.params))
+    if (prevState !== this.value) stateDebug(`[${Action[e.detail.action]}]`, this.value)
     Promise.resolve().then(() => this.resolvePendingCommands())
   }
 

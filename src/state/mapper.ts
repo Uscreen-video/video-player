@@ -1,6 +1,6 @@
-import { Action, State } from './types'
+import { Action, State } from '../types'
 
-export const stateMapper: Record<Action, (s: State, v: any) => State> = {
+export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> = {
   [Action.toggleMuted]: (state) => ({
     ...state,
     isMuted: !state.isMuted
@@ -16,5 +16,17 @@ export const stateMapper: Record<Action, (s: State, v: any) => State> = {
   [Action.update]: (state, params) => ({
     ...state,
     ...params
-  })
+  }),
+  [Action.updateTime]: (state, params) => ({
+    ...state,
+    ...params
+  }),
+  [Action.updateDuration]: (state, params) => ({
+    ...state,
+    ...params
+  }),
+  [Action.init]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }

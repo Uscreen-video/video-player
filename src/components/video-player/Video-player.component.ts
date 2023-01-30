@@ -21,11 +21,6 @@ export class VideoPlayer extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback()
-
-    setInterval(() => {
-      const value = this.state.value.value + 1
-      this.state.setValue({ ...this.state.value, value })
-    }, 1000)
   }
 
   render() {

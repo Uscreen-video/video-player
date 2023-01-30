@@ -13,7 +13,10 @@ export enum Action {
   toggleMuted,
   seekEnd,
   seekStart,
-  canPlay
+  canPlay,
+  updateDuration,
+  updateTime,
+  init
 }
 
 export enum Event {

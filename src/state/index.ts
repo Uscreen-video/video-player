@@ -3,10 +3,10 @@ import { ReactiveElement } from 'lit'
 import { connectConsumer } from './connector'
 import { StateController } from './controller'
 import { createCommandListener } from './commander'
-import { Command, State } from './types'
+import { Command, State } from '../types'
 export { dispatch } from './dispatcher'
 export { createCommand } from './commander'
-export * as Types from './types'
+export * as Types from '../types'
 
 const initialValue: State = {
   value: 0,

@@ -10,8 +10,10 @@ specifiers:
   '@storybook/blocks': ^7.0.0-beta.26
   '@storybook/web-components': ^7.0.0-beta.26
   '@storybook/web-components-vite': ^7.0.0-beta.26
+  '@types/debug': ^4.1.7
   '@types/node': ^18.11.18
   cem-plugin-better-lit-types: 0.1.11
+  debug: ^4.3.4
   hls.js: ^1.3.1
   hygen: ^6.2.11
   lit: ^2.6.1
@@ -30,6 +32,7 @@ specifiers:
 dependencies:
   '@lit-labs/context': 0.2.0
   '@lit/reactive-element': 1.6.1
+  debug: 4.3.4
   hls.js: 1.3.1
 
 optionalDependencies:
@@ -45,6 +48,7 @@ devDependencies:
   '@storybook/blocks': 7.0.0-beta.26_biqbaboplfbrettd7655fr4n2y
   '@storybook/web-components': 7.0.0-beta.26_7zfklryahohurxseda5523n5je
   '@storybook/web-components-vite': 7.0.0-beta.26_ehpciglzgtp5f3m2ia3vroghca
+  '@types/debug': 4.1.7
   '@types/node': 18.11.18
   cem-plugin-better-lit-types: 0.1.11
   hygen: 6.2.11
@@ -2935,6 +2939,12 @@ packages:
       '@types/node': 18.11.18
     dev: true
 
+  /@types/debug/4.1.7:
+    resolution: {integrity: sha512-9AonUzyTjXXhEOa0DnqpzZi6VHlqKMswga9EXjpXnnqxwLtdvPPtlO8evrI5D9S6asFRCQ6v+wpiUKbw+vKqyg==}
+    dependencies:
+      '@types/ms': 0.7.31
+    dev: true
+
   /@types/detect-port/1.3.2:
     resolution: {integrity: sha512-xxgAGA2SAU4111QefXPSp5eGbDm/hW6zhvYl9IeEPZEry9F4d66QAHm5qpUXjb6IsevZV/7emAEx5MhP6O192g==}
     dev: true
@@ -3019,6 +3029,10 @@ packages:
 
   /@types/minimatch/5.1.2:
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
+    dev: true
+
+  /@types/ms/0.7.31:
+    resolution: {integrity: sha512-iiUgKzV9AuaEkZqkOLDIvlQiL6ltuZd9tGcW3gwpnX8JbuiuhFlEGmmFXEXkN50Cvq7Os88IY2v0dkDqXYWVgA==}
     dev: true
 
   /@types/node-fetch/2.6.2:
@@ -4027,7 +4041,6 @@ packages:
         optional: true
     dependencies:
       ms: 2.1.2
-    dev: true
 
   /decamelize/1.2.0:
     resolution: {integrity: sha512-z2S+W9X73hAUUki+N+9Za2lBlun89zigOyGrsax+KUQ6wKW4ZoWpEYBkGhQjwAjjDCkWxhY0VKEhk8wzY7F5cA==}
@@ -5783,7 +5796,6 @@ packages:
 
   /ms/2.1.2:
     resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
-    dev: true
 
   /ms/2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}

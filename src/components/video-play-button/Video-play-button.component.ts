@@ -2,7 +2,7 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement } from 'lit/decorators.js'
 import styles from './Video-play-button.styles.css?inline'
 import { connect, createCommand, dispatch, Types } from '../../state'
-import { Action, Event } from '../../state/types'
+import { Action, Event } from '../../types'
 
 /**
  * @slot - Video-play-button main content
