@@ -1,28 +1,18 @@
 
 :host {
-  --aspect-ratio: 16 / 9;
+  --aspect-ratio: 9 / 16;
 
   display: block;
-  padding-bottom: calc(var(--aspect) * 1%);
-
-  @supports (aspect-ratio: 1) {
-    padding-bottom: 0
-  }
+  padding-bottom: calc(var(--aspect-ratio) * 100%);
 }
-
 
 ::slotted(video) {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
   object-fit: contain;
   outline: none;
   background: black;
-
-  @supports (aspect-ratio: 1) {
-    aspect-ratio: var(--aspect-ratio);
-    position: relative;
-  }
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }

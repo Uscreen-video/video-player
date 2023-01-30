@@ -23,9 +23,7 @@ export class VideoPlayButton extends LitElement {
       this.isPlaying
         ? Types.Command.pause
         : Types.Command.play
-    ).then(() => {
-      console.log('Button click resolved')
-    })
+    )
   }
 
   handleMutedState() {

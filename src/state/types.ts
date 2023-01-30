@@ -2,13 +2,18 @@ export enum Command {
   play,
   pause,
   init,
+  seek,
+  initCustomHLS,
 }
 
 export enum Action {
   play,
   pause,
-  updateSource,
-  toggleMuted
+  update,
+  toggleMuted,
+  seekEnd,
+  seekStart,
+  canPlay
 }
 
 export enum Event {
@@ -24,6 +29,7 @@ export type State = Partial<{
   currentTime: number,
   src: string,
   poster: string,
+  canPlay: boolean,
   isPlaying: boolean,
   isMuted: boolean,
   isAutoplay: boolean

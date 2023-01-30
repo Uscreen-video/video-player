@@ -22,16 +22,17 @@ export const mapState = (
 
 class CachedCommand {
   private _params: unknown
-  private _promise: PromiseConstructor
 
   constructor(
     public readonly cache: Set<CachedCommand>,
+    public readonly pending: Set<CachedCommand>,
     public readonly command: Command,
     public readonly dependencies: State | undefined,
     public readonly callback: (
       params: unknown,
-      promise: PromiseConstructor,
-      unsubscribe: () => void
+      unsubscribe: () => void,
+      resolve: (value: unknown) => void,
+      reject: (value: unknown) => void,
     ) => void,
   ) { }
   
@@ -41,14 +42,21 @@ class CachedCommand {
       .every((k: keyof State) => this.dependencies[k] === s[k])
   }
 
-  setParams(promise: PromiseConstructor, params: unknown) {
+  setParams(params: unknown) {
     this._params = params
-    this._promise = promise
     return this
   }
 
-  exec(promise: PromiseConstructor = this._promise, params = this._params) {
-    this.callback(params, promise, () => this.cache.delete(this))
+  exec(params = this._params) {
+    this.callback(
+      params,
+      () => this.cache.delete(this), // unsubscribe
+      () => this.pending.delete(this), // resolve
+      () => {
+        console.log('Rejected')
+        this.pending.add(this)
+      } // reject
+    )
   }
 }
 
@@ -77,7 +85,6 @@ export class StateController extends ContextProvider<Context> {
     for (const cmd of this._pending) {
       if (!cmd.isMatchingState(this.value)) continue
       cmd.exec()
-      this._pending.delete(cmd)
     }
   }
 
@@ -86,9 +93,9 @@ export class StateController extends ContextProvider<Context> {
     for (const cmd of this._commands) {
       if (cmd.command !== event.command) continue
       if (cmd.isMatchingState(this.value)) {
-        cmd.exec(event.promise, event.params)
+        cmd.exec(event.params)
       } else {
-        this._pending.add(cmd.setParams(event.promise, event.params))
+        this._pending.add(cmd.setParams(event.params))
       }
     }
   }
@@ -98,6 +105,7 @@ export class StateController extends ContextProvider<Context> {
     this._commands.add(
       new CachedCommand(
         this._commands,
+        this._pending,
         event.command,
         event.dependencies,
         event.callback

@@ -21,10 +21,15 @@ export class EventListener implements ReactiveController {
       new CommandRegisterEvent(
         this.event,
         this.dependencies,
-        (params, [resolve, reject], unsubscribe) => {
+        (params, unsubscribe, resolve, reject) => {
           const fx = (this.host as any)[this.name](params)
-          if (fx instanceof Promise) fx.then(resolve).catch(reject)
           this.unsubscribe = unsubscribe
+          console.log(Command[this.event], fx)
+          if (fx instanceof Promise) {
+            fx.then(resolve).catch(reject)
+          } else {
+            resolve()
+          }
         }
       )
     )
@@ -41,15 +46,7 @@ export function createCommand(host: ReactiveElement) {
     params?: Record<string, any>
   ) => {
     console.log('Command fired', Command[command])
-    return new Promise((resolve, reject) =>
-      host.dispatchEvent(
-        new CommandEvent(
-          command,
-          params,
-          [resolve, reject],
-        )
-      )
-    )
+    return host.dispatchEvent(new CommandEvent(command, params))
   }
 }
 
