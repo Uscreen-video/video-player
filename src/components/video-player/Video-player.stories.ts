@@ -11,6 +11,7 @@ export default {
       <video
         playsinline
         autoplay
+        muted
         slot="video"
         poster="https://alpha.uscreencdn.com/video_thumbnails/ekgb_ldxJUzLAg.jpg"
       >

@@ -19,6 +19,7 @@ export class VideoTimeline extends LitElement {
   duration: number
 
   @connect('currentTime')
+  @state()
   currentTime: number
 
   @state()
@@ -37,16 +38,16 @@ export class VideoTimeline extends LitElement {
     super.connectedCallback()
     document.addEventListener('mousemove', this.handlePointerMove, { passive: true })
     document.addEventListener('touchmove', this.handlePointerMove, { passive: true })
-    document.addEventListener('mouseup', this.handlePointerUp)
-    document.addEventListener('touchend', this.handlePointerUp)
+    document.addEventListener('mouseup', this.handlePointerRelease)
+    document.addEventListener('touchend', this.handlePointerRelease)
     document.addEventListener('mouseleave', this.handlePointerLeave, { passive: true })
   }
 
   disconnectedCallback(): void {
     document.removeEventListener('mousemove', this.handlePointerMove)
     document.removeEventListener('touchmove', this.handlePointerMove)
-    document.removeEventListener('mouseup', this.handlePointerUp)
-    document.removeEventListener('touchend', this.handlePointerUp)
+    document.removeEventListener('mouseup', this.handlePointerRelease)
+    document.removeEventListener('touchend', this.handlePointerRelease)
     document.removeEventListener('mouseleave', this.handlePointerLeave)
 
   }
@@ -58,7 +59,11 @@ export class VideoTimeline extends LitElement {
   /**
    * When user releases the timeline we think the dragging is over
    */
-  handlePointerUp = () => {
+  handlePointerRelease = () => {
+    if (this.isDragging) {
+      dispatch(this, Action.seekEnd)
+      this.dispatchTimeUpdate()
+    }
     this.isDragging = false
   }
 
@@ -81,8 +86,8 @@ export class VideoTimeline extends LitElement {
    * we think he started dragging
    */
   handlePointerDown() {
-    console.log('dragging started')
     this.isDragging = true
+    dispatch(this, Action.seekStart)
   }
 
   /**
@@ -100,19 +105,17 @@ export class VideoTimeline extends LitElement {
   }
 
   /**
-   * Handle click the line and update state
+   * Handle click the line and stop dragging
    */
-  handleLineClick({ offsetX }: PointerEvent) {
-    if (this.isDragging) {
-      this.isDragging = false
-      return
-    }
+  handleLineClick() {
+    this.isDragging = false
+  }
 
-    const percentage = offsetX / this.line.clientWidth
-    const time = Math.round(this.duration * percentage)
-
+  dispatchTimeUpdate(progress?: number) {
+    const time = this.duration * (progress || this.progressPosition)
     dispatch(this, Action.seekEnd)
-    this.command(Command.seek, { time: time })
+    this.currentTime = time
+    this.command(Command.seek, { time })
   }
 
   getPinterPosition(clientX: number) {
@@ -125,7 +128,7 @@ export class VideoTimeline extends LitElement {
       clientX < leftBorder ||
       clientX > rightBorder ||
       newPosition < 0
-    ) return null
+    ) return 0
 
     return newPosition / width
   }
@@ -145,12 +148,16 @@ export class VideoTimeline extends LitElement {
           <div class="line">
             <div 
               class="active"
-              style=${styleMap({ transform: `scaleX(${this.progressPosition})` })}
+              style=${styleMap({
+                transform: `scaleX(${this.progressPosition})`
+              })}
             ></div>
           </div>
           <button
             class="handler"
-            style=${styleMap({ left: this.progressPosition * 100 + '%' })}
+            style=${styleMap({
+              left: this.progressPosition * 100 + '%'
+            })}
           ></button>
         </div>
       </div>

@@ -4,6 +4,7 @@ import { customElement, eventOptions, queryAssignedElements } from 'lit/decorato
 import styles from './Video-container.styles.css?inline'
 import { Action, Command, State } from '../../state/types'
 import type { Hls } from 'hls.js'
+
 /**
  * @slot - Video-container main content
  * */
@@ -21,7 +22,7 @@ export class VideoContainer extends LitElement {
   state: State
 
   @listen(Types.Command.play, { canPlay: true })
-  async playVideo() {
+  async onPlayCommand() {
     try {
       await this.videos[0].play()
     } catch (e) {
@@ -29,6 +30,11 @@ export class VideoContainer extends LitElement {
       this.command(Types.Command.initCustomHLS)
       throw e
     }
+  }
+
+  @listen(Types.Command.seek, { canPlay: true })
+  async onSeekCommand({ time }: { time: number }) {
+    this.videos[0].currentTime = time
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -72,7 +78,7 @@ export class VideoContainer extends LitElement {
   }
 
   @eventOptions({ capture: true })
-  handleTimeUpdate(e: { target: HTMLVideoElement}) {
+  handleTimeUpdate(e: { target: HTMLVideoElement }) {
     dispatch(this, Types.Action.update, {
       currentTime: e.target.currentTime
     })

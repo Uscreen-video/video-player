@@ -24,7 +24,6 @@ export class EventListener implements ReactiveController {
         (params, unsubscribe, resolve, reject) => {
           const fx = (this.host as any)[this.name](params)
           this.unsubscribe = unsubscribe
-          console.log(Command[this.event], fx)
           if (fx instanceof Promise) {
             fx.then(resolve).catch(reject)
           } else {
