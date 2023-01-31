@@ -26,10 +26,10 @@ export const mapState = (
 
 class CachedCommand {
   private _params: unknown
+  public isPending: boolean
 
   constructor(
     public readonly cache: Set<CachedCommand>,
-    public readonly pending: Set<CachedCommand>,
     public readonly command: Command,
     public readonly dependencies: State | undefined,
     public readonly callback: (
@@ -51,6 +51,11 @@ class CachedCommand {
     return this
   }
 
+  pend(params = this._params) {
+    this._params = params
+    this.isPending = true
+  }
+
   exec(params = this._params) {
     this.callback(
       params,
@@ -59,19 +64,18 @@ class CachedCommand {
       // resolve
       (res) => {
         commandDebug(`[${Command[this.command]}] resolved`, res)
-        this.pending.delete(this)
+        this.isPending = false
       },
       // reject
       (e) => {
         commandDebug(`[${Command[this.command]}] rejected`, e)
-        this.pending.add(this)
+        this.isPending = true
       }
     )
   }
 }
 
 export class StateController extends ContextProvider<Context> {
-  private _pending = new Set<CachedCommand>()
   private _commands = new Set<CachedCommand>()
 
   hostConnected() {
@@ -94,9 +98,10 @@ export class StateController extends ContextProvider<Context> {
   }
 
   resolvePendingCommands() {
-    for (const cmd of this._pending) {
-      if (!cmd.isMatchingState(this.value)) continue
-      cmd.exec()
+    for (const cmd of this._commands) {
+      if (cmd.isPending && cmd.isMatchingState(this.value)) {
+        cmd.exec()
+      }
     }
   }
 
@@ -107,7 +112,7 @@ export class StateController extends ContextProvider<Context> {
       if (cmd.isMatchingState(this.value)) {
         cmd.exec(event.params)
       } else {
-        this._pending.add(cmd.setParams(event.params))
+        cmd.pend(event.params)
       }
     }
   }
@@ -117,7 +122,6 @@ export class StateController extends ContextProvider<Context> {
     this._commands.add(
       new CachedCommand(
         this._commands,
-        this._pending,
         event.command,
         event.dependencies,
         event.callback
