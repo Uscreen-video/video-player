@@ -13,7 +13,7 @@ export class VideoPlayer extends LitElement {
   static styles?: CSSResultGroup = unsafeCSS(styles)
   public state = createState(this)
   public fullscreen = new FullscreenController(this)
-  private _idle = new IdleController(this)
+  private idleTimer = new IdleController(this, this.handleIdleUpdate)
   
   @property({ type: String, attribute: 'fullscreen-element'})
   fullscreenContainer: string
@@ -31,18 +31,37 @@ export class VideoPlayer extends LitElement {
       : this.fullscreen.enter()
   }
 
-  handleInteraction = () => {
+  handleIdleUpdate(value: boolean) {
+    if (this.idle === value) return
+    this.idle = value
+    dispatch(this, Types.Action.idle, { idle: value })
+  }
+
+  handleClick = () => {
     dispatch(this, Types.Action.interacted)
-    this.disconnectedCallback()
+    document.removeEventListener('click', this.handleClick)
+    document.removeEventListener('touch', this.handleClick)
+  }
+
+  handleMove = () => {
+    this.idleTimer.reset()
   }
 
   connectedCallback(): void {
     super.connectedCallback()
-    document.addEventListener('click', this.handleInteraction, { once: true })
+    document.addEventListener('click', this.handleClick, { once: true })
+    document.addEventListener('touch', this.handleClick, { once: true })
+    this.addEventListener('touchstart', this.handleMove, { passive: true })
+    this.addEventListener('mousemove', this.handleMove, { passive: true })
+    this.addEventListener('mouseleave', this.handleMove, { passive: true })
   }
 
   disconnectedCallback(): void {
-    document.removeEventListener('click', this.handleInteraction)
+    document.removeEventListener('click', this.handleClick)
+    document.addEventListener('touch', this.handleClick, { once: true })
+    this.removeEventListener('touchstart', this.handleMove)
+    this.removeEventListener('mousemove', this.handleMove)
+    this.removeEventListener('mouseleave', this.handleMove)
   }
 
   render() {
