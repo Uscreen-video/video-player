@@ -2,7 +2,6 @@ import { connect, createState, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
-
 import '../video-controls'
 import '../video-container'
 import { FullscreenController } from '../../controllers/Fullscreen'
@@ -51,17 +50,17 @@ export class VideoPlayer extends LitElement {
     super.connectedCallback()
     document.addEventListener('click', this.handleClick, { once: true })
     document.addEventListener('touch', this.handleClick, { once: true })
-    this.addEventListener('touchstart', this.handleMove, { passive: true })
-    this.addEventListener('mousemove', this.handleMove, { passive: true })
-    this.addEventListener('mouseleave', this.handleMove, { passive: true })
+    document.addEventListener('touchstart', this.handleMove,)
+    document.addEventListener('mousemove', this.handleMove)
+    document.addEventListener('mouseleave', this.handleMove)
   }
 
   disconnectedCallback(): void {
     document.removeEventListener('click', this.handleClick)
-    document.addEventListener('touch', this.handleClick, { once: true })
-    this.removeEventListener('touchstart', this.handleMove)
-    this.removeEventListener('mousemove', this.handleMove)
-    this.removeEventListener('mouseleave', this.handleMove)
+    document.removeEventListener('touch', this.handleClick)
+    document.removeEventListener('touchstart', this.handleMove)
+    document.removeEventListener('mousemove', this.handleMove)
+    document.removeEventListener('mouseleave', this.handleMove)
   }
 
   render() {

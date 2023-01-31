@@ -11,7 +11,7 @@ export * as Types from '../types'
 const initialValue: State = {
   isPlaying: false,
   isInteracted: false,
-  idle: true
+  idle: false
 }
 
 export const context = createContext<State>('video-state')

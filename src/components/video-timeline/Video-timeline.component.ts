@@ -52,7 +52,6 @@ export class VideoTimeline extends LitElement {
     document.removeEventListener('mouseup', this.handlePointerRelease)
     document.removeEventListener('touchend', this.handlePointerRelease)
     document.removeEventListener('mouseleave', this.handlePointerLeave)
-
   }
 
   handleMouseUp = (e: PointerEvent & TouchEvent) => {
