@@ -9,8 +9,8 @@ export { createCommand } from './commander'
 export * as Types from '../types'
 
 const initialValue: State = {
-  value: 0,
-  isPlaying: false
+  isPlaying: false,
+  interacted: false,
 }
 
 export const context = createContext<State>('video-state')

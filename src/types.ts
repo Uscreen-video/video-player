@@ -6,7 +6,7 @@ export enum Command {
   initCustomHLS,
   mute,
   unmute,
-  toggleFullscreen
+  toggleFullscreen,
 }
 
 export enum Action {
@@ -21,7 +21,8 @@ export enum Action {
   updateTime,
   init,
   volumeChange,
-  fullscreenChange
+  fullscreenChange,
+  interacted
 }
 
 export enum Event {
@@ -39,6 +40,7 @@ export type State = Partial<{
   poster: string,
   volume: number,
   canPlay: boolean,
+  isInteracted: boolean,
   isPlaying: boolean,
   isMuted: boolean,
   isAutoplay: boolean

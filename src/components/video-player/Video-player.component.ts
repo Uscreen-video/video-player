@@ -23,12 +23,18 @@ export class VideoPlayer extends LitElement {
       : this.fullscreen.enter()
   }
 
-  handlePause = () => {
-    dispatch(this, Types.Action.pause)
+  handleInteraction = () => {
+    dispatch(this, Types.Action.interacted)
+    this.disconnectedCallback()
   }
 
   connectedCallback(): void {
     super.connectedCallback()
+    document.addEventListener('click', this.handleInteraction, { once: true })
+  }
+
+  disconnectedCallback(): void {
+    document.removeEventListener('click', this.handleInteraction)
   }
 
   render() {

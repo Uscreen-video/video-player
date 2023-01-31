@@ -47,7 +47,7 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isNativeHLS: false })
-  async handleHLSInit() {
+  async initHls() {
     const HLS = (await import('hls.js')).default
     if (!HLS.isSupported()) return
 
@@ -67,6 +67,11 @@ export class VideoContainer extends LitElement {
     this.hls.attachMedia(this.videos[0]);
 
     dispatch(this, Types.Action.update, { canPlay: true })
+  }
+
+  @listen(Types.Command.init, { isAutoplay: true, isMuted: true, isInteracted: true })
+  unmuteVideo() {
+    return this.videos[0].muted = false
   }
 
   @listen(Types.Command.pause)
