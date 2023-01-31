@@ -41,4 +41,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     isInteracted: true
   }),
+  [Action.idle]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }

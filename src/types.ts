@@ -22,7 +22,8 @@ export enum Action {
   init,
   volumeChange,
   fullscreenChange,
-  interacted
+  interacted,
+  idle
 }
 
 export enum Event {
@@ -40,6 +41,7 @@ export type State = Partial<{
   poster: string,
   volume: number,
   canPlay: boolean,
+  idle: boolean,
   isInteracted: boolean,
   isPlaying: boolean,
   isMuted: boolean,
