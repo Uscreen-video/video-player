@@ -20,22 +20,24 @@ export class EventListener implements ReactiveController {
   }
 
   hostConnected() {
-    this.host.dispatchEvent(
-      new CommandRegisterEvent(
-        this.command,
-        this.dependencies,
-        (params, unsubscribe, resolve, reject) => {
-          const fx = (this.host as any)[this.name](params)
-          this.unsubscribe = unsubscribe
-          debugCommand(`[${Command[this.command]}] handled`, params)
-          if (fx instanceof Promise) {
-            fx.then(resolve).catch(reject)
-          } else {
-            resolve()
-          }
+    const _host: any = this.host
+    const event = new CommandRegisterEvent(
+      this.command,
+      this.dependencies,
+      (params, unsubscribe, resolve, reject) => {
+        const fx = (this.host as any)[this.name](params)
+        this.unsubscribe = unsubscribe
+        debugCommand(`[${Command[this.command]}] handled`, params)
+        if (fx instanceof Promise) {
+          fx.then(resolve).catch(reject)
+        } else {
+          resolve()
         }
-      )
+      }
     )
+
+    _host.state?.registerCommand?.(event) ||
+    _host.dispatchEvent(event)
   }
 
   hostDisconnected(): void {

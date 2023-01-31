@@ -18,12 +18,19 @@ export class VideoPlayButton extends LitElement {
   @connect('isMuted')
   isMuted: boolean
 
+  @connect('isFullscreen')
+  isFullscreen: boolean
+
   handleClick() {
     this.command(
       this.isPlaying
         ? Types.Command.pause
         : Types.Command.play
     )
+  }
+
+  handleFullscreen() {
+    this.command(Types.Command.toggleFullscreen)
   }
 
   handleMutedState() {
@@ -41,6 +48,9 @@ export class VideoPlayButton extends LitElement {
       </button>
       <button @click=${this.handleMutedState}>
         isMuted: ${this.isMuted ? 'true' : 'false'}
+      </button>
+      <button @click=${this.handleFullscreen}>
+        isFullscreen: ${this.isFullscreen ? 'true' : 'false'}
       </button>
     `
   }

@@ -33,4 +33,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
+  [Action.fullscreenChange]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }

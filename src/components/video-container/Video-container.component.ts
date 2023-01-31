@@ -3,6 +3,7 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type { Hls } from 'hls.js'
+import { VideoEventsController } from '../../controllers/VideoEvents'
 
 /**
  * @slot - Video-container main content
@@ -11,6 +12,7 @@ import type { Hls } from 'hls.js'
 export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
+  public events = new VideoEventsController(this)
 
   hls: Hls
 
@@ -63,6 +65,7 @@ export class VideoContainer extends LitElement {
 
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
+
     dispatch(this, Types.Action.update, { canPlay: true })
   }
 
@@ -72,35 +75,8 @@ export class VideoContainer extends LitElement {
   }
 
   @eventOptions({ capture: true })
-  handlePlay() {
-    dispatch(this, Types.Action.play)
-  }
-
-  @eventOptions({ capture: true })
-  handlePause() {
-    dispatch(this, Types.Action.pause)
-  }
-
-  @eventOptions({ capture: true })
-  handleTimeUpdate(e: { target: HTMLVideoElement }) {
-    dispatch(this, Types.Action.updateTime, {
-      currentTime: e.target.currentTime
-    })
-  }
-
-  @eventOptions({ capture: true })
-  handleLoadedData(e: { target: HTMLVideoElement}) {
-    dispatch(this, Types.Action.updateDuration, {
-      duration: e.target.duration
-    })
-  }
-
-  @eventOptions({ capture: true })
-  handleVolumeChange(e: { target: HTMLVideoElement }) {
-    dispatch(this, Types.Action.volumeChange, {
-      value: e.target.volume,
-      isMuted: e.target.muted
-    })
+  handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
+    this.events.dispatchEvent(e.type, this.videos[0])
   }
 
   initVideo() {
@@ -123,11 +99,11 @@ export class VideoContainer extends LitElement {
     return html`
       <slot
         @slotchange=${this.initVideo}
-        @play=${this.handlePlay}
-        @pause=${this.handlePause}
-        @timeupdate=${this.handleTimeUpdate}
-        @loadeddata=${this.handleLoadedData}
-        @volumechange=${this.handleVolumeChange}
+        @play=${this.handleVideoEvent}
+        @pause=${this.handleVideoEvent}
+        @timeupdate=${this.handleVideoEvent}
+        @loadeddata=${this.handleVideoEvent}
+        @volumechange=${this.handleVideoEvent}
       ></slot>
     `
   }

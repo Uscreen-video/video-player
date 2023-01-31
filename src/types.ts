@@ -5,7 +5,8 @@ export enum Command {
   seek,
   initCustomHLS,
   mute,
-  unmute
+  unmute,
+  toggleFullscreen
 }
 
 export enum Action {
@@ -19,7 +20,8 @@ export enum Action {
   updateDuration,
   updateTime,
   init,
-  volumeChange
+  volumeChange,
+  fullscreenChange
 }
 
 export enum Event {
@@ -40,7 +42,8 @@ export type State = Partial<{
   isPlaying: boolean,
   isMuted: boolean,
   isAutoplay: boolean
-  isNativeHLS: boolean
+  isNativeHLS: boolean,
+  isFullscreen: boolean
 }>
 
 
