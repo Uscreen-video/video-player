@@ -1,0 +1,69 @@
+:host {
+  --active-color: blue;
+  --background-color: rgba(255, 255, 255, 0.4);
+  --border-radius: 2px;
+  --height: 10px;
+  --thumb-size: var(--thumb-size);
+  --thumb-color: white;
+
+  display: flex;
+  align-items: center;
+  box-sizing: borde-box;
+  width: 100%;
+  transition: transformZ(0);
+  padding: 0 calc(var(--thumb-size) / 2);
+}
+
+.container {
+  width: 100%;
+  position: relative;
+  transform: scale(1);
+}
+
+.lines {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  height: var(--height);
+  transition: height 0.1s linear;
+}
+
+.progress{
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  transform-origin: left;
+  background-color: var(--active-color);
+}
+
+.handler {
+  position: absolute;
+  display: flex;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  right: 100%;
+  &:before {
+    content: ' ';
+    flex: 1;
+  }
+  &:after{
+    content: ' ';
+    position: relative;
+    top: 50%;
+    right: 0;
+    width: var(--thumb-size);
+    height: var(--thumb-size);
+    transform: translate3d(50%, -50%, 0);
+    background-color: var(--thumb-color);
+    border-radius: 50%;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+}

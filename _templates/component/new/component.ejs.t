@@ -9,7 +9,7 @@ import styles from './<%= h.capitalize(name) %>.styles.css?inline'
 /**
  * @slot - <%= h.capitalize(name) %> main content
  * */
-@customElement('ds-<%= name %>')
+@customElement('<%= name %>')
 export class <%= h.changeCase.pascal(name) %> extends LitElement {
   static styles = unsafeCSS(styles)
 

@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  flex-wrap: no-wrap;
+}
+
+video-slider {
+  --active-color: blue;
+  --background-color: rgba(255, 255, 255, 0.4);
+  --height: 0.4rem;
+  --thumb-size: 0.75rem;
+  --border-radius: calc(var(--height) / 2);
+
+  width: 100px;
+  padding: 20px 0;
+  padding-left: 10px;
+}

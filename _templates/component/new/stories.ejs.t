@@ -7,13 +7,13 @@ import './<%= h.capitalize(name) %>.component'
 
 export default {
   title: 'components/<%= h.changeCase.title(name) %>',
-  component: 'ds-<%= name %>',
+  component: '<%= name %>',
 }
 
 const Template = ({ slot }: <%= h.changeCase.pascal(name) %>) => html`
-<ds-<%= name %>>
+<<%= name %>>
   ${slot}
-</ds-<%= name %>>
+<<%= name %>>
 `
 
 export const Default = Template.bind({})

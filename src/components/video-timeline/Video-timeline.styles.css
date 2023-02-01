@@ -1,79 +1,20 @@
 :host {
-  --active-color: blue;
-  --background-color: rgba(255, 255, 255, 0.4);
-  --base-height: 1rem;
-  --line-height: 0.25rem;
-  --radius: calc(var(--line-height) / 2);
-
   display: flex;
   align-items: flex-end;
   width: 100%;
 }
 
-.container {
-  position: relative;
-  padding: 0 calc(var(--base-height) / 2);
+video-slider {
+  --active-color: blue;
+  --background-color: rgba(255, 255, 255, 0.4);
+  --height: 0.25rem;
+  --thumb-size: 1rem;
+  --border-radius: calc(var(--height) / 2);
+
+  height: 1rem;
   padding-top: 20px;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 18px;
   &:hover {
-    --line-height: calc(var(--base-height) / 2)
-  }
-}
-
-.line-container {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  border-radius: calc(var(--line-height) / 2);
-  transition: height 0.1s linear;
-  height: var(--line-height);
-  transition: transformZ(0);
-}
-
-.line {
-  position: relative;
-  height: 100%;
-  width: 100%;
-  border-radius: calc(var(--line-height) / 2);
-  overflow: hidden;
-  pointer-events: none;
-  background: var(--background-color);
-  transform: translate(0, 1px);
-}
-
-.progress {
-  position: absolute;
-  inset: 0;
-  transform-origin: left;
-  background: var(--active-color);
-}
-
-.handler{
-  position: absolute;
-  display: flex;
-  border: none;
-  background: transparent;
-  padding: 0;
-  height: 0;
-  width: 100%;
-  top: 50%;
-  right: 100%;
-  &:before {
-    content: ' ';
-    flex: 1;
-  }
-  &:after{
-    content: ' ';
-    width: var(--base-height);
-    height: var(--base-height);
-    transform: translate3d(0, -50%, 0);
-    background-color: #fff;
-    border-radius: 50%;
-    user-select: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+    --height: 0.5rem;
   }
 }
 

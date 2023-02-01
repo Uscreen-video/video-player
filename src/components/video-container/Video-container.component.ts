@@ -79,6 +79,11 @@ export class VideoContainer extends LitElement {
     return this.videos[0].pause()
   }
 
+  @listen(Types.Command.setVolume)
+  changeVolume(volume: number) {
+    return this.videos[0].volume = volume
+  }
+
   @eventOptions({ capture: true })
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     this.events.dispatchEvent(e.type, this.videos[0])

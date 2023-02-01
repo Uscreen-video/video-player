@@ -31,7 +31,7 @@ export class VideoEventsController implements ReactiveController {
         break
       case 'volumechange':
         this.dispatch(Types.Action.volumeChange, {
-          value: video.volume,
+          volume: video.volume,
           isMuted: video.muted
         })
         break

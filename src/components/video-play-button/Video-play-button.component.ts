@@ -33,21 +33,10 @@ export class VideoPlayButton extends LitElement {
     this.command(Types.Command.toggleFullscreen)
   }
 
-  handleMutedState() {
-    this.command(
-      this.isMuted
-        ? Types.Command.unmute
-        : Types.Command.mute
-    )
-  }
-
   render() {
     return html`
       <button @click=${this.handleClick}>
         Click me to ${this.isPlaying ? 'stop' : 'play'} the video
-      </button>
-      <button @click=${this.handleMutedState}>
-        isMuted: ${this.isMuted ? 'true' : 'false'}
       </button>
       <button @click=${this.handleFullscreen}>
         isFullscreen: ${this.isFullscreen ? 'true' : 'false'}

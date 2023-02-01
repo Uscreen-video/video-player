@@ -7,6 +7,7 @@ export enum Command {
   mute,
   unmute,
   toggleFullscreen,
+  setVolume,
 }
 
 export enum Action {

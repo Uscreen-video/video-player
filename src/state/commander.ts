@@ -48,7 +48,7 @@ export class EventListener implements ReactiveController {
 export function createCommand(host: ReactiveElement) {
   return (
     command: Command,
-    params?: Record<string, any>
+    params?: Record<string, any> | unknown
   ) => {
     debugCommand(`[${Command[command]}] fired`, params)
     return host.dispatchEvent(new CommandEvent(command, params))
