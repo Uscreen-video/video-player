@@ -160,7 +160,7 @@ export class VideoTimeline extends LitElement {
           <button
             class="handler"
             style=${styleMap({
-              left: this.progressPosition * 100 + '%'
+              transform: `translateX(${this.progressPosition * 100 + '%'})`
             })}
           ></button>
 

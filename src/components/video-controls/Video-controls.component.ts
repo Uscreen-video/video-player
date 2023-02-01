@@ -15,8 +15,9 @@ export class VideoControls extends LitElement {
   @connect('idle')
   idle: boolean
 
+  @property({ type: Boolean, reflect: true })
   @connect('isPlaying')
-  isPlaying: boolean
+  playing: boolean
 
   render() {
     return html`

@@ -52,17 +52,29 @@
 }
 
 .handler{
-  display: block;
   position: absolute;
-  width: var(--base-height);
-  height: var(--base-height);
-  top: 50%;
-  transform: translate3d(-50%, -50%, 0);
+  display: flex;
   border: none;
-  background-color: #fff;
-  border-radius: 50%;
-  user-select: none;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  padding: 0;
+  height: 0;
+  width: 100%;
+  top: 50%;
+  right: 100%;
+  &:before {
+    content: ' ';
+    flex: 1;
+  }
+  &:after{
+    content: ' ';
+    width: var(--base-height);
+    height: var(--base-height);
+    transform: translate3d(0, -50%, 0);
+    background-color: #fff;
+    border-radius: 50%;
+    user-select: none;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
 }
 
 video-timer{
