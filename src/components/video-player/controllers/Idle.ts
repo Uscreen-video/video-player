@@ -10,6 +10,9 @@ export class IdleController implements ReactiveController {
   ) {
     this.host.addController(this)
     this.callback = callback.bind(host)
+  }
+
+  hostConnected(): void {
     this.start()
   }
 

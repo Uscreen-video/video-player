@@ -23,7 +23,7 @@ export class VideoVolumeControl extends LitElement {
 
   handleVolumeChange(e: CustomEvent & { target: VideoSlider }) {
     this.volume = Number(e.target.position.toFixed(2))
-    this.command(Types.Command.setVolume, this.volume)
+    this.command(Types.Command.setVolume, { volume: this.volume })
   }
 
   handleMutedChange() {
@@ -35,7 +35,6 @@ export class VideoVolumeControl extends LitElement {
   }
 
   render() {
-    console.log(this.volume)
     return html`
       <button @click=${this.handleMutedChange}>
         ${this.isMuted ? '🔇' : '🔈'}

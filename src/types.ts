@@ -7,7 +7,13 @@ export enum Command {
   mute,
   unmute,
   toggleFullscreen,
+  togglePlay,
+  toggleMuted,
   setVolume,
+  increaseVolume,
+  decreaseVolume,
+  forward,
+  backward,
 }
 
 export enum Action {

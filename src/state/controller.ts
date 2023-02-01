@@ -4,7 +4,7 @@ import { context } from './index'
 import { StateAction } from './dispatcher';
 import { stateMapper } from './mapper';
 import { Action, Command, Event, State } from '../types';
-import { CommandEvent, CommandRegisterEvent } from './events';
+import { CommandEvent, CommandMeta, CommandParams, CommandRegisterEvent } from './events';
 import _debug from 'debug'
 
 const commandDebug = _debug('player:commands')
@@ -25,7 +25,8 @@ export const mapState = (
 }
 
 class CachedCommand {
-  private _params: unknown
+  private _params: CommandParams
+  private _meta: CommandMeta
   public isPending: boolean
 
   constructor(
@@ -34,6 +35,7 @@ class CachedCommand {
     public readonly dependencies: State | undefined,
     public readonly callback: (
       params: unknown,
+      meta: unknown,
       unsubscribe: () => void,
       resolve: (value: unknown) => void,
       reject: (value: unknown) => void,
@@ -46,19 +48,22 @@ class CachedCommand {
       .every((k: keyof State) => this.dependencies[k] === s[k])
   }
 
-  setParams(params: unknown) {
+  setParams(params: CommandParams, meta: CommandMeta) {
     this._params = params
+    this._meta = meta
     return this
   }
 
-  pend(params = this._params) {
+  pend(params = this._params, meta = this._meta) {
     this._params = params
-    this.isPending = true
+    this._meta = meta
+    if (!meta.once) this.isPending = true
   }
 
-  exec(params = this._params) {
+  exec(params = this._params, meta = this._meta) {
     this.callback(
       params,
+      meta,
        // unsubscribe
       () => this.cache.delete(this),
       // resolve
@@ -69,7 +74,7 @@ class CachedCommand {
       // reject
       (e) => {
         commandDebug(`[${Command[this.command]}] rejected`, e)
-        this.isPending = true
+        if (!meta.once) this.isPending = true
       }
     )
   }
@@ -110,9 +115,9 @@ export class StateController extends ContextProvider<Context> {
     for (const cmd of this._commands) {
       if (cmd.command !== event.command) continue
       if (cmd.isMatchingState(this.value)) {
-        cmd.exec(event.params)
+        cmd.exec(event.params, event.meta)
       } else {
-        cmd.pend(event.params)
+        cmd.pend(event.params, event.meta)
       }
     }
   }

@@ -3,7 +3,6 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type { Hls } from 'hls.js'
-import { VideoEventsController } from '../../controllers/VideoEvents'
 
 /**
  * @slot - Video-container main content
@@ -12,7 +11,6 @@ import { VideoEventsController } from '../../controllers/VideoEvents'
 export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
-  public events = new VideoEventsController(this)
 
   hls: Hls
 
@@ -20,7 +18,7 @@ export class VideoContainer extends LitElement {
   videos: HTMLVideoElement[]
 
   @listen(Types.Command.play, { canPlay: true })
-  async onPlayCommand() {
+  async play() {
     try {
       await this.videos[0].play()
     } catch (e) {
@@ -30,20 +28,104 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  @listen(Types.Command.pause)
+  pause() {
+    return this.videos[0].pause()
+  }
+
+  @listen(Types.Command.togglePlay)
+  togglePlay() {
+    return this.videos[0].paused
+      ? this.play()
+      : this.pause()
+  }
+
   @listen(Types.Command.seek, { canPlay: true })
-  async onSeekCommand({ time }: { time: number }) {
+  seek({ time }: { time: number }) {
     this.videos[0].currentTime = time
   }
 
+  @listen(Types.Command.forward)
+  forward() {
+    this.seek({
+      time: Math.min(this.videos[0].currentTime + 10, this.videos[0].duration)
+    })
+  }
+
+  @listen(Types.Command.backward)
+  backward() {
+    this.seek({
+      time: Math.max(this.videos[0].currentTime - 10, 0)
+    })
+  }
+
   @listen(Types.Command.mute)
-  async onMuteCommand() {
+  mute() {
     this.videos[0].muted = true
   }
 
+  @listen(Types.Command.toggleMuted)
+  toggleMuted() {
+    this.videos[0].muted
+      ? this.unmute()
+      : this.mute()
+  }
+
+  @listen(Types.Command.init, { isAutoplay: true, isMuted: true, isInteracted: true })
   @listen(Types.Command.unmute)
-  async onUnMuteCommand() {
+  unmute() {
     this.videos[0].muted = false
   }
+
+  @listen(Types.Command.setVolume)
+  setVolume({ volume }: { volume: number }) {
+    return this.videos[0].volume = Math.min(1, Math.max(0, volume))
+  }
+
+  @listen(Types.Command.increaseVolume)
+  increaseVolume() {
+    this.setVolume({
+      volume: this.videos[0].volume + 0.1
+    })
+  }
+
+  @listen(Types.Command.decreaseVolume)
+  decreaseVolume() {
+    this.setVolume({
+      volume: this.videos[0].volume - 0.1
+    })
+  }
+
+  @eventOptions({ capture: true })
+  handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
+    const type = e.type
+    const [video] = this.videos
+    switch (type) {
+      case 'play':
+        dispatch(this, Types.Action.play)
+        break
+      case 'pause':
+        dispatch(this, Types.Action.pause)
+        break
+      case 'timeupdate':
+        dispatch(this, Types.Action.updateTime, {
+          currentTime: video.currentTime
+        })
+        break
+      case 'volumechange':
+        dispatch(this, Types.Action.volumeChange, {
+          volume: video.volume,
+          isMuted: video.muted
+        })
+        break
+      case 'loadeddata':
+        dispatch(this, Types.Action.updateDuration, {
+          duration: video.duration
+        })
+        break
+    }
+  }
+
 
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isNativeHLS: false })
@@ -69,27 +151,7 @@ export class VideoContainer extends LitElement {
     dispatch(this, Types.Action.update, { canPlay: true })
   }
 
-  @listen(Types.Command.init, { isAutoplay: true, isMuted: true, isInteracted: true })
-  unmuteVideo() {
-    return this.videos[0].muted = false
-  }
-
-  @listen(Types.Command.pause)
-  pauseVideo() {
-    return this.videos[0].pause()
-  }
-
-  @listen(Types.Command.setVolume)
-  changeVolume(volume: number) {
-    return this.videos[0].volume = volume
-  }
-
-  @eventOptions({ capture: true })
-  handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
-    this.events.dispatchEvent(e.type, this.videos[0])
-  }
-
-  initVideo() {
+  setup() {
     const [{ autoplay, muted, poster, volume, duration, currentTime }] = this.videos
     dispatch(this, Types.Action.init, {
       poster,
@@ -108,7 +170,7 @@ export class VideoContainer extends LitElement {
   render() {
     return html`
       <slot
-        @slotchange=${this.initVideo}
+        @slotchange=${this.setup}
         @play=${this.handleVideoEvent}
         @pause=${this.handleVideoEvent}
         @timeupdate=${this.handleVideoEvent}

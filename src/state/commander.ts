@@ -1,7 +1,7 @@
 import { ReactiveController, ReactiveElement } from "lit";
 import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
 import { Command, State } from "../types";
-import { CommandEvent, CommandRegisterEvent } from "./events";
+import { CommandEvent, CommandMeta, CommandParams, CommandRegisterEvent } from "./events";
 import _debug from 'debug'
 
 const debugCommand = _debug('player:commands')
@@ -24,7 +24,7 @@ export class EventListener implements ReactiveController {
     const event = new CommandRegisterEvent(
       this.command,
       this.dependencies,
-      (params, unsubscribe, resolve, reject) => {
+      (params, meta, unsubscribe, resolve, reject) => {
         const fx = (this.host as any)[this.name](params)
         this.unsubscribe = unsubscribe
         debugCommand(`[${Command[this.command]}] handled`, params)
@@ -48,10 +48,11 @@ export class EventListener implements ReactiveController {
 export function createCommand(host: ReactiveElement) {
   return (
     command: Command,
-    params?: Record<string, any> | unknown
+    params?: CommandParams,
+    meta?: CommandMeta
   ) => {
     debugCommand(`[${Command[command]}] fired`, params)
-    return host.dispatchEvent(new CommandEvent(command, params))
+    return host.dispatchEvent(new CommandEvent(command, params, meta))
   }
 }
 

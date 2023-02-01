@@ -1,18 +1,22 @@
-import { connect, createState, dispatch, listen, Types } from '../../state'
+import { connect, createCommand, createState, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
 import '../video-controls'
 import '../video-container'
-import { FullscreenController } from '../../controllers/Fullscreen'
-import { IdleController } from '../../controllers/Idle'
+import { FullscreenController } from './controllers/Fullscreen'
+import { IdleController } from './controllers/Idle'
+import { KeyboardController } from './controllers/Keyboard'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
   static styles?: CSSResultGroup = unsafeCSS(styles)
+  protected idleManager = new IdleController(this, this.handleIdleUpdate)
+  protected keyboardManager = new KeyboardController(this)
+
+  public command = createCommand(this)
   public state = createState(this)
   public fullscreen = new FullscreenController(this)
-  private idleTimer = new IdleController(this, this.handleIdleUpdate)
   
   @property({ type: String, attribute: 'fullscreen-element'})
   fullscreenContainer: string
@@ -22,6 +26,9 @@ export class VideoPlayer extends LitElement {
 
   @property({ type: Number, attribute: 'idle-timeout' })
   idleTimeout = 9000
+
+  @property({ attribute: true, reflect: true })
+  tabindex = 0
 
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
@@ -40,16 +47,18 @@ export class VideoPlayer extends LitElement {
     dispatch(this, Types.Action.interacted)
     document.removeEventListener('click', this.handleClick)
     document.removeEventListener('touch', this.handleClick)
+    document.removeEventListener('keydown', this.handleClick)
   }
 
   handleMove = () => {
-    this.idleTimer.reset()
+    this.idleManager.reset()
   }
 
   connectedCallback(): void {
     super.connectedCallback()
     document.addEventListener('click', this.handleClick, { once: true })
     document.addEventListener('touch', this.handleClick, { once: true })
+    document.addEventListener('keydown', this.handleClick, { once: true })
     document.addEventListener('touchstart', this.handleMove,)
     document.addEventListener('mousemove', this.handleMove)
     document.addEventListener('mouseleave', this.handleMove)

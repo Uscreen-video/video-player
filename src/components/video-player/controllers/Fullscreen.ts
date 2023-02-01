@@ -1,10 +1,8 @@
 import { ReactiveController, ReactiveElement } from "lit";
-import { dispatch, Types } from "../state";
+import { dispatch, Types } from "../../../state";
 
 const fullscreenProperties = (() => {
-  if (document.exitFullscreen) {
-    return null
-  }
+  if (document.exitFullscreen) return null
 
   const prefix = ['webkit', 'moz', 'ms'].find(
     item => !!(document as any)[`${item}ExitFullscreen`] || !!(document as any)[`${item}CancelFullScreen`],
@@ -50,7 +48,6 @@ export class FullscreenController implements ReactiveController {
   private fullscreenNodesMatching(target?: Element) {
     return Boolean(target === this.video || target === this.container)
   }
-
 
   private handleFullscreenChange = (e?: Event & { target: Element }) => {
     if (
