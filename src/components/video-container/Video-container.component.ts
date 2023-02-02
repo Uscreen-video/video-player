@@ -1,5 +1,6 @@
 import { connect, createCommand, dispatch, listen, Types } from '../../state'
-import { unsafeCSS, LitElement, html } from 'lit'
+import { unsafeCSS, LitElement } from 'lit'
+import { unsafeStatic, html } from 'lit/static-html.js'
 import { customElement, eventOptions, queryAssignedElements, state } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type { Hls } from 'hls.js'
@@ -179,12 +180,14 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleCueChange({ target }: { target: HTMLTrackElement }) {
-    console.log(target.track)
-    if (target.srclang !== this.activeTextTrack) {
+    const activeTextTrack = target.track.mode === 'showing' ? target.srclang : ''
+
+    if (activeTextTrack !== this.activeTextTrack) {
       dispatch(this, Types.Action.selectTextTrack, {
-        activeTextTrack: target.srclang
+        activeTextTrack
       })
     }
+
     this.cues = Array.from(target.track.activeCues)
       .map((cue: VTTCue) => cue.getCueAsHTML())
       .flatMap(getCueText)
@@ -219,7 +222,14 @@ export class VideoContainer extends LitElement {
         @cuechange=${this.handleCueChange}
       ></slot>
       ${when(this.activeTextTrack, () => html`
-        <div>${this.activeTextTrack}</div>
+        
+        <div class="cues">
+          ${this.cues.map(cue => html`
+            <div class="cue">
+              <span>${unsafeStatic(cue)}</span>
+            </div>
+          `)}
+        </div>
       `)}
     `
   }

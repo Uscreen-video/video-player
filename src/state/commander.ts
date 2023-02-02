@@ -46,13 +46,18 @@ export class EventListener implements ReactiveController {
 }
 
 export function createCommand(host: ReactiveElement) {
+  /**
+   * Dispatches a command event
+   * @type {Command}
+   */
   return (
-    command: Command,
+    command: Command | keyof typeof Command,
     params?: CommandParams,
     meta?: CommandMeta
   ) => {
-    debugCommand(`[${Command[command]}] fired`, params)
-    return host.dispatchEvent(new CommandEvent(command, params, meta))
+    const _command = typeof command === 'string' ? Command[command] : command
+    debugCommand(`[${Command[_command]}] fired`, params)
+    return host.dispatchEvent(new CommandEvent(_command, params, meta))
   }
 }
 

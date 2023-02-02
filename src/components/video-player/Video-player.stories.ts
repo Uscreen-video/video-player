@@ -22,9 +22,8 @@ export default {
         <track
           default
           label="English"
-          kind="subtitles" 
-          srclang="en" 
-          id="sub_1"
+          kind="metadata" 
+          srclang="en"
           src="${enCaptions}"
         />
       </video>
