@@ -12,6 +12,7 @@ const initialValue: State = {
   isPlaying: false,
   isInteracted: false,
   idle: false,
+  canPlay: true,
 }
 
 export const context = createContext<State>('video-state')

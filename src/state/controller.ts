@@ -57,7 +57,7 @@ class CachedCommand {
   pend(params = this._params, meta = this._meta) {
     this._params = params
     this._meta = meta
-    if (!meta.once) this.isPending = true
+    if (!meta?.once) this.isPending = true
   }
 
   exec(params = this._params, meta = this._meta) {
@@ -74,7 +74,7 @@ class CachedCommand {
       // reject
       (e) => {
         commandDebug(`[${Command[this.command]}] rejected`, e)
-        if (!meta.once) this.isPending = true
+        if (!meta?.once) this.isPending = true
       }
     )
   }

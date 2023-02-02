@@ -21,6 +21,9 @@ export class VideoPlayButton extends LitElement {
   @connect('isFullscreen')
   isFullscreen: boolean
 
+  @connect('activeTextTrack')
+  activeTrack: string
+
   handleClick() {
     this.command(
       this.isPlaying
@@ -33,6 +36,12 @@ export class VideoPlayButton extends LitElement {
     this.command(Types.Command.toggleFullscreen)
   }
 
+  handleEnableCaptions() {
+    this.command(Types.Command.enableTextTrack, {
+      lang: this.activeTrack ? '' : 'en'
+    })
+  }
+
   render() {
     return html`
       <button @click=${this.handleClick}>
@@ -40,6 +49,9 @@ export class VideoPlayButton extends LitElement {
       </button>
       <button @click=${this.handleFullscreen}>
         isFullscreen: ${this.isFullscreen ? 'true' : 'false'}
+      </button>
+      <button @click=${this.handleEnableCaptions}>
+        activeTrack: ${this.activeTrack}
       </button>
     `
   }

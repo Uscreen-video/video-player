@@ -14,6 +14,7 @@ export enum Command {
   decreaseVolume,
   forward,
   backward,
+  enableTextTrack
 }
 
 export enum Action {
@@ -29,8 +30,10 @@ export enum Action {
   init,
   volumeChange,
   fullscreenChange,
+  setLevels,
   interacted,
-  idle
+  idle,
+  selectTextTrack
 }
 
 export enum Event {
@@ -53,12 +56,16 @@ export type State = Partial<{
   isPlaying: boolean,
   isMuted: boolean,
   isAutoplay: boolean
-  isNativeHLS: boolean,
-  isFullscreen: boolean
+  isSourceSupported: boolean,
+  isFullscreen: boolean,
+  activeTextTrack: string,
+  activeQuality: string,
+  textTracks: {
+    label: string,
+    src: string,
+    lang: string
+  }[],
+  qualityLevels: {
+    name: string
+  }[]
 }>
-
-
-export type PromiseLike = [
-  resolve: (value: unknown) => void,
-  reject: (value: unknown) => void
-]

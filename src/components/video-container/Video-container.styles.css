@@ -2,6 +2,7 @@
 :host {
   --aspect-ratio: 9 / 16;
 
+  position: relative;
   display: block;
   padding-bottom: calc(var(--aspect-ratio) * 100%);
 }

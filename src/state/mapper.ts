@@ -45,4 +45,12 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
+  [Action.setLevels]: (state, params) => ({
+    ...state,
+    ...params
+  }),
+  [Action.selectTextTrack]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }
