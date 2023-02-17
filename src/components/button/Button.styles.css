@@ -1,0 +1,50 @@
+:host {
+
+}
+
+button {
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: white;
+  position: relative;
+  &:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+  }
+}
+
+.tooltip {
+  position: absolute;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1.43;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.8);
+  height: 0;
+  overflow: hidden;
+  user-select: none;
+  & .inner {
+    padding: 6px 12px;
+  }
+  &[data-popper-placement] {
+    height: auto;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { 
+    opacity: 0;
+  }
+  to { 
+    opacity: 1 
+  }
+}

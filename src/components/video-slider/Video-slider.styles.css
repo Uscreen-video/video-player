@@ -10,8 +10,8 @@
   align-items: center;
   box-sizing: borde-box;
   width: 100%;
-  transition: transformZ(0);
   padding: 0 calc(var(--thumb-size) / 2);
+  overflow: hidden;
 }
 
 .container {

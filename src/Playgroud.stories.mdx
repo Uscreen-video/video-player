@@ -3,16 +3,19 @@ import { Meta, Canvas } from '@storybook/blocks'
 import enCaptions from '../mocks/captions_en.vtt?url'
 
 import './components/video-player'
-import './components/video-play-button'
+import './components/video-controls'
 import './components/video-timeline'
 import './components/video-volume-control'
 import './components/video-cues'
+import './components/buttons/Play'
+import './components/buttons/Forward'
+import './components/buttons/Backward'
+import './components/buttons/Volume'
 
 <Meta title="Playground" />
 
 <Canvas>
   <video-player>
-    <video-cues />
     <video
       slot="video"
       poster="https://alpha.uscreencdn.com/video_thumbnails/ekgb_ldxJUzLAg.jpg"
@@ -29,10 +32,14 @@ import './components/video-cues'
         src={enCaptions}
       />
     </video>
-    <div slot="controls" style={{ flex: 1 }}>
-      <video-play-button />
-      <video-volume-control />
+    <video-controls>
       <video-timeline timer />
-    </div>
+      <video-play-button />
+      <video-forward-button />
+      <video-backward-button />
+      <video-volume-button />
+      <video-volume-control />
+    </video-controls>
+    <video-cues />
   </video-player>
 </Canvas>

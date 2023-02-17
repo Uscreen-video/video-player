@@ -6,9 +6,6 @@ import type { VideoSlider } from '../video-slider';
 
 import '../video-slider';
 
-/**
- * @slot - Video-volume-control main content
- * */
 @customElement('video-volume-control')
 export class VideoVolumeControl extends LitElement {
   static styles = unsafeCSS(styles)
@@ -26,19 +23,8 @@ export class VideoVolumeControl extends LitElement {
     this.command(Types.Command.setVolume, { volume: this.volume })
   }
 
-  handleMutedChange() {
-    this.command(
-      this.isMuted
-        ? Types.Command.unmute
-        : Types.Command.mute
-    )
-  }
-
   render() {
     return html`
-      <button @click=${this.handleMutedChange}>
-        ${this.isMuted ? '🔇' : '🔈'}
-      </button>
       <video-slider
         .value=${this.volume}
         @dragend=${this.handleVolumeChange}

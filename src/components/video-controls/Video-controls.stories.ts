@@ -3,8 +3,8 @@ import type { VideoControls } from './Video-controls.component'
 import './Video-controls.component'
 
 export default {
-  title: 'components/Video Controls',
-  component: 'ds-video-controls',
+  title: 'components/Controls',
+  component: 'video-controls',
 }
 
 const Template = ({ slot }: VideoControls) => html`

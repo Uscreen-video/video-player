@@ -1,5 +1,5 @@
 export default {
-  title: 'components/Video Player',
+  title: 'components/Player',
   component: 'video-player',
 }
 

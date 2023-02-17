@@ -3,14 +3,14 @@ import type { VideoVolumeControl } from './Video-volume-control.component'
 import './Video-volume-control.component'
 
 export default {
-  title: 'components/Video Volume Control',
+  title: 'components/Volume Control',
   component: 'video-volume-control',
 }
 
 const Template = ({ slot }: VideoVolumeControl) => html`
 <video-volume-control>
   ${slot}
-<video-volume-control>
+</video-volume-control>
 `
 
 export const Default = Template.bind({})

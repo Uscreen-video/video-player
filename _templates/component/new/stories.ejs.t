@@ -10,13 +10,4 @@ export default {
   component: '<%= name %>',
 }
 
-const Template = ({ slot }: <%= h.changeCase.pascal(name) %>) => html`
-<<%= name %>>
-  ${slot}
-<<%= name %>>
-`
-
-export const Default = Template.bind({})
-Default.args = {
-  slot: 'I am a <%= name %>'
-}
+export const Default = {}

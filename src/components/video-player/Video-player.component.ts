@@ -59,7 +59,7 @@ export class VideoPlayer extends LitElement {
     document.addEventListener('click', this.handleClick, { once: true })
     document.addEventListener('touch', this.handleClick, { once: true })
     document.addEventListener('keydown', this.handleClick, { once: true })
-    document.addEventListener('touchstart', this.handleMove,)
+    document.addEventListener('touchstart', this.handleMove, { passive: true })
     document.addEventListener('mousemove', this.handleMove)
     document.addEventListener('mouseleave', this.handleMove)
   }
@@ -77,9 +77,6 @@ export class VideoPlayer extends LitElement {
       <video-container>
         <slot name="video"></slot>
       </video-container>
-      <video-controls>
-        <slot name="controls"></slot>
-      </video-controls>
       <slot></slot>
     `
   }

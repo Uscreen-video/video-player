@@ -3,8 +3,8 @@ import type { VideoTimer } from './Video-timer.component'
 import './Video-timer.component'
 
 export default {
-  title: 'components/Video Timer',
-  component: 'ds-video-timer',
+  title: 'components/Timer',
+  component: 'video-timer',
 }
 
 const Template = ({ slot }: VideoTimer) => html`

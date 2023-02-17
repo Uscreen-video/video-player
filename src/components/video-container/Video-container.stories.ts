@@ -3,8 +3,8 @@ import type { VideoContainer } from './Video-container.component'
 import './Video-container.component'
 
 export default {
-  title: 'components/Video Container',
-  component: 'ds-video-container',
+  title: 'components/Container',
+  component: 'video-container',
 }
 
 const Template = ({ slot }: VideoContainer) => html`

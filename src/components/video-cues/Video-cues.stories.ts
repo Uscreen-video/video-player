@@ -3,7 +3,7 @@ import type { VideoCues } from './Video-cues.component'
 import './Video-cues.component'
 
 export default {
-  title: 'components/Video Cues',
+  title: 'components/Cues',
   component: 'video-cues',
 }
 

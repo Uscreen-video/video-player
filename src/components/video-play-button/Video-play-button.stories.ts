@@ -3,8 +3,8 @@ import type { VideoPlayButton } from './Video-play-button.component'
 import './Video-play-button.component'
 
 export default {
-  title: 'components/Video Play Button',
-  component: 'ds-video-play-button',
+  title: 'components/Play Button',
+  component: 'video-play-button',
 }
 
 const Template = ({ slot }: VideoPlayButton) => html`

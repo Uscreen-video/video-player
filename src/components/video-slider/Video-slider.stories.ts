@@ -3,8 +3,8 @@ import type { VideoSlider } from './Video-slider.component'
 import './Video-slider.component'
 
 export default {
-  title: 'components/Video Slider',
-  component: 'ds-video-slider',
+  title: 'components/Slider',
+  component: 'video-slider',
 }
 
 const Template = ({ slot }: VideoSlider) => html`

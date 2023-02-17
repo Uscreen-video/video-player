@@ -11,12 +11,12 @@ import { classMap } from 'lit/directives/class-map.js';
 export class VideoControls extends LitElement {
   static styles = unsafeCSS(styles)
 
-  @property({ type: Boolean, reflect: true })
   @connect('idle')
+  @property({ type: Boolean, reflect: true })
   idle: boolean
 
-  @property({ type: Boolean, reflect: true })
   @connect('isPlaying')
+  @property({ type: Boolean, reflect: true })
   playing: boolean
 
   render() {

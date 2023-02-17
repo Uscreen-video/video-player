@@ -1,6 +1,6 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { classMap } from 'lit/directives/class-map.js'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, eventOptions, property, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { styleMap } from 'lit/directives/style-map.js'
 import { emit } from '../../helpers/emit'
@@ -67,6 +67,7 @@ export class VideoSlider extends LitElement {
    * If user pushed the screen or the button over the line
    * we think he started dragging
    */
+  @eventOptions({ passive: false })
   handlePointerDown() {
     this.isDragging = true
     emit(this, 'dragstart')

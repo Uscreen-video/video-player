@@ -3,8 +3,8 @@ import type { VideoTimeline } from './Video-timeline.component'
 import './Video-timeline.component'
 
 export default {
-  title: 'components/Video Timeline',
-  component: 'ds-video-timeline',
+  title: 'components/Timeline',
+  component: 'video-timeline',
 }
 
 const Template = ({ slot }: VideoTimeline) => html`

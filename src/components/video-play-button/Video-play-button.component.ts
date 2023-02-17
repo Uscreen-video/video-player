@@ -4,6 +4,8 @@ import styles from './Video-play-button.styles.css?inline'
 import { connect, createCommand, dispatch, Types } from '../../state'
 import { Action, Event } from '../../types'
 
+import '../button'
+
 /**
  * @slot - Video-play-button main content
  * */
@@ -44,9 +46,12 @@ export class VideoPlayButton extends LitElement {
 
   render() {
     return html`
-      <button @click=${this.handleClick}>
+      <video-button @click=${this.handleClick}>
         Click me to ${this.isPlaying ? 'stop' : 'play'} the video
-      </button>
+        <span slot="tooltip">
+          ${this.isPlaying ? 'Pause' : 'Play'}
+        </span>
+      </video-button>
       <button @click=${this.handleFullscreen}>
         isFullscreen: ${this.isFullscreen ? 'true' : 'false'}
       </button>
