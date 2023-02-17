@@ -1,0 +1,38 @@
+{ /* Playground.mdx */ }
+import { Meta, Canvas } from '@storybook/blocks'
+import enCaptions from '../mocks/captions_en.vtt?url'
+
+import './components/video-player'
+import './components/video-play-button'
+import './components/video-timeline'
+import './components/video-volume-control'
+import './components/video-cues'
+
+<Meta title="Playground" />
+
+<Canvas>
+  <video-player>
+    <video-cues />
+    <video
+      slot="video"
+      poster="https://alpha.uscreencdn.com/video_thumbnails/ekgb_ldxJUzLAg.jpg"
+    >
+      <source 
+        src="https://stream.mux.com/miQlLYOpwPpHbR6KGQTSgn8ZDm4u4G1X.m3u8"
+        type="application/x-mpegURL"
+      />
+      <track
+        default
+        label="English"
+        kind="metadata" 
+        srcLang="en"
+        src={enCaptions}
+      />
+    </video>
+    <div slot="controls" style={{ flex: 1 }}>
+      <video-play-button />
+      <video-volume-control />
+      <video-timeline timer />
+    </div>
+  </video-player>
+</Canvas>

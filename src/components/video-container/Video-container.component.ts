@@ -1,9 +1,8 @@
 import { connect, createCommand, dispatch, listen, Types } from '../../state'
-import { unsafeCSS, LitElement } from 'lit'
-import { unsafeStatic, html } from 'lit/static-html.js'
-import { customElement, eventOptions, queryAssignedElements, state } from 'lit/decorators.js'
+import { unsafeCSS, LitElement, html } from 'lit'
+import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
-import type { Hls } from 'hls.js'
+import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 import { when } from 'lit/directives/when.js'
 
@@ -19,9 +18,6 @@ export class VideoContainer extends LitElement {
 
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
-
-  @state()
-  cues: string[] = []
 
   @connect('activeTextTrack')
   activeTextTrack: string
@@ -118,14 +114,13 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
-    const HLS = (await import('hls.js')).default
+    const HLS = (await import('hls.js/dist/hls.light.min.js')).default
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()
   
     this.hls = new HLS({
       maxMaxBufferLength: 30,
-      enableWorker: false,
       initialLiveManifestSize: 2,
       liveSyncDurationCount: 5,
       fragLoadingMaxRetry: 10,
@@ -188,9 +183,11 @@ export class VideoContainer extends LitElement {
       })
     }
 
-    this.cues = Array.from(target.track.activeCues)
-      .map((cue: VTTCue) => cue.getCueAsHTML())
-      .flatMap(getCueText)
+    dispatch(this, Types.Action.cues, {
+      cues: Array.from(target.track.activeCues)
+        .map((cue: VTTCue) => cue.getCueAsHTML())
+        .flatMap(getCueText)
+    })
   }
 
   setup() {
@@ -221,16 +218,6 @@ export class VideoContainer extends LitElement {
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
       ></slot>
-      ${when(this.activeTextTrack, () => html`
-        
-        <div class="cues">
-          ${this.cues.map(cue => html`
-            <div class="cue">
-              <span>${unsafeStatic(cue)}</span>
-            </div>
-          `)}
-        </div>
-      `)}
     `
   }
 

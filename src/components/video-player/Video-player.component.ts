@@ -80,6 +80,7 @@ export class VideoPlayer extends LitElement {
       <video-controls>
         <slot name="controls"></slot>
       </video-controls>
+      <slot></slot>
     `
   }
 }

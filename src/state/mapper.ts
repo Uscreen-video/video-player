@@ -53,4 +53,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
+  [Action.cues]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }

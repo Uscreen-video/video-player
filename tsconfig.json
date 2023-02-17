@@ -27,5 +27,14 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "global.d.ts"],
-  "exclude": ["src/**/*.test.ts"]
+  "exclude": ["src/**/*.test.ts"],
+  "mdx": {
+    "plugins": [
+      [
+        "remark-frontmatter",
+        ["toml", "yaml"]
+      ],
+      "remark-gfm"
+    ]
+  }
 }

@@ -1,20 +1,40 @@
+/**
+ * Command are the actions that can be triggered by the user or a interface
+ * They can be handled with the `@listen` decorator, and should not affect the state
+ */
 export enum Command {
+  /** Play the video */
   play,
+  /** Pause the video */
   pause,
-  init,
+  /** Seek to a specific time */
   seek,
-  initCustomHLS,
+  /** Mute the video */
   mute,
+  /** Unmute the video */
   unmute,
+  /** Toggle fullscreen mode */
   toggleFullscreen,
+  /** Toggle play/pause */
   togglePlay,
+  /** Toggle mute/unmute */
   toggleMuted,
+  /** Set the video volume */
   setVolume,
+  /** Increase video volume */
   increaseVolume,
+  /** Decrease video volume */
   decreaseVolume,
+  /** Seek forward for 10 seconds */
   forward,
+  /** Seek backward for 10 seconds */
   backward,
-  enableTextTrack
+  /** Enable a text track */
+  enableTextTrack,
+  /** Initialize the custom HLS player */
+  initCustomHLS,
+  /** Initialize the video player */
+  init,
 }
 
 export enum Action {
@@ -33,7 +53,8 @@ export enum Action {
   setLevels,
   interacted,
   idle,
-  selectTextTrack
+  selectTextTrack,
+  cues
 }
 
 export enum Event {
@@ -60,6 +81,7 @@ export type State = Partial<{
   isFullscreen: boolean,
   activeTextTrack: string,
   activeQuality: string,
+  cues: string[],
   textTracks: {
     label: string,
     src: string,

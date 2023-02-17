@@ -13,9 +13,15 @@ const initialValue: State = {
   isInteracted: false,
   idle: false,
   canPlay: true,
+  cues: [],
 }
 
 export const context = createContext<State>('video-state')
 export const connect = (field?: keyof State) => connectConsumer<State>({ context, field })
-export const listen = (event: Command, dependencies?: State) => createCommandListener(event, dependencies)
+
+/**
+ * A decorator that creates a command listener.  
+ * If dependencies are provided, the command will only be executed if all dependencies are met.
+ */
+export const listen = (command: Command, dependencies?: State) => createCommandListener(command, dependencies)
 export const createState = (host: ReactiveElement) => new StateController(host, context, initialValue)
