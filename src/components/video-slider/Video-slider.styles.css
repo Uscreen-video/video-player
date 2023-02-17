@@ -11,13 +11,13 @@
   box-sizing: borde-box;
   width: 100%;
   padding: 0 calc(var(--thumb-size) / 2);
-  overflow: hidden;
 }
 
 .container {
   width: 100%;
   position: relative;
   transform: scale(1);
+  outline: none;
 }
 
 .lines {
@@ -56,6 +56,7 @@
   &:after{
     content: ' ';
     position: relative;
+    cursor: grab;
     top: 50%;
     right: 0;
     width: var(--thumb-size);

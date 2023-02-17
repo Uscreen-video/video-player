@@ -41,6 +41,14 @@ export class VideoSlider extends LitElement {
     document.removeEventListener('mouseleave', this.handlePointerLeave)
   }
 
+  handleNavigation = (e: KeyboardEvent) => {
+    if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+      this.position += e.code === 'ArrowLeft' ? -0.1 : 0.1
+      e.stopPropagation()
+      emit(this, 'dragend')
+    }
+  }
+
   /**
    * When user releases the timeline we think the dragging is over
    */
@@ -119,6 +127,12 @@ export class VideoSlider extends LitElement {
     return html`
       <div 
         class="container"
+        role="slider"
+        tabindex="0"
+        aria-valuemin="0"
+        aria-valuenow=${this.progressPosition}
+        aria-valuemax="1"
+        @keydown=${this.handleNavigation}
         @mouseenter=${this.handlePointerEnter}
         @mouseleave=${this.handlePointerLeave}
         @mouseup=${this.handleMouseUp}

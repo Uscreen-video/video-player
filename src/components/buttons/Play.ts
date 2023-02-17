@@ -18,11 +18,7 @@ export class PlayButton extends Button {
   isPlaying: boolean
 
   override handleClick() {
-    this.command(
-      this.isPlaying
-        ? Types.Command.pause
-        : Types.Command.play
-    )
+    this.command(Types.Command.togglePlay)
   }
 
   override renderContent() {

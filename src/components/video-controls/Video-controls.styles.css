@@ -5,7 +5,7 @@
   right: 0;
   padding: 28px 16px 16px;
   fransform: translate3d(0, 0, 0);
-  transition: opacity .1s ease-in-out, transition .1s linear;
+  transition: opacity .3s ease-in-out, transition .3s linear;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 53.63%, rgba(0, 0, 0, 0) 96.2%);
   opacity: 1;
   z-index: 1;

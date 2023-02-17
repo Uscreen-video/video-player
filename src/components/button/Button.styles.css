@@ -1,15 +1,35 @@
-:host {
+@import '../../variables.css';
 
+:host {
+  --size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  :host {
+    --size: 1.75rem;
+  }
+}
+
+::slotted(svg) {
+  display: block;
+  width: var(--size);
+  height: var(--size);
 }
 
 button {
   cursor: pointer;
   margin: 0;
-  padding: 0;
+  padding: 0.25rem;
   border: none;
   background: transparent;
   color: white;
   position: relative;
+  color: white;
+  & svg {
+    display: block;
+    width: var(--size);
+    height: var(--size);
+  }
   &:before {
     content: '';
     position: absolute;
@@ -17,10 +37,12 @@ button {
     left: 0;
     bottom: 0;
     right: 0;
+    z-index: 1;
   }
 }
 
 .tooltip {
+  font-family: var(--font-family);
   position: absolute;
   border-radius: 4px;
   color: #fff;
@@ -36,15 +58,5 @@ button {
   }
   &[data-popper-placement] {
     height: auto;
-    animation: fadeIn 0.2s ease-in-out;
-  }
-}
-
-@keyframes fadeIn {
-  from { 
-    opacity: 0;
-  }
-  to { 
-    opacity: 1 
   }
 }

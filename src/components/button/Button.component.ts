@@ -1,6 +1,6 @@
 import { unsafeCSS, LitElement, html, PropertyValueMap } from 'lit'
 import { classMap } from 'lit/directives/class-map.js'
-import { customElement, property, query, queryAssignedElements, state } from 'lit/decorators.js'
+import { customElement, eventOptions, property, query } from 'lit/decorators.js'
 import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
 import styles from './Button.styles.css?inline'
 import { closestElement } from '../../helpers/closest'
@@ -10,7 +10,7 @@ export class Button extends LitElement {
   static styles = unsafeCSS(styles)
 
   @property({ type: Number, attribute: 'tooltip-offset'})
-  tooltipOffset = 50
+  tooltipOffset = 40
 
   @property({ attribute: 'tooltip-potion'})
   tooltipPosition: Placement = 'top'
@@ -55,7 +55,14 @@ export class Button extends LitElement {
   }
 
 
-  handleClick(): void {}
+  handleClick(): void { }
+
+  handleKeypress = (e: KeyboardEvent) =>{
+    if (e.code === 'Space' || e.code === 'Enter') {
+      e.stopPropagation()
+      Promise.resolve(() => this.handleClick())
+    }
+  }
 
   renderContent(): any {
     return html`
@@ -71,7 +78,12 @@ export class Button extends LitElement {
 
   render() {
     return html`
-      <button aria-describedby="tooltip" @click=${this.handleClick}>
+      <button
+        tabindex="0"
+        aria-describedby="tooltip"
+        @click=${this.handleClick}
+        @keydown=${this.handleKeypress}
+      >
         ${this.renderContent()}
       </button>
       <div id="tooltip" role="tooltip" class="tooltip">

@@ -1,17 +1,22 @@
 :host {
+  --slider-width: 60px;
+  --slider-height: 0.2rem;
+  --slider-active-color: white;
+  --slider-background-color: rgba(255, 255, 255, 0.4);
+  --slider-thumb-size: 0.75rem;
+
   display: flex;
   flex-wrap: no-wrap;
 }
 
 video-slider {
-  --active-color: blue;
-  --background-color: rgba(255, 255, 255, 0.4);
-  --height: 0.4rem;
-  --thumb-size: 0.75rem;
-  --border-radius: calc(var(--height) / 2);
+  --active-color: var(--slider-active-color);
+  --background-color: var(--slider-background-color);
+  --height: var(--slider-height);
+  --thumb-size: var(--slider-thumb-size);
+  --border-radius: calc(var(--slider-height) / 2);
 
-  width: 100px;
-  padding: 20px calc(var(--thumb-size) / 2);;
-  padding-left: 10px;
+  width: var(--slider-width);
+  padding: 20px calc(var(--slider-thumb-size) / 2);
   overflow: hidden;
 }

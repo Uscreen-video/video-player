@@ -27,11 +27,7 @@ export class VolumeButton extends Button {
   isMuted: boolean
 
   override handleClick() {
-    this.command(
-      this.isMuted
-        ? Types.Command.unmute
-        : Types.Command.mute
-    )
+    this.command(Types.Command.toggleMuted)
   }
 
   override renderContent() {
