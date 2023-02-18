@@ -1,4 +1,6 @@
 :host {
+  --font: var(--video-player-font, 'Roboto', sans-serif);
+
   display: block;
   position: relative;
   outline: none;

@@ -1,19 +1,22 @@
-@import '../../variables.css';
-
 :host {
-  --size: 1.5rem;
+  --font: $font;
+  --tooltip-text: $tooltip-text;
+  --tooltip-background: $tooltip-background;
+  --tooltip-font-size: $tooltip-font-size;
+  --button-color: $button-color;
+  --button-size: $button-size;
 }
 
 @media (min-width: 768px) {
   :host {
-    --size: 1.75rem;
+    --size: calc(var(--button-size) * 1.5);
   }
 }
 
 ::slotted(svg) {
   display: block;
-  width: var(--size);
-  height: var(--size);
+  width: 100%;
+  height: 100%;
 }
 
 button {
@@ -21,14 +24,20 @@ button {
   margin: 0;
   padding: 0.25rem;
   border: none;
+  color: var(--button-color);
   background: transparent;
-  color: white;
   position: relative;
-  color: white;
+  width: var(--size);
+  height: var(--size);
+  opacity: 0.8;
+  transition: opacity .2s ease;
   & svg {
     display: block;
-    width: var(--size);
-    height: var(--size);
+    width: 100%;
+    height: 100%;
+  }
+  &:hover {
+    opacity: 1;
   }
   &:before {
     content: '';
@@ -42,14 +51,14 @@ button {
 }
 
 .tooltip, .menu {
-  font-family: var(--font-family);
+  font-family: var(--font);
   position: absolute;
   border-radius: 4px;
-  color: #fff;
-  font-size: 14px;
-  line-height: 1.43;
+  color: var(--tooltip-text);
+  font-size: var(--tooltip-font-size);
+  line-height: calc(var(--tooltip-font-size) * 1.5);
   white-space: nowrap;
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--tooltip-background);
   height: 0;
   overflow: hidden;
   user-select: none;

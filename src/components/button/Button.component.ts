@@ -104,7 +104,8 @@ export class Button extends LitElement {
     return html`
       <button
         tabindex="0"
-        aria-haspopup=${ifDefined(menu && 'true')}
+        part="button"
+        aria-haspopup=${ifDefined(menu && 'menu')}
         aria-controls=${ifDefined(menu && 'menu')}
         aria-describedby="tooltip"
         @click=${this.handleClick}
@@ -112,15 +113,13 @@ export class Button extends LitElement {
       >
         ${content}
       </button>
-      ${when(tooltip, () => html`
-        <div id="tooltip" role="tooltip" class="tooltip">
-          <div class="inner">
-            ${tooltip}
-          </div>
+      <div id="tooltip" role="tooltip" class="tooltip" part="tooltip">
+        <div class="inner">
+          ${tooltip}
         </div>
-      `)}
+      </div>
       ${when(menu, () => html`
-        <div id="menu" role="tooltip" class="menu">
+        <div id="menu" role="menu" class="menu" part="menu">
           <div class="inner">
             ${menu}
           </div>

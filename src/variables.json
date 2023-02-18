@@ -1,0 +1,10 @@
+{
+  "font": "Roboto, sans-serif",
+
+  "tooltip-background": "#232323",
+  "tooltip-text": "#ffffff",
+  "tooltip-font-size": "0.75rem",
+
+  "button-color": "#ffffff",
+  "button-size": "1.65rem"
+}
