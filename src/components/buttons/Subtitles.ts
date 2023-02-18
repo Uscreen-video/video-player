@@ -23,14 +23,15 @@ export class SubtitlesButton extends Button {
   @connect('textTracks')
   textTracks: State['textTracks'] = []
     
-  override handleClick() {
+  override handleClick = () => {
+    if (this.menuPopper) return this.destroyMenu()
     this.destroyTooltip()
     this.createMenu()
     document.addEventListener('click', this.removeMenu)
   }
 
-  removeMenu = (e: PointerEvent) => {
-    if (e.target !== this) {
+  removeMenu = (e?: PointerEvent) => {
+    if (!e || e.target !== this) {
       this.destroyMenu()
       document.removeEventListener('click', this.removeMenu)
     }
@@ -58,15 +59,19 @@ export class SubtitlesButton extends Button {
     </span>`
   }
 
+  handleItemClick(lang: string) {
+    this.command(Types.Command.enableTextTrack, { lang })
+    this.removeMenu()
+  }
+
   renderMenuItem({ lang, label }: Partial<typeof this.textTracks[0]>) {
     const isActive = this.activeTrack === lang
     return html`
       <li>
         <button
+          class="menu-item"
           area-pressed=${isActive}
-          @click=${() =>
-            this.command(Types.Command.enableTextTrack, { lang })
-          }
+          @click=${() => this.handleItemClick(lang)}
         >
           ${label}
           ${when(isActive, () => icons.check)}

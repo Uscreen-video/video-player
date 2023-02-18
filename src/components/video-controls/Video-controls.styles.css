@@ -14,7 +14,11 @@
   align-items: center;
 }
 
-:host([idle]):host([playing]) {
+:host([idle]) {
   fransform: translate3d(0, -100%, 0);
   opacity: 0;
+}
+
+::slotted(hr) {
+  border: none;
 }

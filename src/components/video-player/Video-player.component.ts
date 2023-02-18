@@ -37,10 +37,13 @@ export class VideoPlayer extends LitElement {
       : this.fullscreen.enter()
   }
 
-  handleIdleUpdate(value: boolean) {
-    if (this.idle === value) return
-    this.idle = value
-    dispatch(this, Types.Action.idle, { idle: value })
+  handleIdleUpdate(idle: boolean) {
+    if (!this.state.value.isPlaying && idle) {
+      dispatch(this, Types.Action.idle, { idle: false })
+    }
+    if (this.idle === idle) return
+    this.idle = idle
+    dispatch(this, Types.Action.idle, { idle })
   }
 
   handleClick = () => {

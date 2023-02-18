@@ -56,10 +56,12 @@ export class Button extends LitElement {
 
   destroyTooltip(): void {
     this.tooltipPopper?.destroy()
+    this.tooltipPopper = undefined
   }
 
   destroyMenu(): void {
     this.menuPopper?.destroy()
+    this.menuPopper = undefined
   }
 
   protected firstUpdated(): void {

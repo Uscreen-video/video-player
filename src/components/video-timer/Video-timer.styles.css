@@ -1,3 +1,6 @@
 :host {
-  color: var(--text-color, white);
+  font-family: $font;
+  color: $timer-color;
+  font-size: $timer-font-size;
+  user-select: none;
 }
