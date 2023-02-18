@@ -1,7 +1,7 @@
 import { LitElement, html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
-import { connect, createCommand, Types } from '../../state'
+import { connect, Types } from '../../state'
 import _enterIcon from '../../icons/fullscreen-enter-solid.svg?raw'
 import _outIcon from '../../icons/fullscreen-out-solid.svg?raw'
 import { Button } from '../button'
@@ -11,8 +11,6 @@ const outIcon = unsafeSVG(_outIcon)
 
 @customElement('video-fullscreen-button')
 export class FullscreenButton extends Button {
-  public command = createCommand(this)
-
   @connect('isFullscreen')
   isFullscreen: boolean
 

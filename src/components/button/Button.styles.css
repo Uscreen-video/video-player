@@ -41,7 +41,7 @@ button {
   }
 }
 
-.tooltip {
+.tooltip, .menu {
   font-family: var(--font-family);
   position: absolute;
   border-radius: 4px;
@@ -58,5 +58,20 @@ button {
   }
   &[data-popper-placement] {
     height: auto;
+  }
+}
+
+.menu {
+  & ul {
+    margin: 0;
+    padding: 0;
+  }
+  & li {
+    padding: 6px 12px;
+    cursor: pointer;
+    list-style: none;
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }

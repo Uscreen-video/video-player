@@ -1,13 +1,9 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
 import { customElement, eventOptions, property, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { styleMap } from 'lit/directives/style-map.js'
 import { emit } from '../../helpers/emit'
 
-/**
- * @slot - Video-slider main content
- * */
 @customElement('video-slider')
 export class VideoSlider extends LitElement {
   static styles = unsafeCSS(styles)

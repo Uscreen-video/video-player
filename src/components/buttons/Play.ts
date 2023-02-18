@@ -1,19 +1,19 @@
 import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
-import { connect, createCommand, Types } from '../../state'
+import { connect, Types } from '../../state'
 import { Button } from '../button'
 
-import _playIcon from '../../icons/play-solid.svg?raw'
-import _pauseIcon from '../../icons/pause-solid.svg?raw'
+import playIcon from '../../icons/play-solid.svg?raw'
+import pauseIcon from '../../icons/pause-solid.svg?raw'
 
-const playIcon = unsafeSVG(_playIcon)
-const pauseIcon = unsafeSVG(_pauseIcon)
+const icons = {
+  play: unsafeSVG(playIcon),
+  pause: unsafeSVG(pauseIcon)
+}
 
 @customElement('video-play-button')
-export class PlayButton extends Button {
-  public command = createCommand(this)
-  
+export class PlayButton extends Button {  
   @connect('isPlaying')
   isPlaying: boolean
 
@@ -24,7 +24,7 @@ export class PlayButton extends Button {
   override renderContent() {
     return html`
       <slot name=${this.isPlaying ? 'play' : 'pause'}>
-        ${this.isPlaying ? pauseIcon : playIcon}
+        ${this.isPlaying ? icons.pause : icons.play}
       </slot>
     `
   }

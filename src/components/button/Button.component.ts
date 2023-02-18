@@ -1,13 +1,16 @@
-import { unsafeCSS, LitElement, html, PropertyValueMap } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
-import { customElement, eventOptions, property, query } from 'lit/decorators.js'
+import { unsafeCSS, LitElement, html } from 'lit'
+import { customElement, property, query } from 'lit/decorators.js'
 import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
 import styles from './Button.styles.css?inline'
 import { closestElement } from '../../helpers/closest'
+import { when } from 'lit/directives/when.js'
+import { ifDefined } from 'lit/directives/if-defined.js';
+import { createCommand } from '../../state'
 
 @customElement('video-button')
 export class Button extends LitElement {
   static styles = unsafeCSS(styles)
+  public command = createCommand(this)
 
   @property({ type: Number, attribute: 'tooltip-offset'})
   tooltipOffset = 40
@@ -18,10 +21,14 @@ export class Button extends LitElement {
   @query('.tooltip')
   tooltip: HTMLElement
 
-  public popper: PopperInstance
+  @query('.menu')
+  menu: HTMLElement
 
-  initPopper(): void {
-    this.popper = createPopper(this, this.tooltip, {
+  tooltipPopper: PopperInstance
+  menuPopper: PopperInstance
+
+  createPopper(element: HTMLElement) {
+    return createPopper(this, element, {
       placement: this.tooltipPosition,
       modifiers: [
         {
@@ -38,22 +45,34 @@ export class Button extends LitElement {
       ],
     })
   }
+  
+  createTooltip() {
+    this.tooltipPopper = this.createPopper(this.tooltip)
+  }
 
-  destroyPopper(): void {
-    this.popper?.destroy()
+  createMenu() {
+    this.menuPopper = this.createPopper(this.menu)
+  }
+
+  destroyTooltip(): void {
+    this.tooltipPopper?.destroy()
+  }
+
+  destroyMenu(): void {
+    this.menuPopper?.destroy()
   }
 
   protected firstUpdated(): void {
-    this.addEventListener('mouseenter', this.initPopper)
-    this.addEventListener('mouseleave', this.destroyPopper)
+    this.addEventListener('mouseenter', this.createTooltip)
+    this.addEventListener('mouseleave', this.destroyTooltip)
   }
 
   disconnectedCallback(): void {
-    this.destroyPopper()
-    this.removeEventListener('mouseenter', this.initPopper)
-    this.removeEventListener('mouseleave', this.destroyPopper)
+    this.destroyTooltip()
+    this.destroyMenu()
+    this.removeEventListener('mouseenter', this.createTooltip)
+    this.removeEventListener('mouseleave', this.destroyTooltip)
   }
-
 
   handleClick(): void { }
 
@@ -76,21 +95,37 @@ export class Button extends LitElement {
     `
   }
 
+  renderMenu(): any {}
+
   render() {
+    const content = this.renderContent()
+    const tooltip = this.renderTooltip()
+    const menu = this.renderMenu()
     return html`
       <button
         tabindex="0"
+        aria-haspopup=${ifDefined(menu && 'true')}
+        aria-controls=${ifDefined(menu && 'menu')}
         aria-describedby="tooltip"
         @click=${this.handleClick}
         @keydown=${this.handleKeypress}
       >
-        ${this.renderContent()}
+        ${content}
       </button>
-      <div id="tooltip" role="tooltip" class="tooltip">
-        <div class="inner">
-          ${this.renderTooltip()}
+      ${when(tooltip, () => html`
+        <div id="tooltip" role="tooltip" class="tooltip">
+          <div class="inner">
+            ${tooltip}
+          </div>
         </div>
-      </div>
+      `)}
+      ${when(menu, () => html`
+        <div id="menu" role="tooltip" class="menu">
+          <div class="inner">
+            ${menu}
+          </div>
+        </div>
+      `)}
     `
   }
 }

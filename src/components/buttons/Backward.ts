@@ -1,16 +1,14 @@
-import { LitElement, html } from 'lit'
+import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
-import { connect, createCommand, Types } from '../../state'
-import _backwardIcon from '../../icons/backward-solid.svg?raw'
+import { Types } from '../../state'
 import { Button } from '../button'
 
+import _backwardIcon from '../../icons/backward-solid.svg?raw'
 const backwardIcon = unsafeSVG(_backwardIcon)
 
 @customElement('video-backward-button')
 export class BackwardButton extends Button {
-  public command = createCommand(this)
-
   override handleClick() {
     this.command(Types.Command.backward)
   }
