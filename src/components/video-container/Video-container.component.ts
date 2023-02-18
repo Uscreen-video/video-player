@@ -47,7 +47,9 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.seek, { canPlay: true })
   seek({ time }: { time: number }) {
-    this.videos[0].currentTime = time
+    const [video] = this.videos
+    video.currentTime = time
+    if (video.paused) video.play()
   }
 
   @listen(Types.Command.forward)
@@ -84,7 +86,8 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.setVolume)
   setVolume({ volume }: { volume: number }) {
-    return this.videos[0].volume = Math.min(1, Math.max(0, volume))
+    this.videos[0].muted = false
+    this.videos[0].volume = Math.min(1, Math.max(0, volume))
   }
 
   @listen(Types.Command.increaseVolume)
@@ -217,6 +220,7 @@ export class VideoContainer extends LitElement {
         @loadeddata=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
+        @click=${this.togglePlay}
       ></slot>
     `
   }

@@ -26,7 +26,7 @@ export class VideoVolumeControl extends LitElement {
   render() {
     return html`
       <video-slider
-        .value=${this.volume}
+        .value=${this.isMuted ? 0 : this.volume}
         @dragend=${this.handleVolumeChange}
       ></video-slider>
     `
