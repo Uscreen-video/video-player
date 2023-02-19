@@ -97,7 +97,6 @@ button {
 .menu-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: .5rem 0.75rem;
   border: none;
   width: 100%;
@@ -106,8 +105,10 @@ button {
   background: var(--menu-item-background);
   transition: color .2s ease, background .2s ease;
   & svg {
-    margin-inline-start: 6px;
     width: auto;
+  }
+  & svg:last-child {
+    margin-inline-start: auto;
   }
   &:hover {
     color: var(--menu-item-color-hover);

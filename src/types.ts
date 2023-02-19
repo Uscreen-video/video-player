@@ -13,6 +13,8 @@ export enum Command {
   mute,
   /** Unmute the video */
   unmute,
+  /** Set playback rate */
+  setPlaybackRate,
   /** Toggle fullscreen mode */
   toggleFullscreen,
   /** Toggle play/pause */
@@ -54,7 +56,8 @@ export enum Action {
   interacted,
   idle,
   selectTextTrack,
-  cues
+  cues,
+  setPlaybackRate
 }
 
 export enum Event {
@@ -81,6 +84,7 @@ export type State = Partial<{
   isFullscreen: boolean,
   activeTextTrack: string,
   activeQuality: string,
+  playbackRate: number,
   cues: string[],
   textTracks: {
     label: string,

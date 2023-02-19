@@ -114,6 +114,12 @@ export class VideoContainer extends LitElement {
     })
   }
 
+  @listen(Types.Command.setPlaybackRate)
+  setPlaybackRate({ playbackRate }: { playbackRate: number }) {   
+    console.log('here')
+    this.videos[0].playbackRate = playbackRate
+  }
+
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
@@ -173,6 +179,12 @@ export class VideoContainer extends LitElement {
           duration: video.duration
         })
         break
+      case 'ratechange':
+        console.log('here2', video.playbackRate)
+        dispatch(this, Types.Action.setPlaybackRate, {
+          playbackRate: video.playbackRate
+        })
+        break
     }
   }
 
@@ -194,12 +206,18 @@ export class VideoContainer extends LitElement {
   }
 
   setup() {
-    const [{ autoplay, muted, poster, volume, duration, currentTime }] = this.videos
+    const [{
+      autoplay, muted, poster,
+      volume, duration, currentTime,
+      playbackRate
+    }] = this.videos
+
     dispatch(this, Types.Action.init, {
       poster,
       duration,
       currentTime,
       volume,
+      playbackRate,
       src: this.videoSource,
       isAutoplay: autoplay,
       isMuted: muted,
@@ -218,6 +236,7 @@ export class VideoContainer extends LitElement {
         @pause=${this.handleVideoEvent}
         @timeupdate=${this.handleVideoEvent}
         @loadeddata=${this.handleVideoEvent}
+        @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.togglePlay}
