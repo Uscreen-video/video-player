@@ -78,44 +78,6 @@ button {
   }
 }
 
-.menu {
-  z-index: 2;
-  & .inner {
-    padding: 0;
-  }
-  & ul {
-    margin: 0;
-    padding: 0;
-  }
-  & li {
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-}
-
-.menu-item {
-  display: flex;
-  align-items: center;
-  padding: .5rem 0.75rem;
-  border: none;
-  width: 100%;
-  min-width: 215px;
-  color: var(--menu-item-color);
-  background: var(--menu-item-background);
-  transition: color .2s ease, background .2s ease;
-  & svg {
-    width: auto;
-  }
-  & svg:last-child {
-    margin-inline-start: auto;
-  }
-  &:hover {
-    color: var(--menu-item-color-hover);
-    background: var(--menu-item-background-hover);
-  }
-  &[area-pressed="true"] {
-    color: var(--menu-item-color-active);
-    background: var(--menu-item-background-active);
-  }
+.menu .inner {
+  padding: 0;
 }

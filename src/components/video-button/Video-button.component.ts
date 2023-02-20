@@ -1,21 +1,21 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property, query } from 'lit/decorators.js'
+import { customElement, eventOptions, property, query } from 'lit/decorators.js'
 import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
-import styles from './Button.styles.css?inline'
+import styles from './Video-button.styles.css?inline'
 import { closestElement } from '../../helpers/closest'
 import { when } from 'lit/directives/when.js'
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { createCommand } from '../../state'
 
 @customElement('video-button')
-export class Button extends LitElement {
+export class VideoButton extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
 
-  @property({ type: Number, attribute: 'tooltip-offset'})
+  @property({ type: Number, attribute: 'tooltip-offset' })
   tooltipOffset = 40
 
-  @property({ attribute: 'tooltip-potion'})
+  @property({ attribute: 'tooltip-potion' })
   tooltipPosition: Placement = 'top'
 
   @query('.tooltip')
@@ -65,6 +65,8 @@ export class Button extends LitElement {
   }
 
   protected firstUpdated(): void {
+    this.addEventListener('focus', this.handleFocus)
+    this.addEventListener('blur', this.handleBlur)
     this.addEventListener('mouseenter', this.createTooltip)
     this.addEventListener('mouseleave', this.destroyTooltip)
   }
@@ -72,13 +74,30 @@ export class Button extends LitElement {
   disconnectedCallback(): void {
     this.destroyTooltip()
     this.destroyMenu()
+    this.removeEventListener('focus', this.handleFocus)
+    this.removeEventListener('blur', this.handleBlur)
     this.removeEventListener('mouseenter', this.createTooltip)
     this.removeEventListener('mouseleave', this.destroyTooltip)
   }
 
   handleClick(): void { }
 
-  handleKeypress = (e: KeyboardEvent) =>{
+  handleFocus = () => {
+    if (!this.menu) return
+    // We have to have a small timeout to not mix this event with the click event
+    setTimeout(() => {
+      if (!this.menuPopper) {
+        console.log('create menu')
+        this.createMenu()
+      }
+    }, 100)
+  }
+
+  handleBlur = () => {
+    this.destroyMenu()
+  }
+
+  handleKeypress = (e: KeyboardEvent) => {
     if (e.code === 'Space' || e.code === 'Enter') {
       e.stopPropagation()
       Promise.resolve(() => this.handleClick())

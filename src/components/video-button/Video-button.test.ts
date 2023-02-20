@@ -1,5 +1,5 @@
 import { html, fixture, expect } from '@open-wc/testing'
-import type { Button } from './Button.component'
+import type { Button } from './Video-button.component'
 import './Button.component'
 
 describe('<ds-button>', () => {

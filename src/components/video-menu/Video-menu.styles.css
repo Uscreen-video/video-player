@@ -1,0 +1,48 @@
+:host {
+  --item-width: $menu-item-width;
+  --item-padding: $menu-item-padding;
+  --item-background: $menu-item-background;
+  --item-color: $menu-item-color;
+  --item-background-active: $menu-item-background-active;
+  --item-color-active: $menu-item-color-active;
+  --item-background-hover: $menu-item-background-hover;
+  --item-color-hover: $menu-item-color-hover;
+}
+
+.menu {
+  z-index: 2;
+  &, & li {
+    margin: 0;
+    padding: 0;
+  }
+  & li {
+    list-style: none;
+  }
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  border: none;
+  width: 100%;
+  padding: var(--item-padding);
+  min-width: var(--item-width);
+  color: var(--menu-item-color);
+  background: var(--menu-item-background);
+  transition: color .2s ease, background .2s ease;
+  cursor: pointer;
+  & svg {
+    width: auto;
+  }
+  & svg:last-child {
+    margin-inline-start: auto;
+  }
+  &:hover {
+    color: var(--menu-item-color-hover);
+    background: var(--menu-item-background-hover);
+  }
+  &[area-pressed="true"] {
+    color: var(--menu-item-color-active);
+    background: var(--menu-item-background-active);
+  }
+}

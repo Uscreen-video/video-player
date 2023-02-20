@@ -3,11 +3,13 @@ import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js';
 import { connect, Types } from '../../state'
-import { Button } from '../button'
+import { VideoButton } from '../video-button'
 import { State } from '../../types';
 import solidIcon from '../../icons/subtitles-solid.svg?raw'
 import outlineIcon from '../../icons/subtitles-outline.svg?raw'
 import checkIcon from '../../icons/checkmark.svg?raw'
+
+import '../video-menu'
 
 const icons = {
   outline: unsafeSVG(outlineIcon),
@@ -16,25 +18,18 @@ const icons = {
 }
 
 @customElement('video-subtitles-button')
-export class SubtitlesButton extends Button {
+export class SubtitlesButton extends VideoButton {
   @connect('activeTextTrack')
   activeTrack: string
 
   @connect('textTracks')
-  textTracks: State['textTracks'] = []
+  textTracks: State['textTracks']
     
   override handleClick = () => {
     if (this.menuPopper) return this.destroyMenu()
     this.destroyTooltip()
     this.createMenu()
     document.addEventListener('click', this.removeMenu)
-  }
-
-  removeMenu = (e?: PointerEvent) => {
-    if (!e || e.target !== this) {
-      this.destroyMenu()
-      document.removeEventListener('click', this.removeMenu)
-    }
   }
 
   override renderContent() {
@@ -51,32 +46,37 @@ export class SubtitlesButton extends Button {
 
   override renderMenu = () => {
     return html`
-    <span slot="menu">
-      <ul>
-        ${this.renderMenuItem({ label: 'Off' })}
-        ${this.textTracks?.map(track => this.renderMenuItem(track))}
-      </ul>
-    </span>`
+      <video-menu
+        @menu-item-click=${this.handleItemClick}
+        .items=${this.getMenuItems}
+      >
+      </video-menu>
+    `
   }
 
-  handleItemClick(lang: string) {
+  removeMenu = (e?: PointerEvent) => {
+    if (!e || e.target !== this) {
+      this.destroyMenu()
+      document.removeEventListener('click', this.removeMenu)
+    }
+  }
+
+  handleItemClick = (e: any) => {
+    const lang = e.detail.value
     this.command(Types.Command.enableTextTrack, { lang })
     this.removeMenu()
   }
 
-  renderMenuItem({ lang, label }: Partial<typeof this.textTracks[0]>) {
-    const isActive = this.activeTrack === lang
-    return html`
-      <li>
-        <button
-          class="menu-item"
-          area-pressed=${isActive}
-          @click=${() => this.handleItemClick(lang)}
-        >
-          ${label}
-          ${when(isActive, () => icons.check)}
-        </button>
-      </li>
-    `
+  get getMenuItems() {
+    const active = this.activeTrack || ''
+    return [
+      { label: 'Off', lang: '' },
+      ...this.textTracks || [],
+    ].map(track => ({
+      ...track,
+      value: track.lang,
+      isActive: active === track.lang,
+      iconAfter: active === track.lang ? icons.check : null
+    }))
   }
 }

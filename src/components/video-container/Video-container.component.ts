@@ -116,7 +116,6 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.setPlaybackRate)
   setPlaybackRate({ playbackRate }: { playbackRate: number }) {   
-    console.log('here')
     this.videos[0].playbackRate = playbackRate
   }
 
@@ -180,7 +179,6 @@ export class VideoContainer extends LitElement {
         })
         break
       case 'ratechange':
-        console.log('here2', video.playbackRate)
         dispatch(this, Types.Action.setPlaybackRate, {
           playbackRate: video.playbackRate
         })
