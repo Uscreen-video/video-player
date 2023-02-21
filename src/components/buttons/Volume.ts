@@ -2,7 +2,7 @@ import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
 import { connect, createCommand, Types } from '../../state'
-import { Button } from '../button'
+import { VideoButton } from '../video-button'
 
 import _midIcon from '../../icons/volume-mid-solid.svg?raw'
 import _minIcon from '../../icons/volume-min-solid.svg?raw'
@@ -17,7 +17,7 @@ const icons = {
 }
 
 @customElement('video-volume-button')
-export class VolumeButton extends Button {
+export class VolumeButton extends VideoButton {
   public command = createCommand(this)
   
   @connect('volume')

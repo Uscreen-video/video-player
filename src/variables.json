@@ -10,6 +10,8 @@
   "button-color": "#ffffff",
   "button-size": "1.65rem",
 
+  "menu-item-width": "215px",
+  "menu-item-padding": ".5rem 0.75rem",
   "menu-item-background": "transparent",
   "menu-item-color": "white",
   "menu-item-background-active": "#232323",

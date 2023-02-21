@@ -2,7 +2,7 @@ import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
 import { connect, Types } from '../../state'
-import { Button } from '../button'
+import { VideoButton } from '../video-button'
 
 import playIcon from '../../icons/play-solid.svg?raw'
 import pauseIcon from '../../icons/pause-solid.svg?raw'
@@ -13,7 +13,7 @@ const icons = {
 }
 
 @customElement('video-play-button')
-export class PlayButton extends Button {  
+export class PlayButton extends VideoButton {  
   @connect('isPlaying')
   isPlaying: boolean
 

@@ -3,6 +3,7 @@ import { customElement, eventOptions, property, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { styleMap } from 'lit/directives/style-map.js'
 import { emit } from '../../helpers/emit'
+import { eventCode } from '../../helpers/event'
 
 @customElement('video-slider')
 export class VideoSlider extends LitElement {
@@ -38,8 +39,9 @@ export class VideoSlider extends LitElement {
   }
 
   handleNavigation = (e: KeyboardEvent) => {
-    if (e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
-      this.position += e.code === 'ArrowLeft' ? -0.1 : 0.1
+    if (eventCode(e, 'arrowRight', 'arrowLeft')) {
+      const position = eventCode(e, 'arrowLeft') ? -0.1 : 0.1
+      this.position += Math.min(Math.max(this.position + position, 0), 1)
       e.stopPropagation()
       emit(this, 'dragend')
     }

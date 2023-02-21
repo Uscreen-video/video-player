@@ -6,7 +6,7 @@ import { classMap } from 'lit/directives/class-map.js'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './<%= h.capitalize(name) %>.styles.css?inline'
 
-@customElement('video-<%= name %>')
+@customElement('<%= name %>')
 export class <%= h.changeCase.pascal(name) %> extends LitElement {
   static styles = unsafeCSS(styles)
 

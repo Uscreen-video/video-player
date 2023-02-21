@@ -114,6 +114,22 @@ export class VideoContainer extends LitElement {
     })
   }
 
+  @listen(Types.Command.setPlaybackRate)
+  setPlaybackRate({ playbackRate }: { playbackRate: number }) {   
+    this.videos[0].playbackRate = playbackRate
+  }
+
+  @listen(Types.Command.setQualityLevel, { customHLS: true })
+  setHLSQualityLevel({ level }: { level: number }) {
+    const qualityLevelIdx = this.hls.levels.findIndex(({ height }) => height === level)
+    this.hls.nextLevel = qualityLevelIdx
+    if (qualityLevelIdx === -1) {
+      dispatch(this, Types.Action.setQualityLevel, {
+        activeQualityLevel: -1
+      })
+    }
+  }
+
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
@@ -131,6 +147,12 @@ export class VideoContainer extends LitElement {
       levelLoadingMaxRetry: 4,
     })
 
+    this.hls.on(HLS.Events.LEVEL_UPDATED, (_: unknown, { level }: { level: number }) => {
+      dispatch(this, Types.Action.setQualityLevel, {
+        activeQualityLevel: this.hls.levels[level]?.height || -1
+      })
+    })
+  
     this.hls.on(HLS.Events.MANIFEST_PARSED, (_: unknown, { levels }: { levels: unknown[] }) => {
       dispatch(this, Types.Action.setLevels, {
         qualityLevels: levels.map((level: { height: string }) => ({
@@ -142,7 +164,7 @@ export class VideoContainer extends LitElement {
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
 
-    dispatch(this, Types.Action.update, { canPlay: true })
+    dispatch(this, Types.Action.update, { canPlay: true, customHLS: true })
   }
 
 
@@ -173,6 +195,11 @@ export class VideoContainer extends LitElement {
           duration: video.duration
         })
         break
+      case 'ratechange':
+        dispatch(this, Types.Action.setPlaybackRate, {
+          playbackRate: video.playbackRate
+        })
+        break
     }
   }
 
@@ -194,12 +221,18 @@ export class VideoContainer extends LitElement {
   }
 
   setup() {
-    const [{ autoplay, muted, poster, volume, duration, currentTime }] = this.videos
+    const [{
+      autoplay, muted, poster,
+      volume, duration, currentTime,
+      playbackRate
+    }] = this.videos
+
     dispatch(this, Types.Action.init, {
       poster,
       duration,
       currentTime,
       volume,
+      playbackRate,
       src: this.videoSource,
       isAutoplay: autoplay,
       isMuted: muted,
@@ -218,6 +251,7 @@ export class VideoContainer extends LitElement {
         @pause=${this.handleVideoEvent}
         @timeupdate=${this.handleVideoEvent}
         @loadeddata=${this.handleVideoEvent}
+        @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.togglePlay}

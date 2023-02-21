@@ -57,4 +57,12 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
+  [Action.setPlaybackRate]: (state, params) => ({
+    ...state,
+    ...params
+  }),
+  [Action.setQualityLevel]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }
