@@ -7,10 +7,12 @@
   --item-color-active: $menu-item-color-active;
   --item-background-hover: $menu-item-background-hover;
   --item-color-hover: $menu-item-color-hover;
+
+  position: relative;
+  z-index: 2;
 }
 
 .menu {
-  z-index: 2;
   &, & li {
     margin: 0;
     padding: 0;
@@ -29,13 +31,9 @@
   min-width: var(--item-width);
   color: var(--menu-item-color);
   background: var(--menu-item-background);
-  transition: color .2s ease, background .2s ease;
   cursor: pointer;
   & svg {
     width: auto;
-  }
-  & svg:last-child {
-    margin-inline-start: auto;
   }
   &:hover {
     color: var(--menu-item-color-hover);
@@ -44,5 +42,24 @@
   &[area-pressed="true"] {
     color: var(--menu-item-color-active);
     background: var(--menu-item-background-active);
+  }
+}
+
+.text {
+  margin-inline-end: auto;
+}
+
+code {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border-radius: 4px;
+  line-height: 24px;
+  margin-left: 6px;
+  font-size: 12px;
+  outline: 1px solid var(--menu-item-color);
+  box-sizing: border-box;
+  .item:hover &{
+    outline-color: var(--menu-item-color-hover);
   }
 }

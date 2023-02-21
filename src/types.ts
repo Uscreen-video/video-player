@@ -33,6 +33,8 @@ export enum Command {
   backward,
   /** Enable a text track */
   enableTextTrack,
+  /** Sets video quality */
+  setQualityLevel,
   /** Initialize the custom HLS player */
   initCustomHLS,
   /** Initialize the video player */
@@ -57,7 +59,8 @@ export enum Action {
   idle,
   selectTextTrack,
   cues,
-  setPlaybackRate
+  setPlaybackRate,
+  setQualityLevel
 }
 
 export enum Event {
@@ -83,8 +86,9 @@ export type State = Partial<{
   isSourceSupported: boolean,
   isFullscreen: boolean,
   activeTextTrack: string,
-  activeQuality: string,
+  activeQualityLevel: number,
   playbackRate: number,
+  customHLS: boolean,
   cues: string[],
   textTracks: {
     label: string,

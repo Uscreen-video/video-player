@@ -6,6 +6,7 @@ import { closestElement } from '../../helpers/closest'
 import { when } from 'lit/directives/when.js'
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { createCommand } from '../../state'
+import { eventCode } from '../../helpers/event'
 
 @customElement('video-button')
 export class VideoButton extends LitElement {
@@ -87,7 +88,6 @@ export class VideoButton extends LitElement {
     // We have to have a small timeout to not mix this event with the click event
     setTimeout(() => {
       if (!this.menuPopper) {
-        console.log('create menu')
         this.createMenu()
       }
     }, 100)
@@ -98,7 +98,7 @@ export class VideoButton extends LitElement {
   }
 
   handleKeypress = (e: KeyboardEvent) => {
-    if (e.code === 'Space' || e.code === 'Enter') {
+    if (eventCode(e, 'space', 'enter')) {
       e.stopPropagation()
       Promise.resolve(() => this.handleClick())
     }

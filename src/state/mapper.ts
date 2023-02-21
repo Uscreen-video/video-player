@@ -61,4 +61,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
+  [Action.setQualityLevel]: (state, params) => ({
+    ...state,
+    ...params
+  }),
 }

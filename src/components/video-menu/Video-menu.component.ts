@@ -2,6 +2,7 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-menu.styles.css?inline'
 import { emit } from '../../helpers/emit'
+import { eventCode } from '../../helpers/event'
 
 type MenuItem = {
   value: string | number
@@ -24,7 +25,7 @@ export class VideoMenu extends LitElement {
   }
 
   handleKeyDown(e: KeyboardEvent) {
-    if (e.code === 'Space' || e.code === 'Enter') {
+    if (eventCode(e, 'space', 'enter')) {
       e.stopPropagation()
       Promise.resolve(() => this.handleClick(e))
     }
@@ -44,7 +45,7 @@ export class VideoMenu extends LitElement {
             @keydown=${this.handleKeyDown}
           >
             ${item.iconBefore}
-            <span>
+            <span class="text">
               ${item.label}
             </span>
             ${item.iconAfter}

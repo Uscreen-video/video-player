@@ -1,31 +1,63 @@
 import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement, property, state } from 'lit/decorators.js'
-import { when } from 'lit/directives/when.js';
 import { connect, Types } from '../../state'
 import { VideoButton } from '../video-button'
-import { State } from '../../types';
 import _settingsIcon from '../../icons/settings-solid.svg?raw'
 import _checkmarkIcon from '../../icons/checkmark.svg?raw'
+import _chevronIcon from '../../icons/chevron-left.svg?raw'
 import '../video-menu'
+import { emit } from '../../helpers/emit';
 
 const icons = {
   settings: unsafeSVG(_settingsIcon),
   check: unsafeSVG(_checkmarkIcon),
+  chevron: unsafeSVG(_chevronIcon),
 }
 
 enum Menu { shortcuts, rate, quality }
-const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
 @customElement('video-settings-button')
 export class SubtitlesButton extends VideoButton {
   @property({ type: Object })
 
   @connect('playbackRate')
-  playbackRate: number 
+  playbackRate: number
+
+  @connect('activeQualityLevel')
+  qualityLevel: number
+
+  @connect('qualityLevels')
+  qualityLevels: Types.State['qualityLevels']
 
   @state()
   activeMenu: Menu
+
+  playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
+
+  shortcuts = [{
+    label: 'player.play_pause',
+    iconAfter: html`<code>Space</code>`
+  }, {
+    label: 'player.fullscreen',
+    iconAfter: html`<code>Enter</code>`,
+  },
+  {
+    label: 'player.exit_fullscreen',
+    iconAfter: html`<code>Esc</code>`,
+  },
+  {
+    label: 'player.rewind',
+    iconAfter: html`<code>←</code><code>→</code>`,
+  },
+  {
+    label: 'player.change_volume',
+    iconAfter: html`<code>↓</code><code>↑</code>`,
+  },
+  {
+    label: 'player.mute',
+    iconAfter: html`<code>M</code>`
+  }]
 
   override handleClick = () => {
     if (this.menuPopper) return this.destroyMenu()
@@ -67,7 +99,6 @@ export class SubtitlesButton extends VideoButton {
 
   handleItemClick = ({ detail }: CustomEvent<{ value: any }>) => {
     const value = detail.value
-    console.log(value)
     if (!value) return this.selectMenu()
     switch (this.activeMenu) {
       case Menu.rate: return this.selectRate(value)
@@ -79,33 +110,37 @@ export class SubtitlesButton extends VideoButton {
   renderMenuItems = () => {
     switch (this.activeMenu) {
       case Menu.rate: return this.rateMenuItems
+      case Menu.shortcuts: return this.shortcutsMenuItems
+      case Menu.quality: return this.qualityMenuItems
       default: return this.mainMenuItems
     }
   }
-  
 
   selectRate = (playbackRate: number) => {
     this.command(Types.Command.setPlaybackRate, { playbackRate })
     this.removeMenu()
   }
 
-  setQuality = (playbackRate: number) => {
-    this.command(Types.Command.setPlaybackRate, { playbackRate })
+  setQuality = (level: string) => {
+    this.command(Types.Command.setQualityLevel, { level: Number(level) })
     this.removeMenu()
   }
 
   selectMenu(menu?: Menu) {
     this.activeMenu = Number(menu)
+
+    // We need to trigger resize event to update the menu position
+    Promise.resolve().then(() => emit(this, 'resize'))
   }
 
   get rateMenuItems() {
     return [
       {
         label: 'back',
-        iconBefore: icons.check,
+        iconBefore: icons.chevron,
         value: ''
       },
-      ...playbackRates.map(rate => ({
+      ...this.playbackRates.map(rate => ({
         label: `${rate}x`,
         value: rate,
         iconAfter: this.playbackRate === rate ? icons.check : undefined,
@@ -115,15 +150,50 @@ export class SubtitlesButton extends VideoButton {
   }
 
   get mainMenuItems() {
-    return [{
+    const menu = [{
       label: 'Shortcuts',
       value: Menu.shortcuts
     }, {
       label: 'Playback Rate',
       value: Menu.rate
-    }, {
+    }]
+    if (this.qualityLevels?.length) menu.push({
       label: 'Quality',
       value: Menu.quality
-    }]
+    })
+    return menu
+  }
+
+  get shortcutsMenuItems() {
+    return [
+      {
+        label: 'back',
+        iconBefore: icons.chevron,
+        value: ''
+      },
+      ...this.shortcuts
+    ]
+  }
+
+  get qualityMenuItems() {
+    return [
+      {
+        label: 'back',
+        iconBefore: icons.chevron,
+        value: ''
+      },
+      {
+        label: 'auto',
+        iconAfter: this.qualityLevel === -1 ? icons.check : undefined,
+        isActive: this.qualityLevel === -1,
+        value: -1
+      },
+      ...this.qualityLevels.map(level => ({
+        label: `${level.name}p`,
+        value: level.name,
+        iconAfter: this.qualityLevel === Number(level.name) ? icons.check : undefined,
+        isActive: this.qualityLevel === Number(level.name),
+      }))
+    ]
   }
 }
