@@ -1,8 +1,7 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-menu.styles.css?inline'
-import { emit } from '../../helpers/emit'
-import { eventCode } from '../../helpers/event'
+import { eventCode, emit } from '../../helpers/event'
 
 type MenuItem = {
   value: string | number

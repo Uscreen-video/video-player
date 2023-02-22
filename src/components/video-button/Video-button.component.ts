@@ -122,6 +122,9 @@ export class VideoButton extends LitElement {
     const content = this.renderContent()
     const tooltip = this.renderTooltip()
     const menu = this.renderMenu()
+
+    if (!content) return null
+
     return html`
       <button
         tabindex="0"

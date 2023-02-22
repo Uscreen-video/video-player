@@ -17,52 +17,9 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     ...params
   }),
-  [Action.updateTime]: (state, params) => ({
+  [Action.toggleAirplay]: (state) => ({
     ...state,
-    ...params
+    airplayActivated: !state.airplayActivated
   }),
-  [Action.updateDuration]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.init]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.volumeChange]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.fullscreenChange]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.interacted]: (state) => ({
-    ...state,
-    isInteracted: true
-  }),
-  [Action.idle]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.setLevels]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.selectTextTrack]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.cues]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.setPlaybackRate]: (state, params) => ({
-    ...state,
-    ...params
-  }),
-  [Action.setQualityLevel]: (state, params) => ({
-    ...state,
-    ...params
-  }),
+
 }

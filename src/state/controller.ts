@@ -16,13 +16,7 @@ export const mapState = (
   action: Action,
   state: State,
   value: any
-): State => {
-  if (!stateMapper[action]) {
-    stateDebug(`[${Action[action]}] mapper not found"`)
-    return state
-  }
-  return (stateMapper[action] || stateMapper[Action.update])(state, value)
-}
+): State => (stateMapper[action] || stateMapper[Action.update])(state, value)
 
 class CachedCommand {
   private _params: CommandParams
@@ -98,7 +92,11 @@ export class StateController extends ContextProvider<Context> {
     e.stopPropagation()
     const prevState = this.value
     this.setValue(mapState(e.detail.action, this.value, e.detail.params))
-    if (prevState !== this.value) stateDebug(`[${Action[e.detail.action]}]`, this.value)
+    if (prevState !== this.value) {
+      Promise.resolve().then(() => {
+        stateDebug(`[${Action[e.detail.action]}]`, e.detail.params)
+      })
+    }
     Promise.resolve().then(() => this.resolvePendingCommands())
   }
 
