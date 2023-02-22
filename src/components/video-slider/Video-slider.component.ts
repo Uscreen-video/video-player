@@ -2,8 +2,7 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, property, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { styleMap } from 'lit/directives/style-map.js'
-import { emit } from '../../helpers/emit'
-import { eventCode } from '../../helpers/event'
+import { eventCode, emit } from '../../helpers/event'
 
 @customElement('video-slider')
 export class VideoSlider extends LitElement {

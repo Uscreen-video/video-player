@@ -119,6 +119,11 @@ export class VideoContainer extends LitElement {
     this.videos[0].playbackRate = playbackRate
   }
 
+  @listen(Types.Command.requestAirplay)
+  requestAirplay() {   
+    (this.videos[0] as any).webkitShowPlaybackTargetPicker()
+  }
+
   @listen(Types.Command.setQualityLevel, { customHLS: true })
   setHLSQualityLevel({ level }: { level: number }) {
     const qualityLevelIdx = this.hls.levels.findIndex(({ height }) => height === level)
@@ -200,6 +205,14 @@ export class VideoContainer extends LitElement {
           playbackRate: video.playbackRate
         })
         break
+      case 'webkitplaybacktargetavailabilitychanged':
+        dispatch(this, Types.Action.updateAirplayStatus, {
+          airplayAvailable: (e as any).availability === 'available'
+        })
+        break
+      case 'webkitcurrentplaybacktargetiswirelesschanged':
+        dispatch(this, Types.Action.toggleAirplay)
+        break
     }
   }
 
@@ -255,6 +268,8 @@ export class VideoContainer extends LitElement {
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.togglePlay}
+        @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
+        @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>
     `
   }

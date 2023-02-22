@@ -7,7 +7,7 @@ import _settingsIcon from '../../icons/settings-solid.svg?raw'
 import _checkmarkIcon from '../../icons/checkmark.svg?raw'
 import _chevronIcon from '../../icons/chevron-left.svg?raw'
 import '../video-menu'
-import { emit } from '../../helpers/emit';
+import { emit } from '../../helpers/event';
 
 const icons = {
   settings: unsafeSVG(_settingsIcon),

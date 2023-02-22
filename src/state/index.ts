@@ -14,6 +14,7 @@ const initialValue: State = {
   idle: false,
   canPlay: true,
   cues: [],
+  airplayAvailable: Boolean((window as any).WebKitPlaybackTargetAvailabilityEvent),
 }
 
 export const context = createContext<State>('video-state')

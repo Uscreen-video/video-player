@@ -39,6 +39,8 @@ export enum Command {
   initCustomHLS,
   /** Initialize the video player */
   init,
+  /** Request to play via AirPlay on IOS/MacOs devices */
+  requestAirplay,
 }
 
 export enum Action {
@@ -60,7 +62,9 @@ export enum Action {
   selectTextTrack,
   cues,
   setPlaybackRate,
-  setQualityLevel
+  setQualityLevel,
+  updateAirplayStatus,
+  toggleAirplay,
 }
 
 export enum Event {
@@ -89,6 +93,8 @@ export type State = Partial<{
   activeQualityLevel: number,
   playbackRate: number,
   customHLS: boolean,
+  airplayAvailable: boolean,
+  airplayActivated: boolean,
   cues: string[],
   textTracks: {
     label: string,
