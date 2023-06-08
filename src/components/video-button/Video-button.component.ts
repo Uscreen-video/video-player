@@ -1,5 +1,5 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, eventOptions, property, query } from 'lit/decorators.js'
+import { customElement, property, query } from 'lit/decorators.js'
 import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
 import styles from './Video-button.styles.css?inline'
 import { closestElement } from '../../helpers/closest'

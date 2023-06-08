@@ -107,7 +107,7 @@ export class SubtitlesButton extends VideoButton {
     }
   }
 
-  renderMenuItems = () => {
+  renderMenuItems = (): any => {
     switch (this.activeMenu) {
       case Menu.rate: return this.rateMenuItems
       case Menu.shortcuts: return this.shortcutsMenuItems
@@ -133,7 +133,7 @@ export class SubtitlesButton extends VideoButton {
     Promise.resolve().then(() => emit(this, 'resize'))
   }
 
-  get rateMenuItems() {
+  get rateMenuItems(): any {
     return [
       {
         label: 'back',
@@ -164,7 +164,7 @@ export class SubtitlesButton extends VideoButton {
     return menu
   }
 
-  get shortcutsMenuItems() {
+  get shortcutsMenuItems(): any {
     return [
       {
         label: 'back',
@@ -175,7 +175,7 @@ export class SubtitlesButton extends VideoButton {
     ]
   }
 
-  get qualityMenuItems() {
+  get qualityMenuItems(): any {
     return [
       {
         label: 'back',

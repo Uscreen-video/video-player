@@ -1,5 +1,5 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
+import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
 import { connect, createCommand, dispatch } from '../../state'
 import { Action, Command } from '../../types'

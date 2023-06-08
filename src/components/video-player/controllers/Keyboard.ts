@@ -1,4 +1,4 @@
-import { ReactiveController, ReactiveElement } from "lit";
+import { ReactiveController } from "lit";
 import { Types } from "../../../state";
 import type { VideoPlayer } from "../Video-player.component";
 

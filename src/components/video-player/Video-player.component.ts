@@ -1,4 +1,4 @@
-import { connect, createCommand, createState, dispatch, listen, Types } from '../../state'
+import { createCommand, createState, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
@@ -38,10 +38,10 @@ export class VideoPlayer extends LitElement {
   }
 
   handleIdleUpdate(idle: boolean) {
+    if (this.idle === idle) return
     if (!this.state.value.isPlaying && idle) {
       dispatch(this, Types.Action.idle, { idle: false })
     }
-    if (this.idle === idle) return
     this.idle = idle
     dispatch(this, Types.Action.idle, { idle })
   }

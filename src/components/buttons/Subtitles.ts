@@ -1,7 +1,6 @@
 import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
 import { customElement } from 'lit/decorators.js'
-import { when } from 'lit/directives/when.js';
 import { connect, Types } from '../../state'
 import { VideoButton } from '../video-button'
 import { State } from '../../types';
@@ -67,7 +66,7 @@ export class SubtitlesButton extends VideoButton {
     this.removeMenu()
   }
 
-  get getMenuItems() {
+  get getMenuItems(): any {
     const active = this.activeTrack || ''
     return [
       { label: 'Off', lang: '' },

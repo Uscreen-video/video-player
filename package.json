@@ -1,18 +1,21 @@
 {
-  "name": "video-player",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "uscreen-video-player",
+  "version": "0.0.1",
+  "description": "Video player as customizable web-component",
+  "files": [
+    "dist/**/*"
+  ],
   "scripts": {
     "manifest": "custom-elements-manifest analyze",
     "manifest:watch": "pnpm manifest --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate": "hygen component new"
+    "generate": "hygen component new",
+    "build": "tsc --declaration"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["lit", "video-player", "hls", "web-component", "html5 video", "player"],
+  "author": "Uscreen <support@uscreen.tv> (https://www.uscreen.tv)",
   "license": "MIT",
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.6.8",
@@ -34,13 +37,13 @@
     "react-dom": "^18.2.0",
     "storybook": "^7.0.0-beta.49",
     "typescript-json-schema": "^0.55.0",
-    "vite": "^4.1.1",
+    "vite": "^4.3.9",
     "web-component-analyzer": "2.0.0-next.4"
   },
   "optionalDependencies": {
-    "lit": "^2.6.1",
-    "lit-html": "^2.6.1",
-    "typescript": "^4.9.5"
+    "lit": "^2.7.5",
+    "lit-html": "^2.7.4",
+    "typescript": "^5.1.3"
   },
   "dependencies": {
     "@lit-labs/context": "^0.2.0",

@@ -1,7 +1,7 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, state } from 'lit/decorators.js'
 import styles from './Video-volume-control.styles.css?inline'
-import { connect, createCommand, dispatch, Types } from '../../state'
+import { connect, createCommand, Types } from '../../state'
 import type { VideoSlider } from '../video-slider';
 
 import '../video-slider';
