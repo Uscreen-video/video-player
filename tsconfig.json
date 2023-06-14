@@ -9,9 +9,9 @@
   "compilerOptions": {
     "module": "esnext",
     "target": "ES6",
-    "lib": ["es2017", "dom", "dom.iterable"],
+    "lib": ["es2019", "dom", "dom.iterable"],
     "declaration": false,
-    "outDir": "./dist",
+    "outDir": "./types",
     "strict": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -24,7 +24,8 @@
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["vite/client"]
   },
   "include": ["src/**/*.ts", "global.d.ts"],
   "exclude": ["src/**/*.test.ts"],

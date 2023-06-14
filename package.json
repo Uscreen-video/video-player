@@ -2,8 +2,22 @@
   "name": "uscreen-video-player",
   "version": "0.0.1",
   "description": "Video player as customizable web-component",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "*": [
+        "types/index.d.ts"
+      ]
+    }
+  },
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "types/**/*"
   ],
   "scripts": {
     "manifest": "custom-elements-manifest analyze",
@@ -12,7 +26,9 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "generate": "hygen component new",
-    "build": "tsc --declaration"
+    "build": "pnpm run build:types && pnpm run build:lib",
+    "build:lib": "vite build",
+    "build:types": "tsc --declaration --emitDeclarationOnly"
   },
   "keywords": ["lit", "video-player", "hls", "web-component", "html5 video", "player"],
   "author": "Uscreen <support@uscreen.tv> (https://www.uscreen.tv)",
