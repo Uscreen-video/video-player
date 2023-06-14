@@ -1,6 +1,6 @@
 {
   "name": "uscreen-video-player",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Video player as customizable web-component",
   "main": "./dist/index.js",
   "exports": {
@@ -30,7 +30,14 @@
     "build:lib": "vite build",
     "build:types": "tsc --declaration --emitDeclarationOnly"
   },
-  "keywords": ["lit", "video-player", "hls", "web-component", "html5 video", "player"],
+  "keywords": [
+    "lit",
+    "video-player",
+    "hls",
+    "web-component",
+    "html5 video",
+    "player"
+  ],
   "author": "Uscreen <support@uscreen.tv> (https://www.uscreen.tv)",
   "license": "MIT",
   "devDependencies": {
