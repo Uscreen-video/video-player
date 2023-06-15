@@ -16,7 +16,7 @@ export class VideoButton extends LitElement {
   @property({ type: Number, attribute: 'tooltip-offset' })
   tooltipOffset = 40
 
-  @property({ attribute: 'tooltip-potion' })
+  @property({ attribute: 'tooltip-position' })
   tooltipPosition: Placement = 'top'
 
   @query('.tooltip')

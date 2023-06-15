@@ -27,7 +27,7 @@ export class VideoPlayer extends LitElement {
   @property({ type: Number, attribute: 'idle-timeout' })
   idleTimeout = 9000
 
-  @property({ attribute: true, reflect: true })
+  @property({ type: Number, attribute: true, reflect: true })
   tabindex = 0
 
   @listen(Types.Command.toggleFullscreen)

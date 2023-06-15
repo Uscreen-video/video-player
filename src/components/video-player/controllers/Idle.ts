@@ -5,7 +5,7 @@ export class IdleController implements ReactiveController {
   callback: (value: boolean) => void
 
   constructor(
-    private host: ReactiveElement,
+    private host: ReactiveElement & { idleTimeout: number },
     callback: (value: boolean) => void
   ) {
     this.host.addController(this)
@@ -24,7 +24,7 @@ export class IdleController implements ReactiveController {
     this.clear()
     this.timer = window.setTimeout(() => {
       this.callback(true)
-    }, 9000)
+    }, this.host.idleTimeout)
   }
 
   public clear = () => {

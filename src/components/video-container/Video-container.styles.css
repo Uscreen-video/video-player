@@ -14,8 +14,10 @@
   background: black;
   top: 0;
   left: 0;
-  height: 100%;
-  width: 100%;
+  height: 100%!important;
+  width: 100%!important;
+  max-height: auto!important;
+  max-width: auto!important;
 
   &::-webkit-media-text-track-container,
   &::-webkit-media-text-track-display,
