@@ -62,17 +62,17 @@ export class VideoPlayer extends LitElement {
     document.addEventListener('click', this.handleClick, { once: true })
     document.addEventListener('touch', this.handleClick, { once: true })
     document.addEventListener('keydown', this.handleClick, { once: true })
-    document.addEventListener('touchstart', this.handleMove, { passive: true })
-    document.addEventListener('mousemove', this.handleMove)
-    document.addEventListener('mouseleave', this.handleMove)
+    this.addEventListener('touchstart', this.handleMove, { passive: true })
+    this.addEventListener('mousemove', this.handleMove)
+    this.addEventListener('mouseleave', this.handleMove)
   }
 
   disconnectedCallback(): void {
     document.removeEventListener('click', this.handleClick)
     document.removeEventListener('touch', this.handleClick)
-    document.removeEventListener('touchstart', this.handleMove)
-    document.removeEventListener('mousemove', this.handleMove)
-    document.removeEventListener('mouseleave', this.handleMove)
+    this.removeEventListener('touchstart', this.handleMove)
+    this.removeEventListener('mousemove', this.handleMove)
+    this.removeEventListener('mouseleave', this.handleMove)
   }
 
   render() {
