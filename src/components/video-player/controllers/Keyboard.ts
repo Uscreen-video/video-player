@@ -24,7 +24,7 @@ export class KeyboardController implements ReactiveController {
 
   hostConnected(): void {
     this.host.addEventListener('keydown', this.handleKeydown)
-    Promise.resolve().then(() => this.host.focus())
+    Promise.resolve().then(() => this.host.autofocus && this.host.focus())
   }
 
   command(command: Types.Command, props?: Record<string, unknown>) {

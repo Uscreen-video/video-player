@@ -24,6 +24,9 @@ export class VideoPlayer extends LitElement {
   @property({ type: Boolean, reflect: true })
   idle = false
 
+  @property({ type: Boolean })
+  autofocus = false
+
   @property({ type: Number, attribute: 'idle-timeout' })
   idleTimeout = 9000
 
