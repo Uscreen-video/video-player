@@ -1,6 +1,6 @@
 {
   "name": "uscreen-video-player",
-  "version": "0.1.3",
+  "version": "0.1.5",
   "description": "Video player as customizable web-component",
   "main": "./dist/index.js",
   "exports": {
@@ -26,7 +26,8 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "generate": "hygen component new",
-    "build": "pnpm run build:types && pnpm run build:lib",
+    "clean": "rm -rf dist types",
+    "build": "pnpm run clean && pnpm run build:types && pnpm run build:lib",
     "build:lib": "vite build",
     "build:types": "tsc --declaration --emitDeclarationOnly"
   },
