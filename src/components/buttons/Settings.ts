@@ -15,11 +15,12 @@ const icons = {
   chevron: unsafeSVG(_chevronIcon),
 }
 
-enum Menu { shortcuts, rate, quality }
+type Menu = 'shortcuts' | 'rate' | 'quality'
 
 @customElement('video-settings-button')
 export class SubtitlesButton extends VideoButton {
-  @property({ type: Object })
+  @property({ converter: (v) => v.split(',').map(v => v.trim()) })
+  settings: Menu[] = ['shortcuts', 'rate', 'quality']
 
   @connect('playbackRate')
   playbackRate: number
@@ -32,6 +33,13 @@ export class SubtitlesButton extends VideoButton {
 
   @state()
   activeMenu: Menu
+
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.isSingleMenuItem) {
+      this.activeMenu = this.settings[0]
+    }
+  }
 
   playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
@@ -82,6 +90,7 @@ export class SubtitlesButton extends VideoButton {
     return html`
       <slot slot="main-menu">
         <video-menu
+          title=${this.selectedMenuLabel}
           @menu-item-click=${this.handleItemClick}
           .items=${this.renderMenuItems()}
         ></video-menu>
@@ -101,17 +110,17 @@ export class SubtitlesButton extends VideoButton {
     const value = detail.value
     if (!value) return this.selectMenu()
     switch (this.activeMenu) {
-      case Menu.rate: return this.selectRate(value)
-      case Menu.quality: return this.setQuality(value)
+      case 'rate': return this.selectRate(value)
+      case 'quality': return this.setQuality(value)
       default: return this.selectMenu(value)
     }
   }
 
   renderMenuItems = (): any => {
     switch (this.activeMenu) {
-      case Menu.rate: return this.rateMenuItems
-      case Menu.shortcuts: return this.shortcutsMenuItems
-      case Menu.quality: return this.qualityMenuItems
+      case 'rate': return this.rateMenuItems
+      case 'shortcuts': return this.shortcutsMenuItems
+      case 'quality': return this.qualityMenuItems
       default: return this.mainMenuItems
     }
   }
@@ -127,44 +136,59 @@ export class SubtitlesButton extends VideoButton {
   }
 
   selectMenu(menu?: Menu) {
-    this.activeMenu = Number(menu)
+    this.activeMenu = this.isSingleMenuItem ? this.settings[0] : menu
 
     // We need to trigger resize event to update the menu position
     Promise.resolve().then(() => emit(this, 'resize'))
   }
 
+  get isSingleMenuItem() {
+    return this.settings.length === 1
+  }
+
   get rateMenuItems(): any {
+    const items = this.playbackRates.map(rate => ({
+      label: `${rate}x`,
+      value: rate,
+      iconAfter: this.playbackRate === rate ? icons.check : undefined,
+      isActive: this.playbackRate === rate,
+    }))
+    if (this.isSingleMenuItem) return items
     return [
       {
         label: 'back',
         iconBefore: icons.chevron,
         value: ''
       },
-      ...this.playbackRates.map(rate => ({
-        label: `${rate}x`,
-        value: rate,
-        iconAfter: this.playbackRate === rate ? icons.check : undefined,
-        isActive: this.playbackRate === rate,
-      }))
+      ...items
     ]
   }
 
   get mainMenuItems() {
-    const menu = [{
+    const menu: { label: string, value: Menu }[] = []
+    if (this.settings.includes('shortcuts')) menu.push({
       label: 'Shortcuts',
-      value: Menu.shortcuts
-    }, {
+      value: 'shortcuts'
+    })
+    if (this.settings.includes('rate')) menu.push({
       label: 'Playback Rate',
-      value: Menu.rate
-    }]
-    if (this.qualityLevels?.length) menu.push({
+      value: 'rate'
+    })
+
+    if (this.settings.includes('quality') && this.qualityLevels?.length) menu.push({
       label: 'Quality',
-      value: Menu.quality
+      value: 'quality'
     })
     return menu
   }
 
+  get selectedMenuLabel() {
+    if (!this.activeMenu || !this.isSingleMenuItem) return ''
+    return this.mainMenuItems.find(m => m.value === this.activeMenu).label
+  }
+
   get shortcutsMenuItems(): any {
+    if (this.isSingleMenuItem) return this.shortcuts
     return [
       {
         label: 'back',
@@ -176,12 +200,7 @@ export class SubtitlesButton extends VideoButton {
   }
 
   get qualityMenuItems(): any {
-    return [
-      {
-        label: 'back',
-        iconBefore: icons.chevron,
-        value: ''
-      },
+    const items = [
       {
         label: 'auto',
         iconAfter: this.qualityLevel === -1 ? icons.check : undefined,
@@ -194,6 +213,15 @@ export class SubtitlesButton extends VideoButton {
         iconAfter: this.qualityLevel === Number(level.name) ? icons.check : undefined,
         isActive: this.qualityLevel === Number(level.name),
       }))
+    ]
+    if (this.isSingleMenuItem) return items
+    return [
+      {
+        label: 'back',
+        iconBefore: icons.chevron,
+        value: ''
+      },
+      ...items
     ]
   }
 }

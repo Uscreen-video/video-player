@@ -1,5 +1,6 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { when } from 'lit/directives/when.js'
 import styles from './Video-menu.styles.css?inline'
 import { eventCode, emit } from '../../helpers/event'
 
@@ -18,6 +19,9 @@ export class VideoMenu extends LitElement {
   @property({ type: Object })
   items: MenuItem[] = []
 
+  @property()
+  title: string
+
   handleClick(e: any) {
     e.stopPropagation()
     emit(this, 'menu-item-click', { value: e.currentTarget.dataset.value })
@@ -32,6 +36,7 @@ export class VideoMenu extends LitElement {
 
   render() {
     return html`
+      ${when(this.title, () => html`<p class="title">${this.title}</p>`)}
       <ul class="menu">
         ${this.items.map(item => html`
         <li>

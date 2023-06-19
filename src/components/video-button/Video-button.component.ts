@@ -7,6 +7,7 @@ import { when } from 'lit/directives/when.js'
 import { ifDefined } from 'lit/directives/if-defined.js';
 import { createCommand } from '../../state'
 import { eventCode } from '../../helpers/event'
+import { isMobile } from '../../helpers/ismobile'
 
 @customElement('video-button')
 export class VideoButton extends LitElement {
@@ -48,11 +49,15 @@ export class VideoButton extends LitElement {
   }
   
   createTooltip() {
-    this.tooltipPopper = this.createPopper(this.tooltip)
+    if (this.tooltip) {
+      this.tooltipPopper = this.createPopper(this.tooltip)
+    }
   }
 
   createMenu() {
-    this.menuPopper = this.createPopper(this.menu)
+    if (this.menu) {
+      this.menuPopper = this.createPopper(this.menu)
+    }
   }
 
   destroyTooltip(): void {
@@ -137,11 +142,13 @@ export class VideoButton extends LitElement {
       >
         ${content}
       </button>
-      <div id="tooltip" role="tooltip" class="tooltip" part="tooltip">
-        <div class="inner">
-          ${tooltip}
+      ${when(!isMobile(), () => html`
+        <div id="tooltip" role="tooltip" class="tooltip" part="tooltip">
+          <div class="inner">
+            ${tooltip}
+          </div>
         </div>
-      </div>
+      `)}
       ${when(menu, () => html`
         <div id="menu" role="menu" class="menu" part="menu">
           <div class="inner">

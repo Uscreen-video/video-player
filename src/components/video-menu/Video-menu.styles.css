@@ -22,6 +22,12 @@
   }
 }
 
+.title {
+  padding: var(--item-padding);
+  margin: 0;
+  font-size: 14px;
+}
+
 .item {
   display: flex;
   align-items: center;
