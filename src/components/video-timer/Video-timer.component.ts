@@ -19,7 +19,7 @@ export class VideoTimer extends LitElement {
   currentTime: number
 
   getTimeString(timeInSeconds: number) {
-    const time = Number((isNaN(timeInSeconds) ? 0 : timeInSeconds).toFixed(3))
+    const time = Math.abs(Number((isNaN(timeInSeconds) ? 0 : timeInSeconds).toFixed(3)))
     const hours = Math.floor(time / 60 / 60)
     const minutes = Math.floor(time / 60) % 60
     const seconds = Math.floor(time - minutes * 60)
