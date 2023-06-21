@@ -11,6 +11,9 @@ export class VideoSlider extends LitElement {
   @property({ type: Number })
   value = 0
 
+  @property({ type: Boolean, attribute: 'full-width', reflect: true })
+  fullWidth = false
+
   @state()
   position = 0
 
@@ -58,9 +61,9 @@ export class VideoSlider extends LitElement {
    * We track pointer movement by the X coord 
    * if user hover the line or start started its dragging
    */
-  handlePointerMove = ({ clientX, targetTouches }: PointerEvent & TouchEvent) =>{
+  handlePointerMove = (e: PointerEvent & TouchEvent) =>{
     if (!this.isDragging && !this.isHovered) return
-    const eventClientX = targetTouches?.[0]?.clientX || clientX
+    const eventClientX = e.targetTouches?.[0]?.clientX || e.clientX
     const newPosition = this.getPinterPosition(eventClientX)
 
     if (newPosition === null) return

@@ -20,6 +20,9 @@ export class VideoTimeline extends LitElement {
   @property({ type: Boolean })
   timer: false
 
+  @property({ type: Boolean, attribute: 'full-width', reflect: true })
+  fullWidth = false
+
   @connect('duration')
   duration: number
 
@@ -46,6 +49,7 @@ export class VideoTimeline extends LitElement {
   render() {
     return html`
       <video-slider
+        .fullWidth=${this.fullWidth}
         .value=${this.currentTime / this.duration}
         @dragstart=${this.handleDragStart}
         @dragend=${this.handleDragEnd}

@@ -10,6 +10,9 @@
   align-items: center;
   box-sizing: borde-box;
   width: 100%;
+}
+
+:host(:not([full-width])) {
   padding: 0 calc(var(--thumb-size) / 2);
 }
 
