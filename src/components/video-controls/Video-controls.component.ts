@@ -18,6 +18,13 @@ export class VideoControls extends LitElement {
   @property({ type: Boolean, reflect: true })
   playing: boolean
 
+  @connect('isFullscreen')
+  @property({ type: Boolean, reflect: true })
+  fullscreen: boolean
+
+  @property({ type: Boolean, reflect: true })
+  custom = false
+
   render() {
     return html`
       <slot></slot>

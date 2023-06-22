@@ -1,4 +1,4 @@
-:host {
+:host(:not([custom])) {
   position: absolute;
   bottom: 0;
   left: 0;
