@@ -26,10 +26,13 @@
 .lines {
   position: relative;
   overflow: hidden;
-  border-radius: var(--border-radius);
   background-color: var(--background-color);
   height: var(--height);
   transition: height 0.1s linear;
+  
+  :host(:not([full-width])) & {
+    border-radius: var(--border-radius);
+  }
 }
 
 .progress{
