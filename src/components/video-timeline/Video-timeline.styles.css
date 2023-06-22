@@ -6,7 +6,7 @@
 }
 
 video-slider {
-  --active-color: blue;
+  --active-color: var(--primary, blue);
   --background-color: rgba(255, 255, 255, 0.4);
   --height: 0.25rem;
   --thumb-size: 1rem;
