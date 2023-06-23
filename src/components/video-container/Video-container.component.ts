@@ -5,6 +5,8 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 
+import '../video-chromecast'
+
 /**
  * @slot - Video-container main content
  * */
@@ -21,7 +23,10 @@ export class VideoContainer extends LitElement {
   @connect('activeTextTrack')
   activeTextTrack: string
 
-  @listen(Types.Command.play, { canPlay: true })
+  @connect('castActivated')
+  castActivated: string
+
+  @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
       await this.videos[0].play()
@@ -37,7 +42,7 @@ export class VideoContainer extends LitElement {
     return this.videos[0].pause()
   }
 
-  @listen(Types.Command.togglePlay)
+  @listen(Types.Command.togglePlay, { castActivated: false })
   togglePlay() {
     return this.videos[0].paused
       ? this.play()
@@ -48,7 +53,7 @@ export class VideoContainer extends LitElement {
   seek({ time }: { time: number }) {
     const [video] = this.videos
     video.currentTime = time
-    if (video.paused) video.play()
+    if (video.paused && !this.castActivated) video.play()
   }
 
   @listen(Types.Command.forward)
@@ -270,6 +275,7 @@ export class VideoContainer extends LitElement {
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
         @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>
+      <video-chromecast></video-chromecast>
     `
   }
 
