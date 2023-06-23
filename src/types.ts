@@ -41,6 +41,10 @@ export enum Command {
   init,
   /** Request to play via AirPlay on IOS/MacOs devices */
   requestAirplay,
+  /** Triggers when ChromeCast is not supported in browser */
+  castNotSupported,
+  /** Request playing video on ChromeCast device */
+  requestCast,
 }
 
 export enum Action {
@@ -65,6 +69,8 @@ export enum Action {
   setQualityLevel,
   updateAirplayStatus,
   toggleAirplay,
+  castAvailable,
+  setCastStatus,
 }
 
 export enum Event {
@@ -95,6 +101,8 @@ export type State = Partial<{
   customHLS: boolean,
   airplayAvailable: boolean,
   airplayActivated: boolean,
+  castAvailable: boolean,
+  castActivated: boolean,
   cues: string[],
   textTracks: {
     label: string,

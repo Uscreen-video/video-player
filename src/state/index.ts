@@ -8,12 +8,14 @@ export { dispatch } from './dispatcher'
 export { createCommand } from './commander'
 export * as Types from '../types'
 
-const initialValue: State = {
+export const initialState: State = {
   isPlaying: false,
   isInteracted: false,
   idle: false,
   canPlay: true,
   cues: [],
+  castActivated: false,
+  castAvailable: Boolean(window.chrome?.cast?.isAvailable),
   airplayAvailable: Boolean((window as any).WebKitPlaybackTargetAvailabilityEvent),
 }
 
@@ -25,4 +27,4 @@ export const connect = (field?: keyof State) => connectConsumer<State>({ context
  * If dependencies are provided, the command will only be executed if all dependencies are met.
  */
 export const listen = (command: Command, dependencies?: State) => createCommandListener(command, dependencies)
-export const createState = (host: ReactiveElement) => new StateController(host, context, initialValue)
+export const createState = (host: ReactiveElement) => new StateController(host, context, initialState)
