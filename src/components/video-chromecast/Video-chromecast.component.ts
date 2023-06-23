@@ -28,11 +28,6 @@ export class VideoChromecast extends LitElement {
   @state()
   targetDevise: string
 
-  @watch('src')
-  handleSrcChange() {
-    console.log('src changed')
-  }
-
   @listen(Command.togglePlay, { castActivated: true })
   @listen(Command.play, { castActivated: true })
   @listen(Command.pause, { castActivated: true })
@@ -147,6 +142,7 @@ export class VideoChromecast extends LitElement {
 
       this.targetDevise = this.player?.statusText || ''
     } catch (err) {
+      console.error(err)
     }
   }
 
