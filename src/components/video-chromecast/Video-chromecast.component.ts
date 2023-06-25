@@ -3,7 +3,6 @@ import { customElement, state } from 'lit/decorators.js'
 import styles from './Video-chromecast.styles.css?inline'
 import { connect, createCommand, dispatch, listen } from '../../state'
 import { Action, Command, State } from '../../types'
-import { watch } from '../../decorators/watch'
 
 
 @customElement('video-chromecast')
