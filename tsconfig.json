@@ -25,7 +25,7 @@
     "forceConsistentCasingInFileNames": true,
     "useDefineForClassFields": false,
     "skipLibCheck": true,
-    "types": ["vite/client"]
+    "types": ["vite/client", "@types/chromecast-caf-sender"]
   },
   "include": ["src/**/*.ts", "global.d.ts"],
   "exclude": ["src/**/*.test.ts"],
