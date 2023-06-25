@@ -1,13 +1,14 @@
 import { connect } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { DependentPropsMixin } from '../../mixins/DependentProps'
 import styles from './Video-controls.styles.css?inline'
 
 /**
  * @slot - Video-controls main content
  * */
 @customElement('video-controls')
-export class VideoControls extends LitElement {
+export class VideoControls extends DependentPropsMixin(LitElement) {
   static styles = unsafeCSS(styles)
 
   @connect('idle')
