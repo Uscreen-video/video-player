@@ -5,7 +5,7 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 
-import '../video-chromecast'
+// import '../video-chromecast'
 
 /**
  * @slot - Video-container main content
@@ -275,7 +275,6 @@ export class VideoContainer extends LitElement {
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
         @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>
-      <video-chromecast></video-chromecast>
     `
   }
 

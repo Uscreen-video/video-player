@@ -5,6 +5,7 @@ import { connect, createCommand, dispatch } from '../../state'
 import { Action, Command } from '../../types'
 import { when } from 'lit/directives/when.js';
 import type { VideoSlider } from '../video-slider';
+import { DependentPropsMixin } from '../../mixins/DependentProps'
 
 import '../video-timer'
 import '../video-slider'
@@ -13,11 +14,11 @@ import '../video-slider'
  * @slot - Video-timeline main content
  * */
 @customElement('video-timeline')
-export class VideoTimeline extends LitElement {
+export class VideoTimeline extends DependentPropsMixin(LitElement) {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
 
-  @property({ type: Boolean })
+  @property({ type: Boolean, reflect: true })
   timer: false
 
   @property({ type: Boolean, attribute: 'full-width', reflect: true })
@@ -25,6 +26,10 @@ export class VideoTimeline extends LitElement {
 
   @connect('duration')
   duration: number
+  
+  @connect('isFullscreen')
+  @property({ type: Boolean, reflect: true })
+  fullscreen: boolean
 
   @connect('currentTime')
   @state()

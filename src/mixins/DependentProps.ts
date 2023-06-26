@@ -18,9 +18,12 @@ const parseValue = (val: string): any => {
   }
 }
 
+const dashSeparatorRe = new RegExp('-\\w{1}', 'g')
+const formatName = (name: string) => name.replace(dashSeparatorRe, m => m.replace('-', '').toUpperCase())
+
 const parsePropNameValue = (prop: string): [string, unknown] => {
   const [name, val] = prop.split('=')
-  return [name, parseValue(val)]
+  return [formatName(name), parseValue(val)]
 }
 
 type LinkedProps = {
