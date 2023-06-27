@@ -4,7 +4,6 @@ import { customElement, eventOptions, property, queryAssignedElements } from 'li
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
-import { State } from '../../types'
 
 /**
  * @slot - Video-container main content

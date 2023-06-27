@@ -16,6 +16,9 @@ export class ChromeCastButton extends VideoButton {
     this.command(Types.Command.requestCast)
   }
 
+  @connect('castActivated')
+  activated: boolean
+
   override renderContent() {
     if (!this.available) return null
     return html`<slot>${castIcon}</slot>`
@@ -23,7 +26,7 @@ export class ChromeCastButton extends VideoButton {
 
   override renderTooltip() {
     return html`<span slot="tooltip">
-      ${this.status === 'enabled' ? 'Disable Cast' : 'Enable Chrome Cast'}
+      ${this.activated ? 'Disable Cast' : 'Enable Chrome Cast'}
     </span>`
   }
 }
