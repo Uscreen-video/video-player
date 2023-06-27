@@ -149,11 +149,13 @@ export class VideoContainer extends LitElement {
   
     this.hls = new HLS({
       maxMaxBufferLength: 30,
+      enableWorker: true,
       initialLiveManifestSize: 2,
       liveSyncDurationCount: 5,
       fragLoadingMaxRetry: 10,
       manifestLoadingMaxRetry: 2,
       levelLoadingMaxRetry: 4,
+      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30
     })
 
     this.hls.on(HLS.Events.LEVEL_UPDATED, (_: unknown, { level }: { level: number }) => {
@@ -180,7 +182,8 @@ export class VideoContainer extends LitElement {
   @eventOptions({ capture: true })
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type
-    const [video] = this.videos
+    const video = e.target
+
     switch (type) {
       case 'play':
         dispatch(this, Types.Action.play)
@@ -190,7 +193,8 @@ export class VideoContainer extends LitElement {
         break
       case 'timeupdate':
         dispatch(this, Types.Action.updateTime, {
-          currentTime: video.currentTime
+          currentTime: video.currentTime,
+          duration: video.duration // Required for New android devices
         })
         break
       case 'volumechange':
