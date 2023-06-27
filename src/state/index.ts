@@ -4,6 +4,7 @@ import { connectConsumer } from './connector'
 import { StateController } from './controller'
 import { createCommandListener } from './commander'
 import { Command, State } from '../types'
+import { device } from '../helpers/device'
 export { dispatch } from './dispatcher'
 export { createCommand } from './commander'
 export * as Types from '../types'
@@ -17,6 +18,7 @@ export const initialState: State = {
   castActivated: false,
   castAvailable: Boolean(window.chrome?.cast?.isAvailable),
   airplayAvailable: Boolean((window as any).WebKitPlaybackTargetAvailabilityEvent),
+  ...device
 }
 
 export const context = createContext<State>('video-state')

@@ -18,9 +18,11 @@
   max-height: auto!important;
   max-width: auto!important;
 
-  &::-webkit-media-text-track-container,
-  &::-webkit-media-text-track-display,
-  &::cue {
-    display: none;
+  :not(:host([mobile-safari])) & {
+    &::-webkit-media-text-track-container,
+    &::-webkit-media-text-track-display,
+    &::cue {
+      display: none;
+    }
   }
 }

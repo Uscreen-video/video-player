@@ -1,11 +1,10 @@
 import { connect, createCommand, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
+import { customElement, eventOptions, property, queryAssignedElements } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
-
-// import '../video-chromecast'
+import { State } from '../../types'
 
 /**
  * @slot - Video-container main content
@@ -25,6 +24,10 @@ export class VideoContainer extends LitElement {
 
   @connect('castActivated')
   castActivated: string
+
+  @connect('isMobileSafari')
+  @property({ type: Boolean, reflect: true, attribute: 'mobile-safari' })
+  mobileSafari: true
 
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
@@ -247,6 +250,9 @@ export class VideoContainer extends LitElement {
       volume, duration, currentTime,
       playbackRate, title
     }] = this.videos
+
+    // Show native controls on safari browser
+    if (this.mobileSafari) this.videos[0].setAttribute('controls', 'true')
 
     dispatch(this, Types.Action.init, {
       poster,

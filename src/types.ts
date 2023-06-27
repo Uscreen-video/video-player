@@ -1,3 +1,5 @@
+import { device } from "./helpers/device"
+
 /**
  * Command are the actions that can be triggered by the user or a interface
  * They can be handled with the `@listen` decorator, and should not affect the state
@@ -104,6 +106,7 @@ export type State = Partial<{
   airplayActivated: boolean,
   castAvailable: boolean,
   castActivated: boolean,
+  nativeControls: boolean,
   cues: string[],
   textTracks: {
     label: string,
@@ -113,4 +116,4 @@ export type State = Partial<{
   qualityLevels: {
     name: string
   }[]
-}>
+} & typeof device>
