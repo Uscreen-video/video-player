@@ -75,8 +75,9 @@ export class VideoSlider extends LitElement {
    * If user pushed the screen or the button over the line
    * we think he started dragging
    */
-  @eventOptions({ passive: false })
-  handlePointerDown() {
+  @eventOptions({ passive: false, capture: true })
+  handlePointerDown(e: Event) {
+    e.stopPropagation()
     this.isDragging = true
     emit(this, 'dragstart')
   }
@@ -137,6 +138,7 @@ export class VideoSlider extends LitElement {
         @mouseleave=${this.handlePointerLeave}
         @mouseup=${this.handleMouseUp}
         @mousedown=${this.handlePointerDown}
+        @pointerdown=${this.handlePointerDown}
         @touchstart=${this.handlePointerDown}
         @click=${this.handleLineClick}
       >
