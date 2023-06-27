@@ -243,6 +243,12 @@ export class VideoContainer extends LitElement {
     })
   }
 
+  @eventOptions({ capture: true })
+  handleClick() {
+    if (this.mobileSafari) return
+    this.togglePlay()
+  }
+
   setup() {
     const [{
       autoplay, muted, poster,
@@ -281,7 +287,7 @@ export class VideoContainer extends LitElement {
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
-        @click=${this.togglePlay}
+        @click=${this.handleClick}
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
         @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>
