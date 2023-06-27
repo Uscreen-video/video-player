@@ -4,6 +4,7 @@ import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-player.styles.css?inline'
 import '../video-controls'
 import '../video-container'
+import '../video-chromecast'
 import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
@@ -82,6 +83,9 @@ export class VideoPlayer extends LitElement {
     return html`
       <video-container>
         <slot name="video"></slot>
+        <slot name="chromecast">
+          <video-chromecast></video-chromecast>
+        </slot>
       </video-container>
       <slot></slot>
     `

@@ -1,9 +1,12 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, state } from 'lit/decorators.js'
+import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-chromecast.styles.css?inline'
 import { connect, createCommand, dispatch, listen } from '../../state'
 import { Action, Command, State } from '../../types'
-
+import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
+import _castIcon from '../../icons/chrome-cast-outline.svg?raw'
+// import { CastStatus } from '../../types';
+const castIcon = unsafeSVG(_castIcon)
 
 @customElement('video-chromecast')
 export class VideoChromecast extends LitElement {
@@ -14,6 +17,13 @@ export class VideoChromecast extends LitElement {
 
   @connect('src')
   src: string
+
+  @connect('title')
+  title: string
+
+  @connect('castActivated')
+  @property({ type: Boolean, reflect: true })
+  active: false
 
   @connect('poster')
   poster: string
@@ -197,6 +207,9 @@ export class VideoChromecast extends LitElement {
 
   handleCastEvent = ({ field, value }: cast.framework.RemotePlayerChangedEvent) => {
     switch (field) {
+      case 'displayName':
+        this.targetDevise = value
+        break
       case 'isConnected':
         dispatch(this, Action.setCastStatus, { castActivated: value })
         break
@@ -211,7 +224,7 @@ export class VideoChromecast extends LitElement {
 
   render() {
     return html`
-      <div></div>
+      ${castIcon} <slot>Casting to</slot> "${this.targetDevise}"
     `
   }
 }

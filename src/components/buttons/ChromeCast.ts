@@ -5,17 +5,12 @@ import { connect, Types } from '../../state'
 import { VideoButton } from '../video-button'
 
 import _castIcon from '../../icons/chrome-cast-outline.svg?raw'
-// import { CastStatus } from '../../types';
 const castIcon = unsafeSVG(_castIcon)
 
 @customElement('video-chromecast-button')
 export class ChromeCastButton extends VideoButton {
   @connect('castAvailable')
   available: boolean
-
-  // @connect('castStatus')
-  // status: CastStatus
-  status = ''
 
   override handleClick() {
     this.command(Types.Command.requestCast)

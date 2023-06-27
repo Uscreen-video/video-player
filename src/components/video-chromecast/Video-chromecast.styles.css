@@ -1,11 +1,29 @@
 :host {
+  --font: $font;
+}
+
+:host {
   position: absolute;
-  display: flex;
+  display: none;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   left: 0;
   top: 0;
   bottom: 0;
   right: 0;
   padding: 40px;
+  text-transform: uppercase;
+  font-family: var(--font);
+
+  & svg {
+    margin-right: 8px;
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
+:host([active]) {
+  display: flex;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
 }

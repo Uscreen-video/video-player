@@ -85,6 +85,7 @@ export type State = Partial<{
   duration: number,
   currentTime: number,
   src: string,
+  title: string,
   poster: string,
   volume: number,
   canPlay: boolean,

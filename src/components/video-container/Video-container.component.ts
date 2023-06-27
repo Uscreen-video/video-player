@@ -241,7 +241,7 @@ export class VideoContainer extends LitElement {
     const [{
       autoplay, muted, poster,
       volume, duration, currentTime,
-      playbackRate
+      playbackRate, title
     }] = this.videos
 
     dispatch(this, Types.Action.init, {
@@ -249,6 +249,7 @@ export class VideoContainer extends LitElement {
       duration,
       currentTime,
       volume,
+      title,
       playbackRate,
       src: this.videoSource,
       isAutoplay: autoplay,
