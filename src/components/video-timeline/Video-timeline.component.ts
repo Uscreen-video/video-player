@@ -1,11 +1,11 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
-import { connect, createCommand, dispatch } from '../../state'
-import { Action, Command } from '../../types'
+import { connect, createCommand } from '../../state'
+import { Command } from '../../types'
 import { when } from 'lit/directives/when.js';
-import type { VideoSlider } from '../video-slider';
 import { DependentPropsMixin } from '../../mixins/DependentProps'
+import { timeAsString } from '../../helpers/time'
 
 import '../video-timer'
 import '../video-slider'
@@ -35,29 +35,20 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @state()
   currentTime: number
 
-  handleChanged(progress: number) {
-    const time = this.duration * progress
+  handleChanged(e: { detail: { value: number } }) {
+    const time = e.detail.value
     this.currentTime = time
     this.command(Command.seek, { time })
   }
-
-  handleDragEnd(e: CustomEvent & { target: VideoSlider }) {
-    dispatch(this, Action.seekEnd)
-    this.handleChanged(e.target.position)
-  }
-
-  handleDragStart() {
-    dispatch(this, Action.seekStart)
-  }
-
 
   render() {
     return html`
       <video-slider
         .fullWidth=${this.fullWidth}
-        .value=${this.currentTime / this.duration}
-        @dragstart=${this.handleDragStart}
-        @dragend=${this.handleDragEnd}
+        .value=${this.currentTime}
+        .max=${this.duration}
+        .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
+        .tooltipText="${timeAsString(this.currentTime)}"
         @changed=${this.handleChanged}
       ></video-slider>
       ${when(this.timer, () => html`

@@ -1,8 +1,11 @@
-import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, eventOptions, property, state } from 'lit/decorators.js'
+import { unsafeCSS, LitElement, html, PropertyValueMap } from 'lit'
+import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
-import { styleMap } from 'lit/directives/style-map.js'
-import { eventCode, emit } from '../../helpers/event'
+import { emit } from '../../helpers/event'
+import { watch } from '../../decorators/watch'
+import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
+import { closestElement } from '../../helpers/closest'
+import { when } from 'lit/directives/when.js'
 
 @customElement('video-slider')
 export class VideoSlider extends LitElement {
@@ -11,153 +14,119 @@ export class VideoSlider extends LitElement {
   @property({ type: Number })
   value = 0
 
-  @property({ type: Boolean, attribute: 'full-width', reflect: true })
-  fullWidth = false
+  @property({ type: Number })
+  max = 1
+
+  @property({ attribute: 'value-text' })
+  valueText = ''
+
+  @property({ attribute: 'tooltip-text' })
+  tooltipText = ''
 
   @state()
-  position = 0
+  currentValue = 0
 
-  @state()
-  isDragging = false
+  @query('.tooltip')
+  tooltip: HTMLElement
 
-  @state()
-  isHovered = false
+  @query('.slider')
+  slider: HTMLInputElement
 
-  connectedCallback(): void {
-    super.connectedCallback()
-    document.addEventListener('mousemove', this.handlePointerMove)
-    document.addEventListener('touchmove', this.handlePointerMove)
-    document.addEventListener('mouseup', this.handlePointerRelease)
-    document.addEventListener('touchend', this.handlePointerRelease)
-    document.addEventListener('mouseleave', this.handlePointerLeave)
+  isChanging = false
+  isPendingUpdate = false
+
+  tooltipPopper: PopperInstance
+
+  @watch('value')
+  handleValueChange() {
+    if (this.isChanging) return
+    if (this.isPendingUpdate) {
+      setTimeout(() => {
+        this.isPendingUpdate = false
+      }, 200)
+      return
+    }
+  
+    this.currentValue = this.value
   }
+
+  // protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+  //   this.tooltipPopper?.destroy()
+  //   this.tooltipPopper = this.createPopper(this.tooltip)
+  // }
 
   disconnectedCallback(): void {
-    document.removeEventListener('mousemove', this.handlePointerMove)
-    document.removeEventListener('touchmove', this.handlePointerMove)
-    document.removeEventListener('mouseup', this.handlePointerRelease)
-    document.removeEventListener('touchend', this.handlePointerRelease)
-    document.removeEventListener('mouseleave', this.handlePointerLeave)
+    this.tooltipPopper?.destroy()
+    super.disconnectedCallback()
   }
 
-  handleNavigation = (e: KeyboardEvent) => {
-    if (eventCode(e, 'arrowRight', 'arrowLeft')) {
-      const position = eventCode(e, 'arrowLeft') ? -0.1 : 0.1
-      this.position += Math.min(Math.max(this.position + position, 0), 1)
-      e.stopPropagation()
-      emit(this, 'dragend')
-    }
+  handleInput(e: InputEvent & { target: HTMLInputElement }) {
+    this.currentValue = this.max * (Number.parseFloat(e.target.value) / 100)
+    this.isChanging = this.isPendingUpdate = true
   }
 
-  /**
-   * When user releases the timeline we think the dragging is over
-   */
-  handlePointerRelease = () => {
-    if (this.isDragging) emit(this, 'dragend')
-    this.isDragging = false
+  handleChange() {
+    emit(this, 'changed', { value: this.currentValue })
+    this.isChanging = false
   }
 
-  /**
-   * We track pointer movement by the X coord 
-   * if user hover the line or start started its dragging
-   */
-  handlePointerMove = (e: PointerEvent & TouchEvent) =>{
-    if (!this.isDragging && !this.isHovered) return
-    const eventClientX = e.targetTouches?.[0]?.clientX || e.clientX
-    const newPosition = this.getPinterPosition(eventClientX)
-
-    if (newPosition === null) return
-
-    this.position = newPosition
-  }
-
-  /**
-   * If user pushed the screen or the button over the line
-   * we think he started dragging
-   */
-  @eventOptions({ passive: false, capture: true })
-  handlePointerDown(e: Event) {
-    e.stopPropagation()
-    this.isDragging = true
-    emit(this, 'dragstart')
-  }
-
-  /**
-   * When mouse is over the line we think its hovered
-   */
-  handlePointerEnter() {
-    this.isHovered = true
-  }
-
-  /**
-   * When mouse leaves the line we think its not hovered any more
-   */
-  handlePointerLeave() {
-    this.isHovered = false
-  }
-
-  /**
-   * Handle click the line and stop dragging
-   */
-  handleLineClick() {
-    this.isDragging = false
-  }
-
-  handleMouseUp = (e: PointerEvent & TouchEvent) => {
-    e.preventDefault()
-  }
-
-  getPinterPosition(clientX: number) {
-    const { x, width } = this.getBoundingClientRect()
-    const leftBorder = x
-    const rightBorder = x + width
-    const newPosition = clientX - x
-
-    if (clientX > rightBorder) return 1
-    if (clientX < leftBorder || newPosition < 0) return 0
-    return newPosition / width
-  }
-
-  get progressPosition() {
-    return this.isDragging
-      ? this.position
-      : this.value
+  createPopper(element: HTMLElement) {
+    return createPopper(this, element, {
+      placement: 'top',
+      modifiers: [
+        {
+          name: 'preventOverflow',
+          options: {
+            boundary: closestElement('video-player', this),
+          },
+        }, {
+          name: 'offset',
+          options: {
+            offset: [0, 20],
+          }
+        }
+      ],
+    })
   }
 
   render() {
     return html`
-      <div 
-        class="container"
-        role="slider"
-        tabindex="0"
-        aria-valuemin="0"
-        aria-valuenow=${this.progressPosition}
-        aria-valuemax="1"
-        @keydown=${this.handleNavigation}
-        @mouseenter=${this.handlePointerEnter}
-        @mouseleave=${this.handlePointerLeave}
-        @mouseup=${this.handleMouseUp}
-        @mousedown=${this.handlePointerDown}
-        @pointerdown=${this.handlePointerDown}
-        @touchstart=${this.handlePointerDown}
-        @click=${this.handleLineClick}
-      >
-        <div class="lines">
-          <div 
-            class="progress"
-            style=${styleMap({
-              transform: `scaleX(${this.progressPosition})`
-            })}
-          ></div>
-          <slot></slot>
-        </div>
-        <div
-          class="handler"
-          style=${styleMap({
-            transform: `translateX(${this.progressPosition * 100 + '%'})`
-          })}
-        ></div>
+      <div class="container">
+        <input
+          part="slider"
+          class="slider"
+          type="range" 
+          min="0" 
+          max="100"
+          step="0.001"
+          role="slider"
+          .value=${this.positionInPercents}
+          .aria-valuenow=${this.currentValue}
+          aria-valuemin="0"
+          aria-valuemax="1"
+          autocomplete="off"
+          aria-valuetext=${this.valueText}
+          .style="--value: ${this.positionInPercents}%"
+          @input=${this.handleInput}
+          @change=${this.handleChange}
+        />
+        ${when(this.tooltipText, () => html`
+          <div
+            class="tooltip"
+            part="tooltip"
+            style="--value: ${this.positionInPercents}%"
+          >
+            <slot name="tooltip">
+              ${this.tooltipText}
+            </slot>
+          </div>
+        `)}
+        </progress>
       </div>
     `
+  }
+
+  get positionInPercents() {
+    return (100 / this.max * this.currentValue).toFixed(3)
   }
 }

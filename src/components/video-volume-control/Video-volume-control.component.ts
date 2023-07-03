@@ -18,8 +18,8 @@ export class VideoVolumeControl extends LitElement {
   @state()
   volume: number
 
-  handleVolumeChange(e: CustomEvent & { target: VideoSlider }) {
-    this.volume = Number(e.target.position.toFixed(2))
+  handleVolumeChange(e: CustomEvent & { detail: number }) {
+    this.volume = Number(e.detail.value.toFixed(2))
     this.command(Types.Command.setVolume, { volume: this.volume })
   }
 
@@ -27,7 +27,7 @@ export class VideoVolumeControl extends LitElement {
     return html`
       <video-slider
         .value=${this.isMuted ? 0 : this.volume}
-        @dragend=${this.handleVolumeChange}
+        @changed=${this.handleVolumeChange}
       ></video-slider>
     `
   }
