@@ -3,7 +3,7 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { emit } from '../../helpers/event'
 import { watch } from '../../decorators/watch'
-import { createPopper, Instance as PopperInstance, Placement, VirtualElement, ClientRectObject } from '@popperjs/core'
+import { createPopper, Instance as PopperInstance, VirtualElement } from '@popperjs/core'
 import { closestElement } from '../../helpers/closest'
 import { when } from 'lit/directives/when.js'
 
@@ -30,6 +30,9 @@ export class VideoSlider extends LitElement {
 
   @property({ type: Number, attribute: 'tooltip-offset' })
   tooltipOffset = -11
+
+  @property({ type: Boolean, attribute: 'full-width', reflect: true })
+  fullWidth = false
 
   @state()
   currentValue = 0
