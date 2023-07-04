@@ -9,6 +9,7 @@ import { timeAsString } from '../../helpers/time'
 
 import '../video-timer'
 import '../video-slider'
+import { VideoSlider } from '../video-slider'
 
 /**
  * @slot - Video-timeline main content
@@ -35,22 +36,44 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @state()
   currentTime: number
 
+  @state()
+  isHovering = false
+
+  @state()
+  hoverText = ''
+
   handleChanged(e: { detail: { value: number } }) {
     const time = e.detail.value
     this.currentTime = time
     this.command(Command.seek, { time })
   }
 
+  handleHover = (e: CustomEvent & { target: VideoSlider, detail: { position: number } }) => {
+    this.isHovering = true
+    const text = timeAsString(this.duration * (e.detail.position / 100))
+    if (text === this.hoverText) return
+    this.hoverText = text
+  }
+
+  handleHoverEnd = () => {
+    this.isHovering = false
+  }
+
   render() {
     return html`
       <video-slider
+        with-tooltip
         .fullWidth=${this.fullWidth}
         .value=${this.currentTime}
         .max=${this.duration}
         .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
-        .tooltipText="${timeAsString(this.currentTime)}"
+        .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
         @changed=${this.handleChanged}
-      ></video-slider>
+        @hovering=${this.handleHover}
+        @hoverend=${this.handleHoverEnd}
+      >
+    
+    </video-slider>
       ${when(this.timer, () => html`
         <video-timer></video-timer>
       `)}

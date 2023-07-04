@@ -3,9 +3,11 @@ import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-slider.styles.css?inline'
 import { emit } from '../../helpers/event'
 import { watch } from '../../decorators/watch'
-import { createPopper, Instance as PopperInstance, Placement } from '@popperjs/core'
+import { createPopper, Instance as PopperInstance, Placement, VirtualElement, ClientRectObject } from '@popperjs/core'
 import { closestElement } from '../../helpers/closest'
 import { when } from 'lit/directives/when.js'
+
+const generateGetBoundingClientRect = (x = 0, y = 0) => () => new DOMRect(x, y, 0, 0)
 
 @customElement('video-slider')
 export class VideoSlider extends LitElement {
@@ -23,8 +25,19 @@ export class VideoSlider extends LitElement {
   @property({ attribute: 'tooltip-text' })
   tooltipText = ''
 
+  @property({ type: Boolean, attribute: 'with-tooltip' })
+  withTooltip = false
+
+  @property({ type: Number, attribute: 'tooltip-offset' })
+  tooltipOffset = -11
+
   @state()
   currentValue = 0
+
+  @state()
+  isHovered = false
+
+  hoverPosition = '0'
 
   @query('.tooltip')
   tooltip: HTMLElement
@@ -36,6 +49,9 @@ export class VideoSlider extends LitElement {
   isPendingUpdate = false
 
   tooltipPopper: PopperInstance
+  overTimeout: number
+
+  virtualPopper: VirtualElement
 
   @watch('value')
   handleValueChange() {
@@ -50,13 +66,20 @@ export class VideoSlider extends LitElement {
     this.currentValue = this.value
   }
 
-  // protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-  //   this.tooltipPopper?.destroy()
-  //   this.tooltipPopper = this.createPopper(this.tooltip)
-  // }
+  protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    if (!this.withTooltip) return
+    this.tooltipPopper?.destroy()
+    this.tooltipPopper = this.createPopper(this.tooltip)
+    this.addEventListener('mouseover', this.handleMouseOver)
+    this.addEventListener('mouseleave', this.handleMouseLeave)
+    this.addEventListener('mousemove', this.handleMouseMove)
+  }
 
   disconnectedCallback(): void {
     this.tooltipPopper?.destroy()
+    this.removeEventListener('mouseover', this.handleMouseOver)
+    this.removeEventListener('mouseleave', this.handleMouseLeave)
+    this.removeEventListener('mousemove', this.handleMouseMove)
     super.disconnectedCallback()
   }
 
@@ -70,19 +93,57 @@ export class VideoSlider extends LitElement {
     this.isChanging = false
   }
 
+  handleMouseOver() {
+    if (!this.withTooltip) return
+
+    this.isHovered = true
+    if (this.overTimeout) window.clearTimeout(this.overTimeout)
+
+    this.overTimeout = setTimeout(() => {
+      if (!this.isHovered || !this.matches(':hover')) return
+      emit(this, 'hoverend')
+      this.isHovered = false
+    }, 5000)
+  }
+
+  handleMouseLeave() {
+    if (!this.withTooltip) return
+    emit(this, 'hoverend')
+    this.isHovered = false
+  }
+
+  handleMouseMove = (e: MouseEvent & { target: HTMLInputElement }) => {
+    if (!this.withTooltip || !this.isHovered) return
+    const { clientX, target } = e
+    const { y, x, width } = target.getBoundingClientRect()
+    const computedPosition = (100 / width * (clientX - x)).toFixed(3)
+    if (computedPosition === this.hoverPosition) return
+
+    this.hoverPosition = computedPosition
+    this.virtualPopper.getBoundingClientRect = generateGetBoundingClientRect(clientX, y)
+    this.tooltipPopper.update()
+    emit(this, 'hovering', { position: computedPosition })
+  }
+
   createPopper(element: HTMLElement) {
-    return createPopper(this, element, {
+    this.virtualPopper = {
+      getBoundingClientRect: generateGetBoundingClientRect(),
+      contextElement: this
+    }
+  
+    return createPopper(this.virtualPopper, element, {
       placement: 'top',
       modifiers: [
         {
           name: 'preventOverflow',
           options: {
             boundary: closestElement('video-player', this),
+            padding: 10
           },
         }, {
           name: 'offset',
           options: {
-            offset: [0, 20],
+            offset: [0, this.tooltipOffset],
           }
         }
       ],
@@ -110,12 +171,8 @@ export class VideoSlider extends LitElement {
           @input=${this.handleInput}
           @change=${this.handleChange}
         />
-        ${when(this.tooltipText, () => html`
-          <div
-            class="tooltip"
-            part="tooltip"
-            style="--value: ${this.positionInPercents}%"
-          >
+        ${when(this.withTooltip, () => html`
+          <div class="tooltip" part="tooltip">
             <slot name="tooltip">
               ${this.tooltipText}
             </slot>

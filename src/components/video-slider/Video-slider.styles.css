@@ -23,7 +23,6 @@
 .container {
   width: 100%;
   position: relative;
-  transform: scale(1);
   outline: none;
 }
 
@@ -147,13 +146,7 @@ progress {
 }
 
 .tooltip {
-  display: none;
-  position: absolute;
-  left: var(--value);
-  transform: translateX(-50%);
   padding: 6px 12px;
-  bottom: 100%;
-  margin-bottom: 18px;
   z-index: 1;
   font-family: var(--font);
   border-radius: 4px;
@@ -164,8 +157,8 @@ progress {
   background: var(--tooltip-background);
   overflow: hidden;
   user-select: none;
-
-  .container:hover & {
+  display: none;
+  :host(:hover) &{
     display: block;
   }
 }
