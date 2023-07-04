@@ -16,10 +16,6 @@
   width: 100%;
 }
 
-:host(:not([full-width])) {
-  padding: 0 calc(var(--thumb-size) / 2);
-}
-
 .container {
   width: 100%;
   position: relative;
@@ -133,20 +129,6 @@ input[type="range"] {
   &::-ms-fill-lower {
     background: currentColor;
   }
-}
-
-progress {
-  -webkit-appearance: none;
-  background: transparent;
-  border: 0;
-  border-radius: calc(var(--height) / 2);
-  height: 5px;
-  left: 0;
-  margin-top: -2.5px;
-  padding: 0;
-  position: absolute;
-  top: 50%;
-  width: 100%;
 }
 
 .tooltip {

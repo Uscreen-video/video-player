@@ -181,7 +181,7 @@ export class VideoSlider extends LitElement {
             </slot>
           </div>
         `)}
-        </progress>
+        <slot></slot>
       </div>
     `
   }

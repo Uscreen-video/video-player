@@ -3,10 +3,11 @@ import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
 import { connect, createCommand } from '../../state'
 import { Command } from '../../types'
-import { when } from 'lit/directives/when.js';
+import { when } from 'lit/directives/when.js'
 import { DependentPropsMixin } from '../../mixins/DependentProps'
 import { timeAsString } from '../../helpers/time'
 
+import '../video-progress'
 import '../video-timer'
 import '../video-slider'
 import { VideoSlider } from '../video-slider'
@@ -27,6 +28,12 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   @connect('duration')
   duration: number
+
+  @connect('buffered')
+  buffered: number
+
+  @connect('canPlay')
+  canPlay: boolean
   
   @connect('isFullscreen')
   @property({ type: Boolean, reflect: true })
@@ -64,7 +71,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
       <video-slider
         with-tooltip
         .fullWidth=${this.fullWidth}
-        .value=${this.currentTime}
+        .value=${this.currentTime || 0}
         .max=${this.duration}
         .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
         .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
@@ -72,8 +79,8 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
       >
-    
-    </video-slider>
+        <video-progress value=${100 / this.duration * this.buffered}></video-progress>
+      </video-slider>
       ${when(this.timer, () => html`
         <video-timer></video-timer>
       `)}
