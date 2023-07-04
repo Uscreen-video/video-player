@@ -41,6 +41,7 @@ input[type="range"] {
   padding: 0;
   transition: box-shadow 0.3s ease;
   border-radius: calc(var(--height) / 2);
+  cursor: pointer;
 
   /* Thumb */
   &::-webkit-slider-thumb {
