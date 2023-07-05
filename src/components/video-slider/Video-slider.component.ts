@@ -19,6 +19,9 @@ export class VideoSlider extends LitElement {
   @property({ type: Number })
   max = 1
 
+  @property({ type: Boolean })
+  disabled = false
+
   @property({ attribute: 'value-text' })
   valueText = ''
 
@@ -97,7 +100,7 @@ export class VideoSlider extends LitElement {
   }
 
   handleMouseOver() {
-    if (!this.withTooltip) return
+    if (!this.withTooltip || this.disabled) return
 
     this.isHovered = true
     if (this.overTimeout) window.clearTimeout(this.overTimeout)
@@ -164,6 +167,7 @@ export class VideoSlider extends LitElement {
           max="100"
           step="0.001"
           role="slider"
+          ?disabled=${this.disabled}
           .value=${this.positionInPercents}
           .aria-valuenow=${this.currentValue}
           aria-valuemin="0"
@@ -174,7 +178,7 @@ export class VideoSlider extends LitElement {
           @input=${this.handleInput}
           @change=${this.handleChange}
         />
-        ${when(this.withTooltip, () => html`
+        ${when(this.withTooltip && !this.disabled, () => html`
           <div class="tooltip" part="tooltip">
             <slot name="tooltip">
               ${this.tooltipText}

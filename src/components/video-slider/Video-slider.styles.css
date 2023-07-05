@@ -16,6 +16,10 @@
   width: 100%;
 }
 
+:host([disabled]) {
+  --thumb-size: 0!important;
+}
+
 .container {
   width: 100%;
   position: relative;
@@ -30,6 +34,7 @@ input[type="range"] {
   height: var(--height);
   color: var(--active-color);
   background: var(--background-color);
+  border-radius: calc(var(--height) / 2);
   border: 0;
   display: block;
   margin: 0;
@@ -38,8 +43,10 @@ input[type="range"] {
   transition: box-shadow 0.3s ease;
   cursor: pointer;
 
-  :host(:not([full-width])) & {
-    border-radius: calc(var(--height) / 2);
+  :host([disabled]) & {
+    background: linear-gradient(to right, var(--active-color), var(--active-color), var(--background-color), var(--active-color));
+    background-size: 200% 200%;
+    animation: gradient 5s ease-in-out infinite;
   }
 
   /* Thumb */
@@ -147,4 +154,16 @@ input[type="range"] {
   :host(:hover) &{
     display: block;
   }
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }

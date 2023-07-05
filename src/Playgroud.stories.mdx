@@ -5,6 +5,8 @@ import enCaptions from '../mocks/captions_en.vtt?url'
 import './components/video-player'
 import './components/video-controls'
 import './components/video-timeline'
+import './components/video-timer'
+import './components/video-live-sign'
 import './components/video-volume-control'
 import './components/video-cues'
 import './components/buttons/Play'
@@ -39,7 +41,10 @@ import './components/buttons/ChromeCast'
       />
     </video>
     <video-controls>
-      <video-timeline timer />
+      <video-timeline>
+        <video-live-sign></video-live-sign>
+        <video-timer></video-timer>
+      </video-timeline>
       <video-play-button />
       <video-forward-button />
       <video-backward-button />
