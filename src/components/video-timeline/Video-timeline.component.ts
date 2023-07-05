@@ -34,6 +34,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @property({ type: Boolean, reflect: true })
   fullscreen: boolean
 
+  @property({ type: Boolean, attribute: 'full-width', reflect: true })
+  fullWidth = false
+
   @connect('currentTime')
   @state()
   currentTime: number

@@ -22,11 +22,17 @@ video-slider {
   --background-color: var(--progress-background-color);
   --height: 0.25rem;
   --thumb-size: 1rem;
+  --border-radius: 0;
 
   height: 1rem;
   padding-top: 20px;
+
   :host(:not([disabled])) &:hover {
     --height: 0.5rem;
+  }
+
+  :host(:not([full-width])) & {
+    --border-radius: calc(var(--height) / 2);
   }
 }
 

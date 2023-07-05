@@ -34,9 +34,6 @@ export class VideoSlider extends LitElement {
   @property({ type: Number, attribute: 'tooltip-offset' })
   tooltipOffset = -11
 
-  @property({ type: Boolean, attribute: 'full-width', reflect: true })
-  fullWidth = false
-
   @state()
   currentValue = 0
 
