@@ -8,6 +8,7 @@ import '../video-chromecast'
 import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
+import { emit } from '../../helpers/event'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -36,9 +37,13 @@ export class VideoPlayer extends LitElement {
 
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
-    this.state.value.isFullscreen
-      ? this.fullscreen.exit()
-      : this.fullscreen.enter()
+    if (this.state.value.isFullscreen) {
+      this.fullscreen.exit()
+      emit(this, 'exit-fullscreen')
+    } else {
+      this.fullscreen.enter()
+      emit(this, 'enter-fullscreen')
+    }
   }
 
   handleIdleUpdate(idle: boolean) {
