@@ -1,13 +1,13 @@
 import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
-import { connect, createCommand, dispatch } from '../../state'
-import { Action, Command } from '../../types'
-import { when } from 'lit/directives/when.js';
-import type { VideoSlider } from '../video-slider';
+import { connect, createCommand } from '../../state'
+import { Command } from '../../types'
 import { DependentPropsMixin } from '../../mixins/DependentProps'
+import { timeAsString } from '../../helpers/time'
+import { VideoSlider } from '../video-slider'
 
-import '../video-timer'
+import '../video-progress'
 import '../video-slider'
 
 /**
@@ -18,51 +18,68 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
 
-  @property({ type: Boolean, reflect: true })
-  timer: false
-
-  @property({ type: Boolean, attribute: 'full-width', reflect: true })
-  fullWidth = false
+  @property({ type: Boolean })
+  disabled = false
 
   @connect('duration')
   duration: number
+
+  @connect('buffered')
+  buffered: number
+
+  @connect('canPlay')
+  canPlay: boolean
   
   @connect('isFullscreen')
   @property({ type: Boolean, reflect: true })
   fullscreen: boolean
 
+  @property({ type: Boolean, attribute: 'full-width', reflect: true })
+  fullWidth = false
+
   @connect('currentTime')
   @state()
   currentTime: number
 
-  handleChanged(progress: number) {
-    const time = this.duration * progress
+  @state()
+  isHovering = false
+
+  @state()
+  hoverText = ''
+
+  handleChanged(e: { detail: { value: number } }) {
+    const time = e.detail.value
     this.currentTime = time
     this.command(Command.seek, { time })
   }
 
-  handleDragEnd(e: CustomEvent & { target: VideoSlider }) {
-    dispatch(this, Action.seekEnd)
-    this.handleChanged(e.target.position)
+  handleHover = (e: CustomEvent & { target: VideoSlider, detail: { position: number } }) => {
+    this.isHovering = true
+    const text = timeAsString(this.duration * (e.detail.position / 100))
+    if (text === this.hoverText) return
+    this.hoverText = text
   }
 
-  handleDragStart() {
-    dispatch(this, Action.seekStart)
+  handleHoverEnd = () => {
+    this.isHovering = false
   }
-
 
   render() {
     return html`
       <video-slider
-        .fullWidth=${this.fullWidth}
-        .value=${this.currentTime / this.duration}
-        @dragstart=${this.handleDragStart}
-        @dragend=${this.handleDragEnd}
+        with-tooltip
+        .value=${this.currentTime || 0}
+        .max=${this.duration}
+        .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
+        .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
+        ?disabled=${this.disabled || !this.canPlay}
         @changed=${this.handleChanged}
-      ></video-slider>
-      ${when(this.timer, () => html`
-        <video-timer></video-timer>
-      `)}
+        @hovering=${this.handleHover}
+        @hoverend=${this.handleHoverEnd}
+      >
+        <video-progress value=${100 / this.duration * this.buffered}></video-progress>
+      </video-slider>
+      <slot></slot>
     `
   }
 }

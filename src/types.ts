@@ -73,6 +73,7 @@ export enum Action {
   toggleAirplay,
   castAvailable,
   setCastStatus,
+  setBuffer,
 }
 
 export enum Event {
@@ -108,6 +109,7 @@ export type State = Partial<{
   castActivated: boolean,
   nativeControls: boolean,
   cues: string[],
+  buffered: number,
   textTracks: {
     label: string,
     src: string,

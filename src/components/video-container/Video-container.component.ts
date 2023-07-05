@@ -4,6 +4,7 @@ import { customElement, eventOptions, property, queryAssignedElements } from 'li
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
+import { getBufferedEnd } from '../../helpers/buffer'
 
 /**
  * @slot - Video-container main content
@@ -215,6 +216,11 @@ export class VideoContainer extends LitElement {
           playbackRate: video.playbackRate
         })
         break
+      case 'progress':
+        dispatch(this, Types.Action.setBuffer, {
+          buffered: getBufferedEnd(video)
+        })
+        break
       case 'webkitplaybacktargetavailabilitychanged':
         dispatch(this, Types.Action.updateAirplayStatus, {
           airplayAvailable: (e as any).availability === 'available'
@@ -286,6 +292,7 @@ export class VideoContainer extends LitElement {
         @loadeddata=${this.handleVideoEvent}
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
+        @progress=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.handleClick}
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}

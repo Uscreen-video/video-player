@@ -22,5 +22,10 @@
   "timer-color": "#ffffff",
   "timer-font-size": "0.75rem",
 
+  "live-sign-color": "red",
+  "live-sign-font-size": "0.75rem",
+  "live-sign-text-color": "#ffffff",
+  "live-sign-size": "0.5rem",
+
   "cue-font-size": "calc(14px + (26 - 14) * ((100vw - 300px) / (1600 - 300)))"
 }

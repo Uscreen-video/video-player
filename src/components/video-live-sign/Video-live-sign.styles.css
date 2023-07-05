@@ -1,0 +1,40 @@
+:host {
+  --font: $font;
+  --color: $live-sign-color;
+  --text-color: $live-sign-text-color;
+  --font-size: $live-sign-font-size;
+  --size: $live-sign-size;
+
+  display: flex;
+  align-items: center;
+  font-family: var(--font);
+  color: var(--text-color);
+  font-size: var(--font-size);
+}
+
+::slotted(*) {
+  font-family: var(--font);
+  color: var(--text-color);
+  font-size: var(--font-size);
+}
+
+.sign {
+  width: var(--size);
+  height: var(--size);
+  background-color: var(--color);
+  border-radius: 50%;
+  margin-right: calc(var(--size) / 2);
+  animation: blink 1.8s linear infinite;
+}
+
+@keyframes blink {
+	0% {
+		opacity: .2;
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: .2;
+	}
+}

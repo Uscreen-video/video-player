@@ -1,10 +1,14 @@
 :host {
   --active-color: blue;
   --background-color: rgba(255, 255, 255, 0.4);
-  --border-radius: 2px;
   --height: 10px;
   --thumb-size: var(--thumb-size);
   --thumb-color: white;
+  --font: $font;
+  --tooltip-text: $tooltip-text;
+  --tooltip-background: $tooltip-background;
+  --tooltip-font-size: $tooltip-font-size;
+  --radius: var(--border-radius, calc(var(--height) / 2));
 
   display: flex;
   align-items: center;
@@ -12,65 +16,154 @@
   width: 100%;
 }
 
-:host(:not([full-width])) {
-  padding: 0 calc(var(--thumb-size) / 2);
+:host([disabled]) {
+  --thumb-size: 0!important;
 }
 
 .container {
   width: 100%;
   position: relative;
-  transform: scale(1);
   outline: none;
 }
 
-.lines {
+input[type="range"] {
+  appearance: none;
   position: relative;
-  overflow: hidden;
-  background-color: var(--background-color);
+  z-index: 2;
+  width: 100%;
   height: var(--height);
-  transition: height 0.1s linear;
-  
-  :host(:not([full-width])) & {
-    border-radius: var(--border-radius);
-  }
-}
-
-.progress{
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 100%;
-  transform-origin: left;
-  background-color: var(--active-color);
-}
-
-.handler {
-  position: absolute;
-  display: flex;
-  border: none;
-  background-color: transparent;
+  color: var(--active-color);
+  background: var(--background-color);
+  border-radius: var(--radius);
+  border: 0;
+  display: block;
+  margin: 0;
+  min-width: 0;
   padding: 0;
-  top: 0;
-  height: 100%;
-  width: 100%;
-  right: 100%;
-  &:before {
-    content: ' ';
-    flex: 1;
+  transition: box-shadow 0.3s ease;
+  cursor: pointer;
+
+  :host([disabled]) & {
+    background: linear-gradient(to right, var(--active-color), var(--active-color), var(--background-color), var(--active-color));
+    background-size: 200% 200%;
+    animation: gradient 5s ease-in-out infinite;
   }
-  &:after{
-    content: ' ';
-    position: relative;
-    cursor: grab;
-    top: 50%;
-    right: 0;
-    width: var(--thumb-size);
+
+  /* Thumb */
+  &::-webkit-slider-thumb {
+    appearance: none;
     height: var(--thumb-size);
-    transform: translate3d(50%, -50%, 0);
-    background-color: var(--thumb-color);
+    width: var(--thumb-size);
     border-radius: 50%;
-    user-select: none;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+    background: var(--thumb-color);
+    box-shadow: transparent;
+    position: relative;
+    border: 0;
+    margin-top: calc(((var(--thumb-size) - var(--height)) / 2) * -1);
   }
+
+  &::-moz-range-thumb {
+    height: var(--thumb-size);
+    width: var(--thumb-size);
+    border-radius: 50%;
+    background: var(--thumb-color);
+    box-shadow: none;
+    position: relative;
+    border: none;
+    outline: 0;
+  }
+
+  &::-ms-thumb {
+    height: var(--thumb-size);
+    width: var(--thumb-size);
+    border-radius: 50%;
+    background: var(--thumb-color);
+    box-shadow: none;
+    position: relative;
+    border: none;
+    outline: 0;
+    margin-top: 0;
+  }
+
+  &::-ms-tooltip {
+    display: none;
+  }
+
+  &::-moz-focus-outer {
+    border: 0;
+  }
+
+  &:focus {
+    outline: 0;
+  }
+
+  /* Track */
+  &::-webkit-slider-runnable-track {
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius);
+    height: var(--height);
+    user-select: none;
+
+    background-image: linear-gradient(
+      to right, 
+      currentColor var(--value, 0%), 
+      transparent var(--value, 0%)
+    );
+  }
+
+  &::-webkit-slider-runnable-track,
+  &::-ms-track,
+  &::-ms-fill-upper,
+  &::-ms-fill-lower {
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius);
+    height: var(--height);
+    user-select: none;
+  }
+
+  &::-moz-range-progress {
+    background: currentColor;
+    border-radius: var(--radius);
+    height: var(--height);
+  }
+
+  &::-ms-track {
+    color: transparent;
+  }
+
+  &::-ms-fill-lower {
+    background: currentColor;
+  }
+}
+
+.tooltip {
+  padding: 6px 12px;
+  z-index: 1;
+  font-family: var(--font);
+  border-radius: 4px;
+  color: var(--tooltip-text);
+  font-size: var(--tooltip-font-size);
+  line-height: calc(var(--tooltip-font-size) * 1.5);
+  white-space: nowrap;
+  background: var(--tooltip-background);
+  overflow: hidden;
+  user-select: none;
+  display: none;
+  :host(:hover) &{
+    display: block;
+  }
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
 }
