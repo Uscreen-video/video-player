@@ -22,7 +22,6 @@ video-slider {
   --background-color: var(--progress-background-color);
   --height: 0.25rem;
   --thumb-size: 1rem;
-  --border-radius: calc(var(--height) / 2);
 
   height: 1rem;
   padding-top: 20px;

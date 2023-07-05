@@ -1,4 +1,5 @@
 :host {
+  --radius: var(--border-radius, calc(var(--height) / 2));
   display: contents;
 }
 
@@ -9,7 +10,7 @@ progress {
   border: 0;
   outline: 0;
   color: var(--color);
-  border-radius: calc(var(--height) / 2);
+  border-radius: var(--radius);
   height: var(--height);
   margin-top: calc(var(--height) / -2);
   padding: 0;
@@ -24,20 +25,20 @@ progress {
 
   &::-webkit-progress-value {
     background: var(--color);
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     min-width: var(--height);
     transition: width 0.2s ease;
   }
 
   &::-moz-progress-bar {
     background: var(--color);
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     min-width: var(--height);
     transition: width 0.2s ease;
   }
 
   &::-ms-fill {
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     transition: width 0.2s ease;
   }
 }

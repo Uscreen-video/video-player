@@ -1,7 +1,6 @@
 :host {
   --active-color: blue;
   --background-color: rgba(255, 255, 255, 0.4);
-  --border-radius: 2px;
   --height: 10px;
   --thumb-size: var(--thumb-size);
   --thumb-color: white;
@@ -9,6 +8,7 @@
   --tooltip-text: $tooltip-text;
   --tooltip-background: $tooltip-background;
   --tooltip-font-size: $tooltip-font-size;
+  --radius: var(--border-radius, calc(var(--height) / 2));
 
   display: flex;
   align-items: center;
@@ -34,7 +34,7 @@ input[type="range"] {
   height: var(--height);
   color: var(--active-color);
   background: var(--background-color);
-  border-radius: calc(var(--height) / 2);
+  border-radius: var(--radius);
   border: 0;
   display: block;
   margin: 0;
@@ -101,7 +101,7 @@ input[type="range"] {
   &::-webkit-slider-runnable-track {
     background: transparent;
     border: 0;
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     height: var(--height);
     user-select: none;
 
@@ -118,14 +118,14 @@ input[type="range"] {
   &::-ms-fill-lower {
     background: transparent;
     border: 0;
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     height: var(--height);
     user-select: none;
   }
 
   &::-moz-range-progress {
     background: currentColor;
-    border-radius: calc(var(--height) / 2);
+    border-radius: var(--radius);
     height: var(--height);
   }
 
