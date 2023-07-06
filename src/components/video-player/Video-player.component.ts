@@ -9,6 +9,7 @@ import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
 import { emit } from '../../helpers/event'
+import { Action, MuxParams } from '../../types'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -25,6 +26,9 @@ export class VideoPlayer extends LitElement {
 
   @property({ type: Boolean, reflect: true })
   idle = false
+
+  @property({ type: Object, attribute: 'mux-data' })
+  muxData: MuxParams
 
   @property({ type: Boolean })
   autofocus = false
@@ -74,6 +78,10 @@ export class VideoPlayer extends LitElement {
     this.addEventListener('touchstart', this.handleMove, { passive: true })
     this.addEventListener('mousemove', this.handleMove)
     this.addEventListener('mouseleave', this.handleMove)
+
+    if (this.muxData?.env_key) {
+      this.state.setState(Action.setMuxParams, { muxData: this.muxData })
+    }
   }
 
   disconnectedCallback(): void {

@@ -88,15 +88,20 @@ export class StateController extends ContextProvider<Context> {
     this.host.removeEventListener(Event.registerCommand, this.registerCommand)
   }
 
-  handleEvent = (e: CustomEvent<StateAction>) => {
-    e.stopPropagation()
+  setState = (action: Action, params: Record<string, any>) => {
     const prevState = this.value
-    this.setValue(mapState(e.detail.action, this.value, e.detail.params))
+    this.setValue(mapState(action, this.value, params))
     if (prevState !== this.value) {
       Promise.resolve().then(() => {
-        stateDebug(`[${Action[e.detail.action]}]`, e.detail.params)
+        stateDebug(`[${Action[action]}]`, params)
       })
     }
+  }
+
+  handleEvent = (e: CustomEvent<StateAction>) => {
+    e.stopPropagation()
+    this.setState(e.detail.action, e.detail.params)
+
     Promise.resolve().then(() => this.resolvePendingCommands())
   }
 

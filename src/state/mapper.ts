@@ -2,7 +2,8 @@ import { initialState } from '.'
 import { Action, State } from '../types'
 
 export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> = {
-  [Action.init]: (_, params) => ({
+  [Action.init]: (s, params) => ({
+    ...s,
     ...initialState,
     ...params
   }),

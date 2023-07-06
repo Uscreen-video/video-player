@@ -72,9 +72,11 @@
   "dependencies": {
     "@lit-labs/context": "^0.2.0",
     "@lit/reactive-element": "^1.6.1",
+    "@mux/mux-data-chromecast": "^4.11.5",
     "@popperjs/core": "^2.11.6",
     "@types/chromecast-caf-sender": "^1.0.5",
     "debug": "^4.3.4",
-    "hls.js": "^1.3.3"
+    "hls.js": "^1.3.3",
+    "mux-embed": "^4.26.0"
   }
 }

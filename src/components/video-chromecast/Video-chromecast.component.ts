@@ -184,7 +184,7 @@ export class VideoChromecast extends LitElement {
     Object
       .values(cast.framework.RemotePlayerEventType)
       .forEach(event => this.controller.addEventListener(event, this.handleCastEvent))
-    
+  
     dispatch(this, Action.castAvailable)
   }
 

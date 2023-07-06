@@ -1,6 +1,5 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement } from 'lit/decorators.js'
 import styles from './Video-live-sign.styles.css?inline'
 
 @customElement('video-live-sign')
