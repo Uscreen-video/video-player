@@ -27,9 +27,3 @@ declare module 'mux-embed' {
 
   export = M
 }
-
-declare module '@mux/mux-data-chromecast' {
-  function M (player: any, props: Record<string, any>): void
-
-  export = M
-}
