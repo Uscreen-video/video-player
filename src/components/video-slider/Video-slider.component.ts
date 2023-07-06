@@ -165,8 +165,8 @@ export class VideoSlider extends LitElement {
           step="0.001"
           role="slider"
           ?disabled=${this.disabled}
-          .value=${this.positionInPercents || '0'}
-          .aria-valuenow=${this.currentValue || '0'}
+          .value=${this.positionInPercents}
+          .aria-valuenow=${this.currentValue}
           aria-valuemin="0"
           aria-valuemax="1"
           autocomplete="off"
