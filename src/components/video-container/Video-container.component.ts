@@ -5,6 +5,8 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 import { getBufferedEnd } from '../../helpers/buffer'
+import { connectMuxData } from '../../helpers/mux'
+import { MuxParams } from '../../types'
 
 /**
  * @slot - Video-container main content
@@ -15,12 +17,16 @@ export class VideoContainer extends LitElement {
   public command = createCommand(this)
 
   hls: Hls
+  initTime: number
 
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
 
   @connect('activeTextTrack')
   activeTextTrack: string
+
+  @connect('muxData')
+  muxData: MuxParams
 
   @connect('castActivated')
   castActivated: string
@@ -142,6 +148,14 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  @listen(Types.Command.init, { isSourceSupported: true })
+  initNative() {
+    if (this.muxData) connectMuxData(
+      this.videos[0],
+      { ...this.muxData, player_init_time: this.initTime }
+    )
+  }
+
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
@@ -160,6 +174,12 @@ export class VideoContainer extends LitElement {
       levelLoadingMaxRetry: 4,
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30
     })
+    
+    if (this.muxData) await connectMuxData(
+      this.videos[0],
+      { ...this.muxData, player_init_time: this.initTime },
+      { Hls: HLS, hlsjs: this.hls }
+    )
 
     this.hls.on(HLS.Events.LEVEL_UPDATED, (_: unknown, { level }: { level: number }) => {
       dispatch(this, Types.Action.setQualityLevel, {
@@ -261,6 +281,8 @@ export class VideoContainer extends LitElement {
       volume, duration, currentTime,
       playbackRate, title
     }] = this.videos
+
+    this.initTime = Date.now()
 
     // Show native controls on safari browser
     if (this.mobileSafari) this.videos[0].setAttribute('controls', 'true')

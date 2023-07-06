@@ -1,4 +1,5 @@
 import { device } from "./helpers/device"
+import type Hls from 'hls.js'
 
 /**
  * Command are the actions that can be triggered by the user or a interface
@@ -74,6 +75,7 @@ export enum Action {
   castAvailable,
   setCastStatus,
   setBuffer,
+  setMuxParams
 }
 
 export enum Event {
@@ -117,5 +119,31 @@ export type State = Partial<{
   }[],
   qualityLevels: {
     name: string
-  }[]
+  }[],
+  muxData: MuxParams
 } & typeof device>
+
+export type MuxParams = {
+  env_key: string
+  
+  /** any arbitrary string you want to use to identify this player */
+  player_name?: string
+  player_init_time?: number
+  player_version?: string
+
+  viewer_user_id?: string
+  experiment_name?: string
+
+  video_id?: string
+  video_title?: string
+  video_series?: string
+  video_duration?: string
+  video_stream_type?: string
+  video_cdn?: string
+}
+
+export type MuxOptions = {
+  debug?: boolean
+  Hls?: (typeof import('hls.js'))['default']
+  hlsjs?: Hls
+}
