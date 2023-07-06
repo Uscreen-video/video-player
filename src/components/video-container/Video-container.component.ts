@@ -150,7 +150,6 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.init, { isSourceSupported: true })
   initNative() {
-    console.log('here')
     if (this.muxData) connectMuxData(
       this.videos[0],
       { ...this.muxData, player_init_time: this.initTime }
