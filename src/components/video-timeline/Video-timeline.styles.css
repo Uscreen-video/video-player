@@ -7,14 +7,10 @@
   align-items: flex-end;
   width: 100%;
   margin-bottom: 10px;
-
-  & > video-slider:not(:last-child) {
-    margin-right: .5rem;
-  }
 }
 
-::slotted(*:not(:last-child)) {
-  margin-right: .5rem;
+::slotted(*) {
+  margin-inline-start: .5rem;
 }
 
 video-slider {
