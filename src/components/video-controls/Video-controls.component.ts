@@ -27,12 +27,12 @@ export class VideoControls extends DependentPropsMixin(LitElement) {
   @property({ type: Boolean, reflect: true })
   custom = false
   
-  @connect('isMobileSafari')
-  mobileSafari: boolean
+  @connect('isIos')
+  isIos: boolean
 
   render() {
     return html`
-      ${when(!this.mobileSafari, () => html`<slot></slot>`)}
+      ${when(!this.isIos, () => html`<slot></slot>`)}
     `
   }
 }

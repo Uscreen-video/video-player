@@ -18,12 +18,12 @@ export class VideoCues extends LitElement {
   @connect('cues')
   cues: string[]
 
-  @connect('isMobileSafari')
-  @property({ type: Boolean, reflect: true, attribute: 'mobile-safari' })
-  mobileSafari: true
+  @connect('isIos')
+  @property({ type: Boolean, reflect: true, attribute: 'is-ios' })
+  isIos: true
 
   render() {
-    if (this.mobileSafari || !this.activeTextTrack) return null
+    if (this.isIos || !this.activeTextTrack) return null
 
     return this.cues.map(cue => html`
       <div class="cue">

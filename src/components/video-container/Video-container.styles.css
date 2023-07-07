@@ -18,7 +18,7 @@
   max-height: auto!important;
   max-width: auto!important;
 
-  :not(:host([mobile-safari])) & {
+  :not(:host([is-ios])) & {
     &::-webkit-media-text-track-container,
     &::-webkit-media-text-track-display,
     &::cue {

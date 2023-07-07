@@ -12,6 +12,8 @@
   --menu-item-color-active: $menu-item-color-active;
   --menu-item-background-hover: $menu-item-background-hover;
   --menu-item-color-hover: $menu-item-color-hover;
+
+  --size: var(--button-size);
 }
 
 @media (min-width: 768px) {

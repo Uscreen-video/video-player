@@ -93,10 +93,6 @@ input[type="range"] {
     border: 0;
   }
 
-  &:focus {
-    outline: 0;
-  }
-
   /* Track */
   &::-webkit-slider-runnable-track {
     background: transparent;
