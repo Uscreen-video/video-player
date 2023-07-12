@@ -17,12 +17,16 @@ export class VideoVolumeControl extends LitElement {
   @state()
   volume: number
 
+  @connect('isIos')
+  isIos: boolean
+
   handleVolumeChange(e: CustomEvent & { detail: number }) {
     this.volume = Number(e.detail.value.toFixed(2))
     this.command(Types.Command.setVolume, { volume: this.volume })
   }
 
   render() {
+    if (this.isIos) return null
     return html`
       <video-slider
         .value=${this.isMuted ? 0 : this.volume}

@@ -31,10 +31,6 @@ export class VideoContainer extends LitElement {
   @connect('castActivated')
   castActivated: string
 
-  @connect('isIos')
-  @property({ type: Boolean, reflect: true, attribute: 'is-ios' })
-  isIos: true
-
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
@@ -271,7 +267,6 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleClick() {
-    if (this.isIos) return
     this.togglePlay()
   }
 
@@ -283,9 +278,6 @@ export class VideoContainer extends LitElement {
     }] = this.videos
 
     this.initTime = Date.now()
-
-    // Show native controls on safari browser
-    if (this.isIos) this.videos[0].setAttribute('controls', 'true')
 
     dispatch(this, Types.Action.init, {
       poster,

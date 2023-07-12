@@ -18,6 +18,21 @@
   max-height: auto!important;
   max-width: auto!important;
 
+  &::-webkit-media-controls-panel {
+    appearance: none;
+    display: none!important;
+  }
+  
+  &::--webkit-media-controls-play-button {
+    appearance: none;
+    display: none!important;
+  }
+  
+  &::-webkit-media-controls-start-playback-button {
+    appearance: none;
+    display: none!important;
+  }
+
   :not(:host([is-ios])) & {
     &::-webkit-media-text-track-container,
     &::-webkit-media-text-track-display,

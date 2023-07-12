@@ -26,13 +26,8 @@ export class VideoControls extends DependentPropsMixin(LitElement) {
   
   @property({ type: Boolean, reflect: true })
   custom = false
-  
-  @connect('isIos')
-  isIos: boolean
 
   render() {
-    return html`
-      ${when(!this.isIos, () => html`<slot></slot>`)}
-    `
+    return html`<slot></slot>`
   }
 }

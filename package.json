@@ -49,6 +49,7 @@
     "@storybook/blocks": "^7.0.0-beta.49",
     "@storybook/web-components": "^7.0.0-beta.49",
     "@storybook/web-components-vite": "^7.0.0-beta.49",
+    "@types/chromecast-caf-sender": "^1.0.5",
     "@types/debug": "^4.1.7",
     "@types/node": "^18.13.0",
     "cem-plugin-better-lit-types": "0.2.0",
@@ -62,15 +63,14 @@
     "storybook": "^7.0.0-beta.49",
     "typescript-json-schema": "^0.55.0",
     "vite": "^4.3.9",
-    "web-component-analyzer": "2.0.0-next.4",
-    "@types/chromecast-caf-sender": "^1.0.5"
+    "web-component-analyzer": "2.0.0-next.4"
   },
   "optionalDependencies": {
+    "hls.js": "^1.3.3",
     "lit": "^2.7.5",
     "lit-html": "^2.7.4",
-    "typescript": "^5.1.3",
-    "hls.js": "^1.3.3",
-    "mux-embed": "^4.26.0"
+    "mux-embed": "^4.26.0",
+    "typescript": "^5.1.3"
   },
   "dependencies": {
     "@lit-labs/context": "^0.2.0",
