@@ -3,7 +3,6 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { DependentPropsMixin } from '../../mixins/DependentProps'
 import styles from './Video-controls.styles.css?inline'
-import { when } from 'lit/directives/when.js';
 
 /**
  * @slot - Video-controls main content
