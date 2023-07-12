@@ -7,6 +7,7 @@ import { getCueText } from '../../helpers/cue'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
 import { MuxParams } from '../../types'
+import { when } from 'lit/directives/when.js'
 
 /**
  * @slot - Video-container main content
@@ -24,6 +25,15 @@ export class VideoContainer extends LitElement {
 
   @connect('activeTextTrack')
   activeTextTrack: string
+
+  @connect('poster')
+  poster: string
+
+  @connect('title')
+  title: string
+
+  @connect('played')
+  played: boolean
 
   @connect('muxData')
   muxData: MuxParams
@@ -329,6 +339,13 @@ export class VideoContainer extends LitElement {
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
         @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>
+      ${when(this.poster && !this.played, () => html`
+        <img
+          src=${this.poster} 
+          alt=${this.title} 
+          @click=${this.handleClick} 
+        />
+      `)}
     `
   }
 

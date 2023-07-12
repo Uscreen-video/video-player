@@ -97,6 +97,7 @@ export type State = Partial<{
   poster: string,
   volume: number,
   canPlay: boolean,
+  played: boolean,
   idle: boolean,
   isInteracted: boolean,
   isPlaying: boolean,

@@ -6,6 +6,17 @@
   padding-bottom: calc(var(--aspect-ratio) * 100%);
 }
 
+img {
+  position: absolute;
+  object-fit: contain;
+  outline: none;
+  background: black;
+  top: 0;
+  left: 0;
+  height: 100%!important;
+  width: 100%!important;
+}
+
 ::slotted(video) {
   position: absolute;
   object-fit: contain;

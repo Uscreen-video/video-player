@@ -13,7 +13,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
   }),
   [Action.play]: (state) => ({
     ...state,
-    isPlaying: true
+    isPlaying: true,
+    played: true
   }),
   [Action.pause]: (state) => ({
     ...state,
