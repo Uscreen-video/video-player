@@ -48,6 +48,8 @@ export enum Command {
   castNotSupported,
   /** Request playing video on ChromeCast device */
   requestCast,
+  /** Toggles "picture in picture" mode */
+  togglePip,
 }
 
 export enum Action {
@@ -72,6 +74,7 @@ export enum Action {
   setQualityLevel,
   updateAirplayStatus,
   toggleAirplay,
+  togglePip,
   castAvailable,
   setCastStatus,
   setBuffer,
@@ -107,9 +110,10 @@ export type State = Partial<{
   customHLS: boolean,
   airplayAvailable: boolean,
   airplayActivated: boolean,
+  pipAvailable: boolean,
+  pipActivated: boolean,
   castAvailable: boolean,
   castActivated: boolean,
-  nativeControls: boolean,
   cues: string[],
   buffered: number,
   textTracks: {
