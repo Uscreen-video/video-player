@@ -144,6 +144,15 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  @listen(Types.Command.togglePip)
+  togglePip() {
+    if (!document.pictureInPictureElement) {
+      this.videos[0].requestPictureInPicture()
+    } else {
+      document.exitPictureInPicture()
+    }
+  }
+
   @listen(Types.Command.init, { isSourceSupported: true })
   initNative() {
     if (this.muxData) connectMuxData(
@@ -245,6 +254,12 @@ export class VideoContainer extends LitElement {
       case 'webkitcurrentplaybacktargetiswirelesschanged':
         dispatch(this, Types.Action.toggleAirplay)
         break
+      case 'enterpictureinpicture':
+        dispatch(this, Types.Action.togglePip, { pipActivated: true })
+        break
+      case 'leavepictureinpicture':
+        dispatch(this, Types.Action.togglePip, { pipActivated: false })
+        break
     }
   }
 
@@ -306,6 +321,8 @@ export class VideoContainer extends LitElement {
         @loadeddata=${this.handleVideoEvent}
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
+        @enterpictureinpicture=${this.handleVideoEvent}
+        @leavepictureinpicture=${this.handleVideoEvent}
         @progress=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.handleClick}

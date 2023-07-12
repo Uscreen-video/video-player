@@ -18,6 +18,7 @@ export const initialState: State = {
   castActivated: false,
   castAvailable: Boolean(window.chrome?.cast?.isAvailable),
   airplayAvailable: Boolean((window as any).WebKitPlaybackTargetAvailabilityEvent),
+  pipAvailable: Boolean(document.pictureInPictureEnabled),
   ...device
 }
 
