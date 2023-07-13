@@ -44,26 +44,32 @@ export class SubtitlesButton extends VideoButton {
   playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
   shortcuts = [{
-    label: 'player.play_pause',
+    label: 'Play/Pause',
+    key: 'toggle-play',
     iconAfter: html`<code>Space</code>`
   }, {
-    label: 'player.fullscreen',
+    label: 'Enter fullscreen',
+    key: 'enter-fullscreen',
     iconAfter: html`<code>Enter</code>`,
   },
   {
-    label: 'player.exit_fullscreen',
+    label: 'Exit fullscreen',
+    key: 'exit-fullscreen',
     iconAfter: html`<code>Esc</code>`,
   },
   {
-    label: 'player.rewind',
+    label: 'Rewind',
+    key: 'rewind',
     iconAfter: html`<code>←</code><code>→</code>`,
   },
   {
-    label: 'player.change_volume',
+    label: 'Change volume',
+    key: 'volume',
     iconAfter: html`<code>↓</code><code>↑</code>`,
   },
   {
-    label: 'player.mute',
+    label: 'Mute',
+    key: 'mute',
     iconAfter: html`<code>M</code>`
   }]
 

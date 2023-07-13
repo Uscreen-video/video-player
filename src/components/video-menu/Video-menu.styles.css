@@ -1,4 +1,5 @@
 :host {
+  --font: $font;
   --item-width: $menu-item-width;
   --item-padding: $menu-item-padding;
   --item-background: $menu-item-background;

@@ -10,13 +10,14 @@ type MenuItem = {
   isActive?: boolean
   iconBefore?: any
   iconAfter?: any
+  key?: string
 }
 
 @customElement('video-menu')
 export class VideoMenu extends LitElement {
   static styles = unsafeCSS(styles)
 
-  @property({ type: Object })
+  @property({ type: Array })
   items: MenuItem[] = []
 
   @property()

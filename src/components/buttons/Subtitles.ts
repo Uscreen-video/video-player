@@ -32,6 +32,8 @@ export class SubtitlesButton extends VideoButton {
   }
 
   override renderContent() {
+    if (!this.textTracks?.length) return null
+
     return html`
       <slot name=${this.activeTrack ? 'selected' : 'not-selected'}>
         ${this.activeTrack ? icons.solid : icons.outline}
