@@ -9,14 +9,18 @@ import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
 import { emit } from '../../helpers/event'
-import { Action, MuxParams } from '../../types'
+import { Action, Command, MuxParams } from '../../types'
+import { enumProxy } from '../../helpers/enumProxy'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
   static styles?: CSSResultGroup = unsafeCSS(styles)
+
   protected idleManager = new IdleController(this, this.handleIdleUpdate)
   protected keyboardManager = new KeyboardController(this)
 
+  public _actions = enumProxy(Action)
+  public _commands = enumProxy(Command)
   public command = createCommand(this)
   public state = createState(this)
   public fullscreen = new FullscreenController(this)

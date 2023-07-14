@@ -78,7 +78,7 @@ export enum Action {
   castAvailable,
   setCastStatus,
   setBuffer,
-  setMuxParams
+  setMuxParams,
 }
 
 export enum Event {
