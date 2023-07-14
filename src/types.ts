@@ -7,78 +7,78 @@ import type Hls from 'hls.js'
  */
 export enum Command {
   /** Play the video */
-  play,
+  play = 'play',
   /** Pause the video */
-  pause,
+  pause = 'pause',
   /** Seek to a specific time */
-  seek,
+  seek = 'seek',
   /** Mute the video */
-  mute,
+  mute = 'mute',
   /** Unmute the video */
-  unmute,
+  unmute = 'unmute',
   /** Set playback rate */
-  setPlaybackRate,
+  setPlaybackRate = 'setPlaybackRate',
   /** Toggle fullscreen mode */
-  toggleFullscreen,
+  toggleFullscreen = 'toggleFullscreen',
   /** Toggle play/pause */
-  togglePlay,
+  togglePlay = 'togglePlay',
   /** Toggle mute/unmute */
-  toggleMuted,
+  toggleMuted = 'toggleMuted',
   /** Set the video volume */
-  setVolume,
+  setVolume = 'setVolume',
   /** Increase video volume */
-  increaseVolume,
+  increaseVolume = 'increaseVolume',
   /** Decrease video volume */
-  decreaseVolume,
+  decreaseVolume = 'decreaseVolume',
   /** Seek forward for 10 seconds */
-  forward,
+  forward = 'forward',
   /** Seek backward for 10 seconds */
-  backward,
+  backward = 'backward',
   /** Enable a text track */
-  enableTextTrack,
+  enableTextTrack = 'enableTextTrack',
   /** Sets video quality */
-  setQualityLevel,
+  setQualityLevel = 'setQualityLevel',
   /** Initialize the custom HLS player */
-  initCustomHLS,
+  initCustomHLS = 'initCustomHLS',
   /** Initialize the video player */
-  init,
+  init = 'init',
   /** Request to play via AirPlay on IOS/MacOs devices */
-  requestAirplay,
+  requestAirplay = 'requestAirplay',
   /** Triggers when ChromeCast is not supported in browser */
-  castNotSupported,
+  castNotSupported = 'castNotSupported',
   /** Request playing video on ChromeCast device */
-  requestCast,
+  requestCast = 'requestCast',
   /** Toggles "picture in picture" mode */
-  togglePip,
+  togglePip = 'togglePip',
 }
 
 export enum Action {
-  play,
-  pause,
-  update,
-  toggleMuted,
-  seekEnd,
-  seekStart,
-  canPlay,
-  updateDuration,
-  updateTime,
-  init,
-  volumeChange,
-  fullscreenChange,
-  setLevels,
-  interacted,
-  idle,
-  selectTextTrack,
-  cues,
-  setPlaybackRate,
-  setQualityLevel,
-  updateAirplayStatus,
-  toggleAirplay,
-  togglePip,
-  castAvailable,
-  setCastStatus,
-  setBuffer,
-  setMuxParams,
+  play = 'play',
+  pause = 'pause',
+  update = 'update',
+  toggleMuted = 'toggleMuted',
+  seekEnd = 'seekEnd',
+  seekStart = 'seekStart',
+  canPlay = 'canPlay',
+  updateDuration = 'updateDuration',
+  updateTime = 'updateTime',
+  init = 'init',
+  volumeChange = 'volumeChange',
+  fullscreenChange = 'fullscreenChange',
+  setLevels = 'setLevels',
+  interacted = 'interacted',
+  idle = 'idle',
+  selectTextTrack = 'selectTextTrack',
+  cues = 'cues',
+  setPlaybackRate = 'setPlaybackRate',
+  setQualityLevel = 'setQualityLevel',
+  updateAirplayStatus = 'updateAirplayStatus',
+  toggleAirplay = 'toggleAirplay',
+  togglePip = 'togglePip',
+  castAvailable = 'castAvailable',
+  setCastStatus = 'setCastStatus',
+  setBuffer = 'setBuffer',
+  setMuxParams = 'setMuxParams',
 }
 
 export enum Event {
