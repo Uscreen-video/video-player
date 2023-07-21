@@ -68,6 +68,7 @@ export class VideoButton extends LitElement {
   destroyMenu(): void {
     this.menuPopper?.destroy()
     this.menuPopper = undefined
+    this.destroyTooltip()
   }
 
   protected firstUpdated(): void {
