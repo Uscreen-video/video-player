@@ -166,11 +166,10 @@ export class VideoContainer extends LitElement {
   setHLSQualityLevel({ level }: { level: number }) {
     const qualityLevelIdx = this.hls.levels.findIndex(({ height }) => height === level)
     this.hls.nextLevel = qualityLevelIdx
-    if (qualityLevelIdx === -1) {
-      dispatch(this, Types.Action.setQualityLevel, {
-        activeQualityLevel: -1
-      })
-    }
+    // We need to update state here as well, as HLS.Events.LEVEL_UPDATED sometimes not triggered
+    dispatch(this, Types.Action.setQualityLevel, {
+      activeQualityLevel: qualityLevelIdx === -1 ? -1 : level
+    })
   }
 
   @listen(Types.Command.togglePip)
