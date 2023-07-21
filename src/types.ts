@@ -93,6 +93,10 @@ export type State = Partial<{
   duration: number,
   currentTime: number,
   src: string,
+  sources: {
+    type: string,
+    src: string
+  }[],
   title: string,
   poster: string,
   volume: number,

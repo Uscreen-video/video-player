@@ -395,6 +395,7 @@ export class VideoContainer extends LitElement {
       volume,
       title,
       playbackRate,
+      sources: this.videoSources,
       src: this.videoSource,
       isAutoplay: autoplay,
       isMuted: muted,
@@ -444,8 +445,11 @@ export class VideoContainer extends LitElement {
     `
   }
 
-  get videoSources() {
-    return Array.from(this.videos[0].querySelectorAll('source'))
+  get videoSources(): State['sources'] {
+    return Array.from(this.videos[0].querySelectorAll('source')).map(s => ({
+      type: s.type,
+      src: s.src
+    }))
   }
 
   get videoTracks() {
