@@ -65,7 +65,7 @@ export class VideoChromecast extends LitElement {
   @listen(Command.toggleMuted, { castActivated: true })
   @listen(Command.mute)
   mute() {
-    this.controller.muteOrUnmute()
+    if (this.controller) this.controller.muteOrUnmute()
   }
 
   @listen(Command.setVolume, { castActivated: true })

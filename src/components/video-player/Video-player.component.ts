@@ -40,6 +40,9 @@ export class VideoPlayer extends LitElement {
   @property({ type: Number, attribute: true, reflect: true })
   tabindex = 0
 
+  @property({ type: String, attribute: 'storage-key' })
+  storageKey: string
+
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
     if (this.state.value.isFullscreen) {
@@ -95,7 +98,7 @@ export class VideoPlayer extends LitElement {
 
   render() {
     return html`
-      <video-container>
+      <video-container storage-key=${this.storageKey}>
         <slot name="video"></slot>
         <slot name="chromecast">
           <video-chromecast></video-chromecast>

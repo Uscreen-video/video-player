@@ -1,13 +1,17 @@
 import { connect, createCommand, dispatch, listen, Types } from '../../state'
+import { CommandParams } from '../../state/events'
+import { State } from '../../types'
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, eventOptions, queryAssignedElements } from 'lit/decorators.js'
+import { customElement, eventOptions, queryAssignedElements, property } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
+import { createProvider, StorageProvider, StorageValue } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
+
 
 /**
  * @slot - Video-container main content
@@ -40,6 +44,17 @@ export class VideoContainer extends LitElement {
 
   @connect('castActivated')
   castActivated: string
+
+  @property({ type: String, attribute: 'storage-key' })
+  storageKey: string
+
+  _storageProvider: StorageProvider
+  connectedCallback() {
+    super.connectedCallback();
+    if (this.storageKey) {
+      this._storageProvider = createProvider(this.storageKey)
+    }
+  }
 
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
@@ -123,11 +138,15 @@ export class VideoContainer extends LitElement {
     })
   }
 
-  @listen(Types.Command.enableTextTrack)
-  enableTextTrack({ lang }: { lang: string }) {    
+  private _enableTextTrack(lang: string) {
     this.videoTracks.forEach(({ track, srclang }) => {
       track.mode = srclang === lang ? 'showing' : 'hidden'
     })
+  }
+
+  @listen(Types.Command.enableTextTrack)
+  enableTextTrack({ lang }: { lang: string }) {    
+    this._enableTextTrack(lang)
     dispatch(this, Types.Action.selectTextTrack, {
       activeTextTrack: lang
     })
@@ -208,6 +227,16 @@ export class VideoContainer extends LitElement {
           name: level.height || 'auto'
         }))
       })
+      const { activeQualityLevel } = this._storageProvider ? this._storageProvider.get() : {} as StorageValue
+      if (activeQualityLevel >= 0) {
+        const qualityLevelIdx = levels.findIndex(({ height }) => height === activeQualityLevel)
+        if (qualityLevelIdx >= 0) {
+          this.hls.nextLevel = qualityLevelIdx
+          dispatch(this, Types.Action.setQualityLevel, {
+            activeQualityLevel
+          })
+        }
+      }
     })
 
     this.hls.loadSource(this.videoSource);
@@ -295,7 +324,63 @@ export class VideoContainer extends LitElement {
     this.togglePlay()
   }
 
+  @listen(Types.Command.setVolume)
+  @listen(Types.Command.setQualityLevel)
+  @listen(Types.Command.mute)
+  @listen(Types.Command.unmute)
+  @listen(Types.Command.toggleMuted)
+  @listen(Types.Command.setPlaybackRate)
+  @listen(Types.Command.enableTextTrack)
+  _syncStateWithStorage(params: CommandParams, _: any, command: Types.Command) {
+    if (!this._storageProvider) return
+
+    let key: keyof State
+    let value: unknown
+
+    switch (command) {
+      case Types.Command.setVolume:
+        key = 'volume'
+        value = +params.volume
+        break
+      case Types.Command.setQualityLevel:
+        key = 'activeQualityLevel'
+        value = +params.level
+        break
+      case Types.Command.toggleMuted:
+      case Types.Command.mute:
+      case Types.Command.unmute:
+        key = 'isMuted'
+        value = this.videos[0].muted
+        break
+      case Types.Command.setPlaybackRate:
+        key = 'playbackRate'
+        value = +params.playbackRate
+        break
+      case Types.Command.enableTextTrack:
+        key = 'activeTextTrack'
+        value = params.lang
+        break
+    }
+    const currentVal = this._storageProvider.get()
+    this._storageProvider.set({ ...currentVal, [key]: value })
+  }
+
   setup() {
+    // active quality level will be initialized in HLS callback
+    const { activeQualityLevel, ...savedSettings } = this._storageProvider ? this._storageProvider.get() : {} as StorageValue
+    
+    if (typeof savedSettings.isMuted === 'boolean') {
+      this.videos[0].muted = savedSettings.isMuted
+    }
+
+    if (typeof savedSettings.activeTextTrack === 'string') {
+      this._enableTextTrack(savedSettings.activeTextTrack)
+    }
+
+    if (typeof savedSettings.volume === 'number') {
+      this.videos[0].volume = savedSettings.volume
+    }
+
     const [{
       autoplay, muted, poster,
       volume, duration, currentTime,
@@ -315,10 +400,21 @@ export class VideoContainer extends LitElement {
       isAutoplay: autoplay,
       isMuted: muted,
       isSourceSupported: Boolean(this.supportedSource),
-      textTracks: this.videoCues
+      textTracks: this.videoCues,
+      ...savedSettings
     })
 
     this.command(Types.Command.init)
+
+    /**
+     * For some reasons if we update playback rate in setup method - playback updates twice and second time always with value = 1
+     * I didn't found root cause of that issue
+     */
+    if (typeof savedSettings.playbackRate === 'number') {
+      setTimeout(() => {
+        this.command(Types.Command.setPlaybackRate, { playbackRate: savedSettings.playbackRate })
+      }, 100)
+    }
   }
 
   render() {
