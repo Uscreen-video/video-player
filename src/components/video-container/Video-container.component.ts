@@ -51,9 +51,7 @@ export class VideoContainer extends LitElement {
   _storageProvider: StorageProvider
   connectedCallback() {
     super.connectedCallback();
-    if (this.storageKey) {
-      this._storageProvider = createProvider(this.storageKey)
-    }
+    this._storageProvider = createProvider(this.storageKey)
   }
 
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
@@ -226,7 +224,7 @@ export class VideoContainer extends LitElement {
           name: level.height || 'auto'
         }))
       })
-      const { activeQualityLevel } = this._storageProvider ? this._storageProvider.get() : {} as StorageValue
+      const { activeQualityLevel } = this._storageProvider.get()
       if (activeQualityLevel >= 0) {
         const qualityLevelIdx = levels.findIndex(({ height }) => height === activeQualityLevel)
         if (qualityLevelIdx >= 0) {
@@ -331,7 +329,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.setPlaybackRate)
   @listen(Types.Command.enableTextTrack)
   _syncStateWithStorage(params: CommandParams, _: any, command: Types.Command) {
-    if (!this._storageProvider) return
+    if (!this.storageKey) return
 
     let key: keyof State
     let value: unknown
@@ -366,7 +364,7 @@ export class VideoContainer extends LitElement {
 
   setup() {
     // active quality level will be initialized in HLS callback
-    const { activeQualityLevel, ...savedSettings } = this._storageProvider ? this._storageProvider.get() : {} as StorageValue
+    const { activeQualityLevel, ...savedSettings } = this._storageProvider.get()
     
     if (typeof savedSettings.isMuted === 'boolean') {
       this.videos[0].muted = savedSettings.isMuted
