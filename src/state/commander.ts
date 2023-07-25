@@ -25,7 +25,7 @@ export class EventListener implements ReactiveController {
       this.command,
       this.dependencies,
       (params, meta, unsubscribe, resolve, reject) => {
-        const fx = (this.host as any)[this.name](params, meta)
+        const fx = (this.host as any)[this.name](params, meta, this.command)
         this.unsubscribe = unsubscribe
         debugCommand(`[${Command[this.command]}] handled`, params)
         if (fx instanceof Promise) {
