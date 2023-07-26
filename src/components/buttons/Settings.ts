@@ -7,6 +7,7 @@ import _settingsIcon from '../../icons/settings-solid.svg?raw'
 import _checkmarkIcon from '../../icons/checkmark.svg?raw'
 import _chevronIcon from '../../icons/chevron-left.svg?raw'
 import '../video-menu'
+import type { VideoMenu } from '../video-menu'
 import { emit } from '../../helpers/event';
 
 const icons = {
@@ -171,19 +172,21 @@ export class SubtitlesButton extends VideoButton {
   }
 
   get mainMenuItems() {
-    const menu: { label: string, value: Menu }[] = []
+    const menu: VideoMenu['items'] = []
     if (this.settings.includes('shortcuts')) menu.push({
       label: 'Shortcuts',
       value: 'shortcuts'
     })
     if (this.settings.includes('rate')) menu.push({
       label: 'Playback Rate',
-      value: 'rate'
+      value: 'rate',
+      iconAfter: `${this.playbackRate}x`
     })
 
     if (this.settings.includes('quality') && this.qualityLevels?.length) menu.push({
       label: 'Quality',
-      value: 'quality'
+      value: 'quality',
+      iconAfter: this.qualityLevel
     })
     return menu
   }

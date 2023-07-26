@@ -429,6 +429,12 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  onPlayClick(e: { target: HTMLDivElement }) {
+    if (e.target.nodeName === 'DIV') {
+      this.command(Types.Command.play)
+    }
+  }
+
   render() {
     return html`
       <slot
@@ -456,7 +462,7 @@ export class VideoContainer extends LitElement {
         />
       `)}
       ${when(this.canPlay && !this.played, () => html`
-        <div class="play-button">
+        <div class="play-button" @click=${this.onPlayClick}>
           <video-play-button></video-play-button>
         </div>
       `)}
