@@ -68,7 +68,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
     return html`
       <video-slider
         with-tooltip
-        .value=${this.currentTime || 0}
+        .value=${this.currentTime}
         .max=${this.duration}
         .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
         .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"

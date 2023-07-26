@@ -35,7 +35,7 @@ export class VideoSlider extends LitElement {
   tooltipOffset = -11
 
   @state()
-  currentValue = 0
+  currentValue?: number
 
   @state()
   isHovered = false
@@ -188,8 +188,7 @@ export class VideoSlider extends LitElement {
   }
 
   get positionInPercents() {
-    return !this.currentValue
-      ? 0
-      : (100 / this.max * this.currentValue).toFixed(3)
+    const value = (100 / this.max * this.currentValue)
+    return isNaN(value) ? '0' : value.toFixed(3)
   }
 }
