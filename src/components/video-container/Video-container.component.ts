@@ -11,6 +11,7 @@ import { connectMuxData } from '../../helpers/mux'
 import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
+import '../buttons/Play'
 
 /**
  * @slot - Video-container main content
@@ -38,6 +39,9 @@ export class VideoContainer extends LitElement {
   @connect('played')
   played: boolean
 
+  @connect('canPlay')
+  canPlay: boolean
+
   @connect('muxData')
   muxData: MuxParams
 
@@ -61,7 +65,7 @@ export class VideoContainer extends LitElement {
       if (e.toString().includes('source')) {
         this.command(Types.Command.initCustomHLS)
       }
-      dispatch(this, Types.Action.update, { isPlaying: false })
+      dispatch(this, Types.Action.update, { isPlaying: false, played: false })
       throw e
     }
   }
@@ -450,6 +454,11 @@ export class VideoContainer extends LitElement {
           alt=${this.title} 
           @click=${this.handleClick} 
         />
+      `)}
+      ${when(this.canPlay && !this.played, () => html`
+        <div class="play-button">
+          <video-play-button></video-play-button>
+        </div>
       `)}
     `
   }
