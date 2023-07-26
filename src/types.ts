@@ -79,6 +79,7 @@ export enum Action {
   setCastStatus = 'setCastStatus',
   setBuffer = 'setBuffer',
   setMuxParams = 'setMuxParams',
+  setVideoOffset = 'setVideoOffset',
 }
 
 export enum Event {

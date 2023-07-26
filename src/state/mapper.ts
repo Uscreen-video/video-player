@@ -32,5 +32,9 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     castAvailable: true
   }),
+  [Action.canPlay]: (state) => ({
+    ...state,
+    canPlay: true
+  }),
 
 }

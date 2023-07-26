@@ -8,10 +8,9 @@ import type Hls from 'hls.js'
 import { getCueText } from '../../helpers/cue'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
-import { createProvider, StorageProvider, StorageValue } from '../../helpers/storage'
+import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
-
 
 /**
  * @slot - Video-container main content
@@ -212,6 +211,10 @@ export class VideoContainer extends LitElement {
       { Hls: HLS, hlsjs: this.hls }
     )
 
+    this.hls.on(HLS.Events.LEVEL_LOADED, () => {
+      dispatch(this, Types.Action.canPlay)
+    })
+
     this.hls.on(HLS.Events.LEVEL_UPDATED, (_: unknown, { level }: { level: number }) => {
       dispatch(this, Types.Action.setQualityLevel, {
         activeQualityLevel: this.hls.levels[level]?.height || -1
@@ -239,9 +242,8 @@ export class VideoContainer extends LitElement {
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
 
-    dispatch(this, Types.Action.update, { canPlay: true, customHLS: true })
+    dispatch(this, Types.Action.update, { customHLS: true })
   }
-
 
   @eventOptions({ capture: true })
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
@@ -295,6 +297,9 @@ export class VideoContainer extends LitElement {
         break
       case 'leavepictureinpicture':
         dispatch(this, Types.Action.togglePip, { pipActivated: false })
+        break
+      case 'loadedmetadata':
+        dispatch(this, Types.Action.canPlay)
         break
     }
   }
