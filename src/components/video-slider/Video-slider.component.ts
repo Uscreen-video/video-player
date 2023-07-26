@@ -188,6 +188,8 @@ export class VideoSlider extends LitElement {
   }
 
   get positionInPercents() {
-    return (100 / this.max * this.currentValue).toFixed(3)
+    return !this.currentValue
+      ? 0
+      : (100 / this.max * this.currentValue).toFixed(3)
   }
 }

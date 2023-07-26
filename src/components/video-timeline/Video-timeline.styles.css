@@ -7,7 +7,13 @@
   display: flex;
   align-items: flex-end;
   width: 100%;
-  margin-bottom: 10px;
+  margin-bottom: 0;
+
+  @media (min-width: 768px) {
+    & {
+      margin-bottom: 10px;
+    }
+  }
 }
 
 ::slotted(*) {
@@ -24,8 +30,12 @@ video-slider {
   height: 1rem;
   padding-top: 20px;
 
-  :host(:not([disabled])) &:hover {
+  :host(:hover) & {
     --height: 0.5rem;
+  }
+
+  &[disabled] {
+    --height: 0.25rem!important;
   }
 
   :host(:not([full-width])) & {
