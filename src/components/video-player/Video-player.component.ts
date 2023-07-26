@@ -95,10 +95,6 @@ export class VideoPlayer extends LitElement {
     this.addEventListener('mousemove', this.handleMove)
     this.addEventListener('mouseleave', this.handleMove)
 
-    if (this.offset) {
-      this.state.setState(Action.setVideoOffset, { offset: this.offset })
-    }
-
     if (this.muxData?.env_key) {
       this.state.setState(Action.setMuxParams, { muxData: this.muxData })
     }

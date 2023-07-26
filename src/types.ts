@@ -98,7 +98,6 @@ export type State = Partial<{
     type: string,
     src: string
   }[],
-  offset: number,
   title: string,
   poster: string,
   volume: number,
