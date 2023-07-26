@@ -58,8 +58,10 @@ export class VideoContainer extends LitElement {
     try {
       await this.videos[0].play()
     } catch (e) {
-      dispatch(this, Types.Action.update, { canPlay: false })
-      this.command(Types.Command.initCustomHLS)
+      if (e.toString().includes('source')) {
+        this.command(Types.Command.initCustomHLS)
+      }
+      dispatch(this, Types.Action.update, { canPlay: false, isPlaying: false })
       throw e
     }
   }
@@ -68,7 +70,7 @@ export class VideoContainer extends LitElement {
   pause() {
     return this.videos[0].pause()
   }
-
+ 
   @listen(Types.Command.togglePlay, { castActivated: false })
   togglePlay() {
     return this.videos[0].paused
@@ -80,7 +82,7 @@ export class VideoContainer extends LitElement {
   seek({ time }: { time: number }) {
     const [video] = this.videos
     video.currentTime = time
-    if (video.paused && !this.castActivated) video.play()
+    if (video.paused && !this.castActivated) this.play()
   }
 
   @listen(Types.Command.forward)
@@ -414,6 +416,13 @@ export class VideoContainer extends LitElement {
         ? savedSettings.playbackRate
         : playbackRate
     })
+  }
+
+  @eventOptions({ capture: true })
+  onError(error: { target: HTMLVideoElement }) {
+    if (error.target && error.target.error instanceof MediaError && error.target.error.code === 4) {
+      this.command(Types.Command.initCustomHLS)
+    }
   }
 
   render() {
