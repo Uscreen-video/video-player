@@ -10,6 +10,7 @@ import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
 import { emit } from '../../helpers/event'
 import { Action, MuxParams } from '../../types'
+import { watch } from '../../decorators/watch'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -43,6 +44,9 @@ export class VideoPlayer extends LitElement {
   @property({ type: String, attribute: 'storage-key' })
   storageKey: string
 
+  @property({ type: Number })
+  offset: number
+
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
     if (this.state.value.isFullscreen) {
@@ -52,6 +56,14 @@ export class VideoPlayer extends LitElement {
       this.fullscreen.enter()
       emit(this, 'enter-fullscreen')
     }
+  }
+
+  @watch('offset')
+  handleOffsetChange() {
+    // We have to wait before all the command listeners will be registered
+    requestAnimationFrame(() => {
+      this.command(Types.Command.seek, { time: this.offset })
+    })
   }
 
   handleIdleUpdate(idle: boolean) {
@@ -82,6 +94,10 @@ export class VideoPlayer extends LitElement {
     this.addEventListener('touchstart', this.handleMove, { passive: true })
     this.addEventListener('mousemove', this.handleMove)
     this.addEventListener('mouseleave', this.handleMove)
+
+    if (this.offset) {
+      this.state.setState(Action.setVideoOffset, { offset: this.offset })
+    }
 
     if (this.muxData?.env_key) {
       this.state.setState(Action.setMuxParams, { muxData: this.muxData })

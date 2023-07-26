@@ -79,6 +79,7 @@ export enum Action {
   setCastStatus = 'setCastStatus',
   setBuffer = 'setBuffer',
   setMuxParams = 'setMuxParams',
+  setVideoOffset = 'setVideoOffset',
 }
 
 export enum Event {
@@ -97,6 +98,7 @@ export type State = Partial<{
     type: string,
     src: string
   }[],
+  offset: number,
   title: string,
   poster: string,
   volume: number,
