@@ -149,9 +149,9 @@ export class VideoContainer extends LitElement {
     })
   }
 
-  @listen(Types.Command.setPlaybackRate)
+  @listen(Types.Command.setPlaybackRate, { canPlay: true })
   setPlaybackRate({ playbackRate }: { playbackRate: number }) {   
-    this.videos[0].playbackRate = playbackRate
+    this.videos[0].playbackRate = this.videos[0].defaultPlaybackRate = playbackRate
   }
 
   @listen(Types.Command.requestAirplay)
@@ -397,11 +397,11 @@ export class VideoContainer extends LitElement {
       currentTime,
       volume,
       title,
-      playbackRate,
       sources: this.videoSources,
       src: this.videoSource,
       isAutoplay: autoplay,
       isMuted: muted,
+      playbackRate,
       isSourceSupported: Boolean(this.supportedSource),
       textTracks: this.videoCues,
       ...savedSettings
@@ -409,15 +409,11 @@ export class VideoContainer extends LitElement {
 
     this.command(Types.Command.init)
 
-    /**
-     * For some reasons if we update playback rate in setup method - playback updates twice and second time always with value = 1
-     * I didn't found root cause of that issue
-     */
-    if (typeof savedSettings.playbackRate === 'number') {
-      setTimeout(() => {
-        this.command(Types.Command.setPlaybackRate, { playbackRate: savedSettings.playbackRate })
-      }, 100)
-    }
+    this.command(Types.Command.setPlaybackRate, {
+      playbackRate: typeof savedSettings.playbackRate === 'number'
+        ? savedSettings.playbackRate
+        : playbackRate
+    })
   }
 
   render() {
@@ -428,6 +424,7 @@ export class VideoContainer extends LitElement {
         @pause=${this.handleVideoEvent}
         @timeupdate=${this.handleVideoEvent}
         @loadeddata=${this.handleVideoEvent}
+        @loadedmetadata=${this.handleVideoEvent}
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
         @enterpictureinpicture=${this.handleVideoEvent}
