@@ -46,7 +46,8 @@ input[type="range"] {
   :host([disabled]) & {
     background: linear-gradient(to right, var(--active-color), var(--active-color), var(--background-color), var(--active-color));
     background-size: 200% 200%;
-    animation: gradient 5s ease-in-out infinite;
+    animation: gradient 2s ease-in-out infinite;
+    animation-delay: 1s;
   }
 
   /* Thumb */
@@ -158,8 +159,5 @@ input[type="range"] {
 	}
 	50% {
 		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
 	}
 }

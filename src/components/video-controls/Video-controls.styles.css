@@ -3,7 +3,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 28px 16px 16px;
+  padding: 0 10px;
   transform: translate3d(0, 0, 0);
   transition: opacity .3s ease-in-out;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.6) 53.63%, rgba(0, 0, 0, 0) 96.2%);
@@ -12,6 +12,12 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+
+  @media (min-width: 768px) {
+    & {
+      padding: 28px 16px 16px;
+    }
+  }
 }
 
 :host([idle][playing]) {

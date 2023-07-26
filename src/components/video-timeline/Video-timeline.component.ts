@@ -72,7 +72,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         .max=${this.duration}
         .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
         .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
-        ?disabled=${this.disabled || !this.canPlay}
+        .disabled=${this.disabled || !this.canPlay}
         @changed=${this.handleChanged}
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
