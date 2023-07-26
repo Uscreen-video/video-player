@@ -80,7 +80,6 @@ export class VideoContainer extends LitElement {
   seek({ time }: { time: number }) {
     const [video] = this.videos
     video.currentTime = time
-    console.log(video.currentTime)
     if (video.paused && !this.castActivated) video.play()
   }
 
