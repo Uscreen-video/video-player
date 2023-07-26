@@ -61,7 +61,7 @@ export class VideoContainer extends LitElement {
       if (e.toString().includes('source')) {
         this.command(Types.Command.initCustomHLS)
       }
-      dispatch(this, Types.Action.update, { canPlay: false, isPlaying: false })
+      dispatch(this, Types.Action.update, { isPlaying: false })
       throw e
     }
   }
