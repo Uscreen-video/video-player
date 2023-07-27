@@ -4,7 +4,6 @@
 
   display: block;
   padding-bottom: calc(var(--aspect-ratio) * 100%);
-  position: relative;
 }
 
 img {
