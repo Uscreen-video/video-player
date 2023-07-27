@@ -100,11 +100,14 @@ export class VideoSlider extends LitElement {
     if (!this.withTooltip || this.disabled) return
 
     this.isHovered = true
-    if (this.overTimeout) window.clearTimeout(this.overTimeout)
+    if (this.overTimeout) {
+      window.clearTimeout(this.overTimeout)
+    }
 
     this.overTimeout = setTimeout(() => {
       if (!this.isHovered || !this.matches(':hover')) return
       emit(this, 'hoverend')
+      console.log('EMITING HOVEREND')
       this.isHovered = false
     }, 5000)
   }
@@ -116,6 +119,7 @@ export class VideoSlider extends LitElement {
   }
 
   handleMouseMove = (e: MouseEvent & { target: HTMLInputElement }) => {
+    window.clearTimeout(this.overTimeout)
     if (!this.withTooltip || !this.isHovered) return
     const { clientX, target } = e
     const { y, x, width } = target.getBoundingClientRect()
