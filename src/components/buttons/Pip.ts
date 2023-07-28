@@ -30,8 +30,10 @@ export class PipButton extends VideoButton {
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">
-      ${this.pipActivated ? 'Disable picture in picture' : 'Enable picture in picture'}
-    </span>`
+    return html`
+      <slot name="tooltip:${this.pipActivated ? 'enabled' : 'disabled'}">
+        ${this.pipActivated ? 'Disable picture in picture' : 'Enable picture in picture'}
+      </slot>
+    `
   }
 }

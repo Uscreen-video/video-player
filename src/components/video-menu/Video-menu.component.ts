@@ -37,7 +37,13 @@ export class VideoMenu extends LitElement {
 
   render() {
     return html`
-      ${when(this.title, () => html`<p class="title">${this.title}</p>`)}
+      ${when(this.title, () => html`
+        <p class="title">
+          <slot name="title">
+            ${this.title}
+          </slot>
+        </p>
+      `)}
       <ul class="menu">
         ${this.items.map(item => html`
         <li>
@@ -51,7 +57,9 @@ export class VideoMenu extends LitElement {
           >
             ${item.iconBefore}
             <span class="text">
-              ${item.label}
+              <slot name="label:${item.value}">
+                ${item.label}
+              </slot>
             </span>
             ${item.iconAfter}
           </button>

@@ -31,9 +31,9 @@ export class PlayButton extends VideoButton {
 
   override renderTooltip() {
     return html`
-      <span slot="tooltip">
+      <slot name="tooltip">
         ${this.isPlaying ? 'Pause' : 'Play'}
-      </span>
+      </slot>
     `
   }
 }

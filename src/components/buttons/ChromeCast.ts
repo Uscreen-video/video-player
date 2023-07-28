@@ -21,12 +21,14 @@ export class ChromeCastButton extends VideoButton {
 
   override renderContent() {
     if (!this.available) return null
-    return html`<slot>${castIcon}</slot>`
+    return html`<slot name="icon">${castIcon}</slot>`
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">
-      ${this.activated ? 'Disable Cast' : 'Enable Chrome Cast'}
-    </span>`
+    return html`
+      <slot name="tooltip:${this.activated ? 'enabled' : 'disabled'}">
+        ${this.activated ? 'Disable Cast' : 'Enable Chrome Cast'}
+      </slot>
+    `
   }
 }

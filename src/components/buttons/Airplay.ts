@@ -25,7 +25,7 @@ export class AirplayButton extends VideoButton {
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">
+    return html`<span slot="tooltip:${this.airplayActivated ? 'enabled' : 'disabled'}">
       ${this.airplayActivated ? 'Disable Airplay' : 'Enable Airplay'}
     </span>`
   }

@@ -20,8 +20,11 @@ type Menu = 'shortcuts' | 'rate' | 'quality'
 
 @customElement('video-settings-button')
 export class SubtitlesButton extends VideoButton {
-  @property({ converter: (v) => v.split(',').map(v => v.trim()) })
+  @property({ type: Array, converter: (v) => v.split(',').map(v => v.trim()) })
   settings: Menu[] = ['shortcuts', 'rate', 'quality']
+
+  @property({ type: Object })
+  translation: Record<string, any> = {}
 
   @connect('playbackRate')
   playbackRate: number
@@ -46,31 +49,31 @@ export class SubtitlesButton extends VideoButton {
 
   shortcuts = [{
     label: 'Play/Pause',
-    key: 'toggle-play',
+    value: 'toggle-play',
     iconAfter: html`<code>Space</code>`
   }, {
     label: 'Enter fullscreen',
-    key: 'enter-fullscreen',
+    value: 'enter-fullscreen',
     iconAfter: html`<code>Enter</code>`,
   },
   {
     label: 'Exit fullscreen',
-    key: 'exit-fullscreen',
+    value: 'exit-fullscreen',
     iconAfter: html`<code>Esc</code>`,
   },
   {
     label: 'Rewind',
-    key: 'rewind',
+    value: 'rewind',
     iconAfter: html`<code>←</code><code>→</code>`,
   },
   {
     label: 'Change volume',
-    key: 'volume',
+    value: 'volume',
     iconAfter: html`<code>↓</code><code>↑</code>`,
   },
   {
     label: 'Mute',
-    key: 'mute',
+    value: 'mute',
     iconAfter: html`<code>M</code>`
   }]
 
@@ -95,12 +98,13 @@ export class SubtitlesButton extends VideoButton {
 
   override renderMenu = () => {
     return html`
-      <slot slot="main-menu">
+      <slot name="menu">
         <video-menu
           title=${this.selectedMenuLabel}
           @menu-item-click=${this.handleItemClick}
-          .items=${this.renderMenuItems()}
-        ></video-menu>
+          .items=${this.translateLabels(this.renderMenuItems())}
+        >
+        </video-menu>
       </slot>
     `
   }
@@ -115,12 +119,20 @@ export class SubtitlesButton extends VideoButton {
 
   handleItemClick = ({ detail }: CustomEvent<{ value: any }>) => {
     const value = detail.value
-    if (!value) return this.selectMenu()
+    if (value === 'back') return this.selectMenu()
     switch (this.activeMenu) {
       case 'rate': return this.selectRate(value)
       case 'quality': return this.setQuality(value)
       default: return this.selectMenu(value)
     }
+  }
+
+  translateLabels(items: any[]) {
+    return items.map((i:any) => {
+      if (!this.translation[i.label]) return i
+      i.label = this.translation[i.label]
+      return i
+    })
   }
 
   renderMenuItems = (): any => {
@@ -165,7 +177,7 @@ export class SubtitlesButton extends VideoButton {
       {
         label: 'back',
         iconBefore: icons.chevron,
-        value: ''
+        value: 'back'
       },
       ...items
     ]
@@ -175,7 +187,7 @@ export class SubtitlesButton extends VideoButton {
     const menu: VideoMenu['items'] = []
     if (this.settings.includes('shortcuts')) menu.push({
       label: 'Shortcuts',
-      value: 'shortcuts'
+      value: 'shortcuts',
     })
     if (this.settings.includes('rate')) menu.push({
       label: 'Playback Rate',
@@ -202,7 +214,7 @@ export class SubtitlesButton extends VideoButton {
       {
         label: 'back',
         iconBefore: icons.chevron,
-        value: ''
+        value: 'back'
       },
       ...this.shortcuts
     ]
@@ -228,7 +240,7 @@ export class SubtitlesButton extends VideoButton {
       {
         label: 'back',
         iconBefore: icons.chevron,
-        value: ''
+        value: 'back'
       },
       ...items
     ]

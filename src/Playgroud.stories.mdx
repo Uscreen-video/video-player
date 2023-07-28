@@ -47,15 +47,22 @@ import './components/buttons/Pip'
         <video-timer></video-timer>
       </video-timeline>
       <video-play-button />
-      <video-forward-button />
+      <video-forward-button>
+        <span slot="tooltip">Nach vorne</span>
+      </video-forward-button>
       <video-backward-button />
       <video-volume-button />
       <video-volume-control />
       <hr />
       <video-subtitles-button />
-      <video-settings-button />
+      <video-settings-button translation={JSON.stringify({
+        'back': 'પાછા',
+        'auto': 'si toos ah'
+      })}/>
       <video-airplay-button />
-      <video-pip-button />
+      <video-pip-button>
+        <span slot="tooltip:disabled">Bild-in-Bild aktivieren</span>
+      </video-pip-button>
       <video-chromecast-button />
       <video-fullscreen-button />
     </video-controls>

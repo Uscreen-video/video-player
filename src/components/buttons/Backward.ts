@@ -14,7 +14,7 @@ export class BackwardButton extends VideoButton {
   }
 
   override renderContent() {
-    return html`<slot>${backwardIcon}</slot>`
+    return html`<slot name="icon">${backwardIcon}</slot>`
   }
 
   override renderTooltip() {

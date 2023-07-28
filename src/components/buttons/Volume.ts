@@ -41,9 +41,9 @@ export class VolumeButton extends VideoButton {
 
   override renderTooltip() {
     return html`
-      <span slot="tooltip">
+      <slot name="tooltip:${this.isMuted ? 'enabled' : 'disabled'}">
         ${this.isMuted ? 'Unmute' : 'Mute'}
-      </span>
+      </slot>
     `
   }
 

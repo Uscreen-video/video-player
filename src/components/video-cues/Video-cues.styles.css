@@ -2,6 +2,8 @@
 :host {
   --font-family: $font;
   --font-size: $cue-font-size;
+  --padding: 6px 10px;
+  --translate: translateY(-90px);
 
   position: absolute;
   bottom: 0;
@@ -9,11 +11,19 @@
   width: 100%;
   text-align: center;
   padding: 0 20px;
-  transform: translateY(-90px);
+  transform: var(--translate);
   box-sizing: border-box;
-  transition: transform 0.35s ease-in;
+  transition: transform 0.1s linear;
   user-select: none;
   pointer-events: none;
+
+  @media (max-width: 768px) {
+    & {
+      --font-size: calc(var(--font-size) / 2);
+      --padding: 3 5px;
+      --translate: translateY(-60px);
+    }
+  }
 }
 
 :host([idle]) {
@@ -25,7 +35,7 @@
 
   & > span {
     margin: 0;
-    padding: 6px 10px;
+    padding: var(--padding);
     border-radius: 2px;
     box-decoration-break: clone;
     line-height: 1.8;

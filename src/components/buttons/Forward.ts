@@ -15,10 +15,10 @@ export class ForwardButton extends VideoButton {
   }
 
   override renderContent() {
-    return html`<slot>${forwardIcon}</slot>`
+    return html`<slot name="icon">${forwardIcon}</slot>`
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">Forward</span>`
+    return html`<slot name="tooltip">Forward</slot>`
   }
 }

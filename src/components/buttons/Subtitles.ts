@@ -1,6 +1,6 @@
 import { html } from 'lit'
 import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
-import { customElement } from 'lit/decorators.js'
+import { customElement, property } from 'lit/decorators.js'
 import { connect, Types } from '../../state'
 import { VideoButton } from '../video-button'
 import { State } from '../../types';
@@ -23,7 +23,10 @@ export class SubtitlesButton extends VideoButton {
 
   @connect('textTracks')
   textTracks: State['textTracks']
-    
+
+  @property({ type: Object })
+  translation: Record<string, string> = {}
+
   override handleClick = () => {
     if (this.menuPopper) return this.destroyMenu()
     this.destroyTooltip()
@@ -42,17 +45,27 @@ export class SubtitlesButton extends VideoButton {
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">Subtitles</span>`
+    return html`<slot name="tooltip">Subtitles</slot>`
   }
 
   override renderMenu = () => {
     return html`
-      <video-menu
-        @menu-item-click=${this.handleItemClick}
-        .items=${this.getMenuItems}
-      >
-      </video-menu>
+      <slot name="menu">
+        <video-menu
+          @menu-item-click=${this.handleItemClick}
+          .items=${this.translateLabels(this.getMenuItems)}
+        >
+        </video-menu>
+      </slot>
     `
+  }
+
+  translateLabels(items: any[]) {
+    return items.map((i:any) => {
+      if (!this.translation[i.label]) return i
+      i.label = this.translation[i.label]
+      return i
+    })
   }
 
   removeMenu = (e?: PointerEvent) => {
@@ -64,7 +77,7 @@ export class SubtitlesButton extends VideoButton {
 
   handleItemClick = (e: any) => {
     const lang = e.detail.value
-    this.command(Types.Command.enableTextTrack, { lang })
+    this.command(Types.Command.enableTextTrack, { lang: lang === 'off' ? '' : lang })
     this.removeMenu()
   }
 
@@ -75,7 +88,7 @@ export class SubtitlesButton extends VideoButton {
       ...this.textTracks || [],
     ].map(track => ({
       ...track,
-      value: track.lang,
+      value: track.lang || 'off',
       isActive: active === track.lang,
       iconAfter: active === track.lang ? icons.check : null
     }))
