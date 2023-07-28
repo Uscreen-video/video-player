@@ -130,8 +130,10 @@ export class SubtitlesButton extends VideoButton {
   translateLabels(items: any[]) {
     return items.map((i:any) => {
       if (!this.translation[i.label]) return i
-      i.label = this.translation[i.label]
-      return i
+      return {
+        ...i,
+        label: this.translation[i.label]
+      }
     })
   }
 
