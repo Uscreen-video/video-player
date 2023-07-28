@@ -10,8 +10,8 @@
   --menu-item-background: $menu-item-background;
   --menu-item-background-active: $menu-item-background-active;
   --menu-item-color-active: $menu-item-color-active;
-  --menu-item-background-hover: $menu-item-background-hover;
-  --menu-item-color-hover: var(--primary, $menu-item-color-hover);
+  --menu-item-background-hover: var(--primary, $menu-item-background-hover);
+  --menu-item-color-hover: $menu-item-color-hover;
 
   --size: var(--button-size);
 }
