@@ -420,6 +420,7 @@ export class VideoContainer extends LitElement {
         ? savedSettings.playbackRate
         : playbackRate
     })
+
   }
 
   @eventOptions({ capture: true })
@@ -432,6 +433,24 @@ export class VideoContainer extends LitElement {
   onPlayClick(e: { target: HTMLDivElement }) {
     if (e.target.nodeName === 'DIV') {
       this.command(Types.Command.play)
+    }
+  }
+
+  _boundingRect: DOMRect
+  get boundingRect(): DOMRect {
+    this._boundingRect = this._boundingRect || this.getBoundingClientRect()
+    return this._boundingRect
+  }
+
+  _videoRect: DOMRect
+  handleDblClick(e: PointerEvent) {
+    const { x, width } = this.boundingRect
+    const xPercentage = ((e.clientX - x) / width) * 100
+    if (xPercentage < 33) {
+      this.command(Types.Command.backward)
+    }
+    if (xPercentage > 66) {
+      this.command(Types.Command.forward)
     }
   }
 
@@ -451,6 +470,7 @@ export class VideoContainer extends LitElement {
         @progress=${this.handleVideoEvent}
         @cuechange=${this.handleCueChange}
         @click=${this.handleClick}
+        @dblclick=${this.handleDblClick}
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
         @webkitplaybacktargetavailabilitychanged=${this.handleVideoEvent}
       ></slot>

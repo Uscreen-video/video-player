@@ -17,7 +17,7 @@ export const initialState: State = {
   cues: [],
   castActivated: false,
   played: false,
-  castAvailable: Boolean(window.chrome?.cast?.isAvailable),
+  castAvailable: Boolean(window.chrome?.cast),
   airplayAvailable: Boolean((window as any).WebKitPlaybackTargetAvailabilityEvent),
   pipAvailable: Boolean(document.pictureInPictureEnabled),
   ...device
