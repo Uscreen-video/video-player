@@ -1,5 +1,5 @@
 :host {
-  --active-color: blue;
+  --active-color: var(--primary, blue);
   --background-color: rgba(255, 255, 255, 0.4);
   --height: 10px;
   --thumb-size: var(--thumb-size);
@@ -24,6 +24,7 @@
   width: 100%;
   position: relative;
   outline: none;
+  margin-top: 2px;
 }
 
 input[type="range"] {
@@ -44,10 +45,20 @@ input[type="range"] {
   cursor: pointer;
 
   :host([disabled]) & {
-    background: linear-gradient(to right, var(--active-color), var(--active-color), var(--background-color), var(--active-color));
+    background: var(--active-color);
+  }
+
+  :host([loading]) & {
+    background: linear-gradient(
+      to right, 
+      var(--active-color) 35%, 
+      var(--background-color) 37%, 
+      var(--background-color) 40%,
+      var(--active-color) 46%,
+      var(--active-color));
     background-size: 200% 200%;
-    animation: gradient 2s ease-in-out infinite;
-    animation-delay: 1s;
+    animation: gradient 3s ease-in-out infinite;
+    animation-delay: 2s;
   }
 
   /* Thumb */
@@ -107,6 +118,10 @@ input[type="range"] {
       currentColor var(--value, 0%), 
       transparent var(--value, 0%)
     );
+
+    :host([disabled]) &, :host([loading]) &{
+      background-image: none;
+    }
   }
 
   &::-webkit-slider-runnable-track,

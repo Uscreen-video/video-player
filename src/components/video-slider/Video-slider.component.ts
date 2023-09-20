@@ -19,8 +19,11 @@ export class VideoSlider extends LitElement {
   @property({ type: Number })
   max = 1
 
-  @property({ type: Boolean })
+  @property({ type: Boolean, reflect: true })
   disabled = false
+
+  @property({ type: Boolean, reflect: true })
+  loading = false
 
   @property({ attribute: 'value-text' })
   valueText = ''
