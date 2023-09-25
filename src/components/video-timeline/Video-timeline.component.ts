@@ -6,6 +6,7 @@ import { Command } from '../../types'
 import { DependentPropsMixin } from '../../mixins/DependentProps'
 import { timeAsString } from '../../helpers/time'
 import { VideoSlider } from '../video-slider'
+import { when } from 'lit/directives/when.js'
 
 import '../video-progress'
 import '../video-slider'
@@ -79,7 +80,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
       >
-        <video-progress value=${100 / this.duration * this.buffered}></video-progress>
+        ${when(!this.disabled, () => html`
+          <video-progress value=${100 / this.duration * this.buffered}></video-progress>
+        `)}
       </video-slider>
       <slot></slot>
     `
