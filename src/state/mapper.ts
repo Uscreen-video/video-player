@@ -1,5 +1,6 @@
 import { initialState } from '.'
 import { Action, State } from '../types'
+import { getCueText } from '../helpers/cue'
 
 export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> = {
   [Action.init]: (s, params) => ({
@@ -36,5 +37,10 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     canPlay: true
   }),
-
+  [Action.cues]: (state, params: TextTrackCueList) => ({
+    ...state,
+    cues: Array.from(params)
+      .map((cue: VTTCue) => cue.getCueAsHTML())
+      .flatMap(getCueText)
+  })
 }

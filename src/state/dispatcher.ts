@@ -11,7 +11,7 @@ export type StateAction = {
 export const dispatch = (
   host: ReactiveElement,
   action: Action,
-  params?: Partial<State>
+  params?: any
 ) => new Promise((resolve, reject) =>
   host.dispatchEvent(
     new CustomEvent<StateAction>(Event.state, {

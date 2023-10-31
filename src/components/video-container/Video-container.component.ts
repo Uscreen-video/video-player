@@ -5,7 +5,6 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements, property } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
-import { getCueText } from '../../helpers/cue'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
 import { createProvider, StorageProvider } from '../../helpers/storage'
@@ -153,6 +152,10 @@ export class VideoContainer extends LitElement {
     dispatch(this, Types.Action.selectTextTrack, {
       activeTextTrack: lang
     })
+    const activeTrack = this.videoTracks.find(t => t.track.mode === 'showing')
+    if (activeTrack) {
+      dispatch(this, Types.Action.cues, activeTrack.track.activeCues)
+    }
   }
 
   @listen(Types.Command.setPlaybackRate, { canPlay: true })
@@ -312,19 +315,17 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleCueChange({ target }: { target: HTMLTrackElement }) {
-    const activeTextTrack = target.track.mode === 'showing' ? target.srclang : ''
+    if (target.track.mode === 'showing') {
+      const activeTextTrack = target.srclang
 
-    if (activeTextTrack !== this.activeTextTrack) {
-      dispatch(this, Types.Action.selectTextTrack, {
-        activeTextTrack
-      })
+      if (activeTextTrack !== this.activeTextTrack) {
+        dispatch(this, Types.Action.selectTextTrack, {
+          activeTextTrack
+        })
+      }
+
+      dispatch(this, Types.Action.cues, target.track.activeCues)
     }
-
-    dispatch(this, Types.Action.cues, {
-      cues: Array.from(target.track.activeCues)
-        .map((cue: VTTCue) => cue.getCueAsHTML())
-        .flatMap(getCueText)
-    })
   }
 
   @eventOptions({ capture: true })
