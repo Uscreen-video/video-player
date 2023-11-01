@@ -7,6 +7,7 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
+import { mapCueListToState } from '../../helpers/cue'
 import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
@@ -154,7 +155,7 @@ export class VideoContainer extends LitElement {
     })
     const activeTrack = this.videoTracks.find(t => t.track.mode === 'showing')
     if (activeTrack) {
-      dispatch(this, Types.Action.cues, activeTrack.track.activeCues)
+      dispatch(this, Types.Action.cues, { cues: mapCueListToState(activeTrack.track.activeCues) })
     }
   }
 
@@ -324,7 +325,7 @@ export class VideoContainer extends LitElement {
         })
       }
 
-      dispatch(this, Types.Action.cues, target.track.activeCues)
+      dispatch(this, Types.Action.cues, { cues: mapCueListToState(target.track.activeCues) })
     }
   }
 
