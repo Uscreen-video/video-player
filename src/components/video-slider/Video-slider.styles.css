@@ -15,7 +15,7 @@
   width: 100%;
 }
 
-:host([disabled]) {
+:host([disabled]), :host([full]) {
   --thumb-size: 0!important;
 }
 
@@ -42,7 +42,8 @@ input[type="range"] {
   transition: box-shadow 0.3s ease;
   cursor: pointer;
 
-  :host([disabled]) & {
+  :host([disabled]) &,
+  :host([full]) & {
     background: var(--active-color);
   }
 
@@ -117,7 +118,7 @@ input[type="range"] {
       transparent var(--value, 0%)
     );
 
-    :host([disabled]) &, :host([loading]) &{
+    :host([disabled]) &, :host([loading]) &, :host([full]) & {
       background-image: none;
     }
   }

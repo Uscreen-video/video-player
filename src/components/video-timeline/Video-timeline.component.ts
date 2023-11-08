@@ -22,6 +22,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @property({ type: Boolean })
   disabled = false
 
+  @connect('live')
+  live: boolean
+
   @connect('duration')
   duration: number
 
@@ -75,6 +78,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
         .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
         ?disabled=${disabled}
+        ?full=${this.live}
         ?loading=${!this.canPlay}
         @changed=${this.handleChanged}
         @hovering=${this.handleHover}
