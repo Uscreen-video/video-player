@@ -15,6 +15,11 @@ import '../buttons/Play'
 
 const END_OF_STREAM_SECONDS = 99999
 
+// In Safari on live streams video.duration = Infinity
+const getVideoDuration = (video: HTMLVideoElement) => video.duration === Infinity
+  ? video.seekable.end(0)
+  : video.duration
+
 /**
  * @slot - Video-container main content
  * */
@@ -106,7 +111,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.forward)
   forward() {
     this.seek({
-      time: Math.min(this.videos[0].currentTime + 10, this.videos[0].duration)
+      time: Math.min(this.videos[0].currentTime + 10, getVideoDuration(this.videos[0]))
     })
   }
 
@@ -295,7 +300,7 @@ export class VideoContainer extends LitElement {
       case 'timeupdate':
         dispatch(this, Types.Action.updateTime, {
           currentTime: video.currentTime,
-          duration: video.duration // Required for New android devices
+          duration: getVideoDuration(video) // Required for New android devices
         })
         break
       case 'volumechange':
@@ -307,7 +312,7 @@ export class VideoContainer extends LitElement {
       case 'loadeddata':
         dispatch(this, Types.Action.updateDuration, {
           initialized: true,
-          duration: video.duration
+          duration: getVideoDuration(video)
         })
         break
       case 'ratechange':
@@ -419,7 +424,7 @@ export class VideoContainer extends LitElement {
 
     const [{
       autoplay, muted, poster,
-      volume, duration, currentTime,
+      volume, currentTime,
       playbackRate, title
     }] = this.videos
 
@@ -427,7 +432,7 @@ export class VideoContainer extends LitElement {
 
     dispatch(this, Types.Action.init, {
       poster,
-      duration,
+      duration: getVideoDuration(this.videos[0]),
       currentTime,
       volume,
       title,
