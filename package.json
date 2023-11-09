@@ -1,6 +1,6 @@
 {
   "name": "uscreen-video-player",
-  "version": "0.1.76",
+  "version": "0.1.85",
   "description": "Video player as customizable web-component",
   "main": "./dist/index.js",
   "exports": {

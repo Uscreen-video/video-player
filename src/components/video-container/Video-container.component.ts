@@ -15,6 +15,8 @@ import '../buttons/Play'
 
 const END_OF_STREAM_SECONDS = 99999
 
+const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i
+
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement) => video.duration === Infinity
   ? video.seekable.end(0)
@@ -230,6 +232,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
     const HLS = (await import('hls.js/dist/hls.light.min.js')).default
+
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()
@@ -242,7 +245,8 @@ export class VideoContainer extends LitElement {
       fragLoadingMaxRetry: 10,
       manifestLoadingMaxRetry: 2,
       levelLoadingMaxRetry: 4,
-      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30
+      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
+      liveDurationInfinity: true
     })
     
     if (this.muxData) await connectMuxData(
@@ -278,10 +282,10 @@ export class VideoContainer extends LitElement {
         }
       }
     })
-
+    
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
-
+    
     dispatch(this, Types.Action.update, { customHLS: true })
   }
 
@@ -441,7 +445,7 @@ export class VideoContainer extends LitElement {
       isAutoplay: autoplay,
       isMuted: muted,
       playbackRate,
-      isSourceSupported: Boolean(this.supportedSource),
+      isSourceSupported: !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource),
       textTracks: this.videoCues,
       ...savedSettings
     })
