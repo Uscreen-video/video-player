@@ -50,6 +50,8 @@ export enum Command {
   requestCast = 'requestCast',
   /** Toggles "picture in picture" mode */
   togglePip = 'togglePip',
+  /** Toggles live mode */
+  live = 'live'
 }
 
 export enum Action {
@@ -80,6 +82,7 @@ export enum Action {
   setBuffer = 'setBuffer',
   setMuxParams = 'setMuxParams',
   setVideoOffset = 'setVideoOffset',
+  live = 'live'
 }
 
 export enum Event {
@@ -130,7 +133,9 @@ export type State = Partial<{
   qualityLevels: {
     name: string
   }[],
-  muxData: MuxParams
+  muxData: MuxParams,
+  live: boolean,
+  initialized: boolean
 } & typeof device>
 
 export type MuxParams = {

@@ -23,6 +23,9 @@ export class VideoSlider extends LitElement {
   disabled = false
 
   @property({ type: Boolean, reflect: true })
+  full = false
+
+  @property({ type: Boolean, reflect: true })
   loading = false
 
   @property({ attribute: 'value-text' })
@@ -110,7 +113,6 @@ export class VideoSlider extends LitElement {
     this.overTimeout = setTimeout(() => {
       if (!this.isHovered || !this.matches(':hover')) return
       emit(this, 'hoverend')
-      console.log('EMITING HOVEREND')
       this.isHovered = false
     }, 5000)
   }

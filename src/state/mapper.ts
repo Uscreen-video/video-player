@@ -18,7 +18,8 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
   }),
   [Action.pause]: (state) => ({
     ...state,
-    isPlaying: false
+    isPlaying: false,
+    live: state.live && !state.played ? true : false
   }),
   [Action.update]: (state, params) => ({
     ...state,

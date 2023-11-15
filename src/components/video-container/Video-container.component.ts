@@ -13,6 +13,15 @@ import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
 import '../buttons/Play'
 
+const END_OF_STREAM_SECONDS = 99999
+
+const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i
+
+// In Safari on live streams video.duration = Infinity
+const getVideoDuration = (video: HTMLVideoElement) => video.duration === Infinity
+  ? video.seekable.end(0)
+  : video.duration
+
 /**
  * @slot - Video-container main content
  * */
@@ -48,6 +57,9 @@ export class VideoContainer extends LitElement {
   @connect('castActivated')
   castActivated: string
 
+  @connect('live')
+  live: boolean
+
   @property({ type: String, attribute: 'storage-key' })
   storageKey: string
 
@@ -60,7 +72,13 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
+      const shouldRewindToEnd = !this.played && this.live
       await this.videos[0].play()
+      if (shouldRewindToEnd) {
+        window.requestAnimationFrame(() => {
+          this.videos[0].currentTime = END_OF_STREAM_SECONDS
+        })
+      }
     } catch (e) {
       if (e.toString().includes('source')) {
         this.command(Types.Command.initCustomHLS)
@@ -87,12 +105,15 @@ export class VideoContainer extends LitElement {
     const [video] = this.videos
     video.currentTime = time
     if (video.paused && !this.castActivated) this.play()
+    dispatch(this, Types.Action.live, {
+      live: false
+    })
   }
 
   @listen(Types.Command.forward)
   forward() {
     this.seek({
-      time: Math.min(this.videos[0].currentTime + 10, this.videos[0].duration)
+      time: Math.min(this.videos[0].currentTime + 10, getVideoDuration(this.videos[0]))
     })
   }
 
@@ -138,6 +159,17 @@ export class VideoContainer extends LitElement {
   decreaseVolume() {
     this.setVolume({
       volume: this.videos[0].volume - 0.1
+    })
+  }
+
+  @listen(Types.Command.live, { canPlay: true, initialized: true })
+  enableLiveMode() {
+    dispatch(this, Types.Action.live, {
+      live: true
+    })
+    window.requestAnimationFrame(() => {
+      this.videos[0].currentTime = END_OF_STREAM_SECONDS
+      if (this.videos[0].paused && !this.castActivated) this.play()
     })
   }
 
@@ -200,6 +232,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
     const HLS = (await import('hls.js/dist/hls.light.min.js')).default
+
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()
@@ -212,7 +245,8 @@ export class VideoContainer extends LitElement {
       fragLoadingMaxRetry: 10,
       manifestLoadingMaxRetry: 2,
       levelLoadingMaxRetry: 4,
-      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30
+      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
+      liveDurationInfinity: true
     })
     
     if (this.muxData) await connectMuxData(
@@ -248,10 +282,10 @@ export class VideoContainer extends LitElement {
         }
       }
     })
-
+    
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
-
+    
     dispatch(this, Types.Action.update, { customHLS: true })
   }
 
@@ -270,7 +304,7 @@ export class VideoContainer extends LitElement {
       case 'timeupdate':
         dispatch(this, Types.Action.updateTime, {
           currentTime: video.currentTime,
-          duration: video.duration // Required for New android devices
+          duration: getVideoDuration(video) // Required for New android devices
         })
         break
       case 'volumechange':
@@ -281,7 +315,8 @@ export class VideoContainer extends LitElement {
         break
       case 'loadeddata':
         dispatch(this, Types.Action.updateDuration, {
-          duration: video.duration
+          initialized: true,
+          duration: getVideoDuration(video)
         })
         break
       case 'ratechange':
@@ -393,7 +428,7 @@ export class VideoContainer extends LitElement {
 
     const [{
       autoplay, muted, poster,
-      volume, duration, currentTime,
+      volume, currentTime,
       playbackRate, title
     }] = this.videos
 
@@ -401,7 +436,7 @@ export class VideoContainer extends LitElement {
 
     dispatch(this, Types.Action.init, {
       poster,
-      duration,
+      duration: getVideoDuration(this.videos[0]),
       currentTime,
       volume,
       title,
@@ -410,7 +445,7 @@ export class VideoContainer extends LitElement {
       isAutoplay: autoplay,
       isMuted: muted,
       playbackRate,
-      isSourceSupported: Boolean(this.supportedSource),
+      isSourceSupported: !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource),
       textTracks: this.videoCues,
       ...savedSettings
     })
