@@ -23,7 +23,7 @@ import './components/buttons/Pip'
 <Meta title="Playground" />
 
 <Canvas>
-  <video-player storage-key="uscreen:player" offset="10">
+  <video-player storage-key="uscreen:player">
     <video
       preload="metadata"
       slot="video"
@@ -31,7 +31,7 @@ import './components/buttons/Pip'
       poster="https://alpha.uscreencdn.com/video_thumbnails/VRbT3_aS41zh3A.jpg?key1=/gGNqWB2hryMcnePnJwf9zqzLKXuj4oV1J+iiEG33FEWdQ6VvzRehSJE9SGr0K1M&key2=bba1ecd75ecd5d9d0a8013577f4d585f"
     >
       <source 
-        src="https://stream.mux.com/miQlLYOpwPpHbR6KGQTSgn8ZDm4u4G1X.m3u8"
+        src="https://mtoczko.github.io/hls-test-streams/test-vtt-ts-segments/playlist.m3u8"
         type="application/x-mpegURL"
       />
       <track
@@ -44,7 +44,6 @@ import './components/buttons/Pip'
     </video>
     <video-controls>
       <video-timeline>
-        <video-live-sign></video-live-sign>
         <video-timer></video-timer>
       </video-timeline>
       <video-play-button />

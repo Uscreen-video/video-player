@@ -5,6 +5,7 @@ import { unsafeCSS, LitElement, html } from 'lit'
 import { customElement, eventOptions, queryAssignedElements, property } from 'lit/decorators.js'
 import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
+
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
 import { mapCueListToState } from '../../helpers/cue'
@@ -62,6 +63,10 @@ export class VideoContainer extends LitElement {
 
   @property({ type: String, attribute: 'storage-key' })
   storageKey: string
+
+  // @connect('isIos')
+  // @property({ type: Boolean, reflect: true, attribute: 'is-ios' })
+  // isIos: true
 
   _storageProvider: StorageProvider
   connectedCallback() {
@@ -186,6 +191,7 @@ export class VideoContainer extends LitElement {
       activeTextTrack: lang
     })
     const activeTrack = this.videoTracks.find(t => t.track.mode === 'showing')
+    console.log(activeTrack.track.activeCues)
     if (activeTrack) {
       dispatch(this, Types.Action.cues, { cues: mapCueListToState(activeTrack.track.activeCues) })
     }
@@ -231,7 +237,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
-    const HLS = (await import('hls.js/dist/hls.light.min.js')).default
+    const HLS = (await import('hls.js')).default
 
     if (!HLS.isSupported()) return
 
@@ -265,7 +271,7 @@ export class VideoContainer extends LitElement {
       })
     })
   
-    this.hls.on(HLS.Events.MANIFEST_PARSED, (_: unknown, { levels }: { levels: unknown[] }) => {
+    this.hls.on(HLS.Events.MANIFEST_PARSED, (_: unknown, { levels, subtitleTracks, subtitles, captions }: { levels: unknown[] }) => {
       dispatch(this, Types.Action.setLevels, {
         qualityLevels: levels.map((level: { height: string }) => ({
           name: level.height || 'auto'
@@ -282,11 +288,31 @@ export class VideoContainer extends LitElement {
         }
       }
     })
+
+    this.hls.on(HLS.Events.SUBTITLE_TRACKS_UPDATED, (_: unknown, { subtitleTracks }) => {
+      // this.hls.subtitleTrack = 0
+      // console.log('TRACKS UPDATED', this.hls.subtitleTracks, this.hls.subtitleTrack, this.hls.subtitleDisplay)
+    })
+
+    this.hls.on(HLS.Events.SUBTITLE_FRAG_PROCESSED, (_: unknown, details) => {
+      // console.log('FRAG PROCESSED', details)
+    })
+
+    this.hls.on(HLS.Events.SUBTITLE_TRACK_LOADED, (_: unknown, details) => {
+      // console.log('TRACK LOADED!', details)
+    })
     
     this.hls.loadSource(this.videoSource);
     this.hls.attachMedia(this.videos[0]);
     
     dispatch(this, Types.Action.update, { customHLS: true })
+
+    // setTimeout(() => {
+    //   console.log('UPD SUBS')
+    //   this.hls.track
+    //   this.hls.subtitleTrack = 0
+    //   this.hls.subtitleDisplay = true
+    // }, 5000)
   }
 
   @eventOptions({ capture: true })
@@ -351,6 +377,7 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleCueChange({ target }: { target: HTMLTrackElement }) {
+    console.log('CUE HAS CHANGED!')
     if (target.track.mode === 'showing') {
       const activeTextTrack = target.srclang
 
