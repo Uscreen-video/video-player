@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       fileName: 'video-player',
-      formats: ['cjs', 'es'],
+      formats: ['es'],
     },
   }
 }))
