@@ -23,15 +23,17 @@ export class FullscreenButton extends VideoButton {
 
   override renderContent() {
     return html`
-    <slot name=${this.isFullscreen ? 'icon:enabled' : 'disabled'}>
-      ${this.isFullscreen ? icons.out : icons.in}
-    </slot>`
+      <slot name="icon:${this.isFullscreen ? 'enabled' : 'disabled'}">
+        ${this.isFullscreen ? icons.out : icons.in}
+      </slot>
+    `
   }
 
   override renderTooltip() {
     return html`
       <slot name="tooltip:${this.isFullscreen ? 'enabled' : 'disabled'}">
         ${this.isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-      </slot>`
+      </slot>
+    `
   }
 }
