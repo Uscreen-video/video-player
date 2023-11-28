@@ -1,6 +1,5 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
-import license from 'rollup-plugin-license'
 
 export default defineConfig(({ mode }) => ({
   define: {
