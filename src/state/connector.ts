@@ -1,6 +1,6 @@
-import { Context, ContextType, ContextEvent } from '@lit-labs/context'
+import { Context, ContextType, ContextEvent } from '@lit/context'
 import { ReactiveController, ReactiveElement } from 'lit';
-import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
+import { type Interface } from '@lit/reactive-element/decorators/base';
 
 const isEqual = (a: any, b: any) => {
   if (typeof a !== typeof b) return false
@@ -70,6 +70,28 @@ export class ContextConsumer<
   }
 }
 
+export type ContextDecorator = {
+  // accessor decorator signature
+  <C extends Interface<ReactiveElement>, V>(
+    target: ClassAccessorDecoratorTarget<C, V>,
+    context: ClassAccessorDecoratorContext<C, V>
+  ): ClassAccessorDecoratorResult<C, V>;
+
+  // setter decorator signature
+  <C extends Interface<ReactiveElement>, V>(
+    target: (value: V) => void,
+    context: ClassSetterDecoratorContext<C, V>
+  ): (this: C, value: V) => void;
+
+  // legacy decorator signature
+  (
+    protoOrDescriptor: Object,
+    name: PropertyKey,
+    descriptor?: PropertyDescriptor
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any;
+};
+
 
 export function connectConsumer<ValueType>({
   context: context,
@@ -77,23 +99,26 @@ export function connectConsumer<ValueType>({
 }: {
   context: Context<unknown, ValueType>;
   field?: keyof ValueType;
-}): <K extends PropertyKey>(
-  // Partial<> allows for providing the value to an optional field
-  protoOrDescriptor: ReactiveElement & Partial<Record<K, ValueType[typeof field]> | ValueType>,
-  name?: K
-  // Note TypeScript requires the return type to be `void|any`
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => void | any {
-  return decorateProperty({
-    finisher: (ctor: typeof ReactiveElement, name: PropertyKey) => {
-      ctor.addInitializer((element: ReactiveElement): void => {
-        new ContextConsumer(
-          element,
-          context,
-          field,
-          name
-        );
-      });
-    },
-  });
+}): ContextDecorator {
+  return <C extends Interface<ReactiveElement>, V>(
+    protoOrTarget:
+      | object
+      | ClassAccessorDecoratorTarget<C, V>
+      | ((value: V) => void),
+    nameOrContext:
+      | PropertyKey
+      | ClassAccessorDecoratorContext<C, V>
+      | ClassSetterDecoratorContext<C, V>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): any => {
+    const ctor = protoOrTarget.constructor as typeof ReactiveElement;
+    ctor.addInitializer((element: ReactiveElement): void => {
+      new ContextConsumer(
+        element,
+        context,
+        field,
+        nameOrContext as string
+      );
+    });
+  }
 }

@@ -1,8 +1,8 @@
 import { ReactiveController, ReactiveElement } from "lit";
-import { decorateProperty } from '@lit/reactive-element/decorators/base.js';
 import { Command, State } from "../types";
 import { CommandEvent, CommandMeta, CommandParams, CommandRegisterEvent } from "./events";
 import _debug from 'debug'
+import { Interface } from "@lit/reactive-element/decorators/base";
 
 const debugCommand = _debug('player:commands')
 
@@ -61,20 +61,36 @@ export function createCommand(host: ReactiveElement) {
   }
 }
 
-export function createCommandListener(command: Command, requirements?: State): <K extends PropertyKey>(
-  protoOrDescriptor: ReactiveElement,
-  name?: K
-) => void | any {
-  return decorateProperty({
-    finisher: (ctor: typeof ReactiveElement, name: PropertyKey) => {
-      ctor.addInitializer((element: ReactiveElement): void => {
-        new EventListener(
-          element,
-          command,
-          name,
-          requirements
-        );
-      });
-    },
-  });
+export type CommandDecorator = {
+  // legacy
+  (
+    proto: Interface<ReactiveElement>,
+    name: PropertyKey
+    // Note TypeScript requires the return type to be `void|any`
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): void | any;
+
+  // standard
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  <C, V extends (this: C, ...args: any) => any>(
+    value: V,
+    _context: ClassMethodDecoratorContext<C, V>
+  ): void;
+};
+
+export function createCommandListener(command: Command, requirements?: State): CommandDecorator {
+  return (<C, V extends (this: C, ...args: any) => any>(
+    protoOrValue: ReactiveElement,
+    nameOrContext: PropertyKey | ClassMethodDecoratorContext<C, V>
+  ) => {
+    const ctor = protoOrValue.constructor as typeof ReactiveElement;
+    ctor.addInitializer((element: ReactiveElement): void => {
+      new EventListener(
+        element,
+        command,
+        nameOrContext as string,
+        requirements
+      );
+    })
+  })
 }

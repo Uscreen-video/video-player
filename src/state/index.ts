@@ -1,4 +1,4 @@
-import { createContext } from '@lit-labs/context'
+import { createContext } from '@lit/context'
 import { ReactiveElement } from 'lit'
 import { connectConsumer } from './connector'
 import { StateController } from './controller'
