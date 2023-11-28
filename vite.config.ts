@@ -6,10 +6,12 @@ export default defineConfig(({ mode }) => ({
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   build: {
-    lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      fileName: 'video-player',
-      formats: ['cjs', 'es'],
-    },
+    rollupOptions: {
+      input: resolve(__dirname, 'src/index.ts'),
+      output: {
+        chunkFileNames: '[name].js',
+        entryFileNames: '[name].js',
+      },
+    }
   }
 }))
