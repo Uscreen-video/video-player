@@ -24,9 +24,11 @@ export class PipButton extends VideoButton {
 
   override renderContent() {
     if (!this.pipAvailable) return null
-    return this.pipActivated
-      ? html`<slot>${pipActiveIcon}</slot>`
-      : html`<slot>${pipIcon}</slot>`
+    return html`
+      <slot name="icon:${this.pipActivated ? 'enabled' : 'disabled'}">
+        ${this.pipActivated ? pipActiveIcon : pipIcon}
+      </slot>
+    `
   }
 
   override renderTooltip() {

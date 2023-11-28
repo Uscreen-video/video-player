@@ -21,12 +21,18 @@ export class AirplayButton extends VideoButton {
 
   override renderContent() {
     if (!this.airplayAvailable) return null
-    return html`<slot>${airplayIcon}</slot>`
+    return html`
+      <slot name="icon:${this.airplayActivated ? 'enabled' : 'disabled'}">
+        ${airplayIcon}
+      </slot>
+    `
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip:${this.airplayActivated ? 'enabled' : 'disabled'}">
-      ${this.airplayActivated ? 'Disable Airplay' : 'Enable Airplay'}
-    </span>`
+    return html`
+      <span slot="tooltip:${this.airplayActivated ? 'enabled' : 'disabled'}">
+        ${this.airplayActivated ? 'Disable Airplay' : 'Enable Airplay'}
+      </span>
+    `
   }
 }

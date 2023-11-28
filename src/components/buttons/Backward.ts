@@ -18,6 +18,6 @@ export class BackwardButton extends VideoButton {
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">Backward</span>`
+    return html`<slot name="tooltip">Backward</slot>`
   }
 }

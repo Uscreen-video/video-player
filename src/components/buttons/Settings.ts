@@ -93,7 +93,7 @@ export class SubtitlesButton extends VideoButton {
   }
 
   override renderTooltip() {
-    return html`<span slot="tooltip">Settings</span>`
+    return html`<slot name="tooltip">Settings</slot>`
   }
 
   override renderMenu = () => {

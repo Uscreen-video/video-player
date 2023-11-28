@@ -33,7 +33,7 @@ export class VolumeButton extends VideoButton {
   override renderContent() {
     const level = this.getVolumeLevel()
     return html`
-      <slot name=${level}>
+      <slot name="icon:${level}">
         ${icons[level]}
       </slot>
     `
@@ -41,7 +41,7 @@ export class VolumeButton extends VideoButton {
 
   override renderTooltip() {
     return html`
-      <slot name="tooltip:${this.isMuted ? 'enabled' : 'disabled'}">
+      <slot name="tooltip:${this.isMuted ? 'unmute' : 'mute'}">
         ${this.isMuted ? 'Unmute' : 'Mute'}
       </slot>
     `
