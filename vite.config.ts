@@ -1,15 +1,18 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
+import license from 'rollup-plugin-license'
 
 export default defineConfig(({ mode }) => ({
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   build: {
-    lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      fileName: 'video-player',
-      formats: ['es'],
-    },
+    rollupOptions: {
+      input: resolve(__dirname, 'src/index.ts'),
+      output: {
+        chunkFileNames: '[name].js',
+        entryFileNames: '[name].js',
+      },
+    }
   }
 }))

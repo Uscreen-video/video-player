@@ -1,22 +1,24 @@
-const path = require('path')
+import { readFileSync } from 'node:fs'
+import nesting from 'postcss-nesting'
+import simpleVars from 'postcss-simple-vars'
+import env from 'postcss-preset-env'
 
 const getVariables = () => {
   const file = './src/variables.json';
-  delete require.cache[path.join(__dirname, file)];
-  const config = require(file)
+  const config = JSON.parse(readFileSync(new URL(file, import.meta.url)))
   return Object.keys(config).reduce((acc, key) => {
     acc[key] = `var(--video-player-${key}, ${config[key]})`
     return acc
   }, {})
 }
 
-module.exports = {
+export default {
   plugins: [
-    require('postcss-nesting'),
-    require('postcss-simple-vars')({
+    nesting,
+    simpleVars({
       variables: () => getVariables(),
     }),
-    require('postcss-preset-env')({
+    env({
       autoprefixer: {
         flexbox: 'no-2009',
       },
