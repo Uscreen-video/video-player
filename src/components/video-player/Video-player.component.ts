@@ -8,7 +8,6 @@ import '../video-chromecast'
 import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
-import { SubtitlesController } from './controllers/Subtitles'
 
 import { emit } from '../../helpers/event'
 import { Action, MuxParams } from '../../types'
@@ -20,7 +19,6 @@ export class VideoPlayer extends LitElement {
 
   protected idleManager = new IdleController(this, this.handleIdleUpdate)
   protected keyboardManager = new KeyboardController(this)
-  protected subtitlesController = new SubtitlesController(this)
 
   public command = createCommand(this)
   public state = createState(this)

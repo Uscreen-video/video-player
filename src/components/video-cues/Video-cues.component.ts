@@ -24,7 +24,6 @@ export class VideoCues extends LitElement {
 
   render() {
     if (this.isIos || !this.activeTextTrack) return null
-
     return this.cues.map(cue => html`
       <div class="cue">
         <span>${unsafeStatic(cue)}</span>

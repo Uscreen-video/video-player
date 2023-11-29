@@ -93,8 +93,8 @@ export class SubtitlesButton extends VideoButton {
     ].map(track => ({
       ...track,
       value: track.lang || 'off',
-      isActive: active === track.label,
-      iconAfter: active === track.label ? icons.check : null
+      isActive: active === track.lang,
+      iconAfter: active === track.lang ? icons.check : null
     }))
   }
 }
