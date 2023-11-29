@@ -1,5 +1,5 @@
 
-import { ContextProvider } from '@lit-labs/context';
+import { ContextProvider } from '@lit/context';
 import { context } from './index'
 import { StateAction } from './dispatcher';
 import { stateMapper } from './mapper';

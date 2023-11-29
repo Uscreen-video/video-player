@@ -46,25 +46,44 @@ import './components/buttons/Pip'
       <video-timeline>
         <video-timer></video-timer>
       </video-timeline>
-      <video-play-button />
+      <video-play-button>
+        <span slot="tooltip:play">Spille</span>
+        <span slot="tooltip:pause">Stående</span>
+      </video-play-button>
       <video-forward-button>
         <span slot="tooltip">Nach vorne</span>
       </video-forward-button>
-      <video-backward-button />
-      <video-volume-button />
+      <video-backward-button>
+        <span slot="tooltip">Bakover</span>
+      </video-backward-button>
+      <video-volume-button>
+        <span slot="tooltip:unmute">Unmute</span>
+        <span slot="tooltip:mute">Stum</span>
+      </video-volume-button>
       <video-volume-control />
       <hr />
-      <video-subtitles-button />
+      <video-subtitles-button>
+        <span slot="tooltip">Undertekster</span>
+      </video-subtitles-button>
       <video-settings-button translation={JSON.stringify({
         'back': 'પાછા',
         'auto': 'si toos ah'
-      })}/>
+      })}>
+        <span slot="tooltip">Innstillinger</span>
+      </video-settings-button>
       <video-airplay-button />
       <video-pip-button>
         <span slot="tooltip:disabled">Bild-in-Bild aktivieren</span>
+        <span slot="tooltip:enabled">Bild-in-Bild deactiviren</span>
       </video-pip-button>
-      <video-chromecast-button />
-      <video-fullscreen-button />
+      <video-chromecast-button>
+        <span slot="tooltip:disabled">Chromecast aktivieren</span>
+        <span slot="tooltip:enabled">Chromecast deactiviren</span>
+      </video-chromecast-button>
+      <video-fullscreen-button>
+        <span slot="tooltip:disabled">Aktivieren Fullscrenn</span>
+        <span slot="tooltip:enabled">Deactiviren Fullscreen</span>
+      </video-fullscreen-button>
     </video-controls>
     <video-cues />
   </video-player>

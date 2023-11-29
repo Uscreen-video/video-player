@@ -38,14 +38,18 @@ export class SubtitlesButton extends VideoButton {
     if (!this.textTracks?.length) return null
 
     return html`
-      <slot name=${this.activeTrack ? 'selected' : 'not-selected'}>
+      <slot name="icon:${this.activeTrack ? 'enabled' : 'disabled'}">
         ${this.activeTrack ? icons.solid : icons.outline}
       </slot>
     `
   }
 
   override renderTooltip() {
-    return html`<slot name="tooltip">Subtitles</slot>`
+    return html`
+      <slot name="tooltip">
+        Subtitles
+      </slot>
+    `
   }
 
   override renderMenu = () => {
