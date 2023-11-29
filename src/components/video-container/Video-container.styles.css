@@ -49,6 +49,7 @@ img {
     &::-webkit-media-text-track-display,
     &::cue {
       display: none;
+      opacity: 0;
     }
   }
 }
