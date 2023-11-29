@@ -1,6 +1,8 @@
 { /* Playground.mdx */ }
 import { Meta, Canvas } from '@storybook/blocks'
 import enCaptions from '../mocks/captions_en.vtt?url'
+import jpCaptions from '../mocks/caption_jp.vtt?url'
+import ptCaptions from '../mocks/caption_pt.vtt?url'
 
 import './components/video-player'
 import './components/video-controls'
@@ -31,7 +33,7 @@ import './components/buttons/Pip'
       poster="https://alpha.uscreencdn.com/video_thumbnails/VRbT3_aS41zh3A.jpg?key1=/gGNqWB2hryMcnePnJwf9zqzLKXuj4oV1J+iiEG33FEWdQ6VvzRehSJE9SGr0K1M&key2=bba1ecd75ecd5d9d0a8013577f4d585f"
     >
       <source 
-        src="https://mtoczko.github.io/hls-test-streams/test-vtt-ts-segments/playlist.m3u8"
+        src="https://stream.mux.com/miQlLYOpwPpHbR6KGQTSgn8ZDm4u4G1X.m3u8"
         type="application/x-mpegURL"
       />
       <track
@@ -40,6 +42,20 @@ import './components/buttons/Pip'
         kind="metadata" 
         srcLang="en"
         src={enCaptions}
+      />
+      <track
+        default
+        label="Japan"
+        kind="metadata" 
+        srcLang="jp"
+        src={jpCaptions}
+      />
+      <track
+        default
+        label="Portuguese"
+        kind="metadata" 
+        srcLang="pt"
+        src={ptCaptions}
       />
     </video>
     <video-controls>

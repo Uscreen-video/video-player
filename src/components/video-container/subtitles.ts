@@ -12,11 +12,18 @@ export const subtitlesController = (
   let activeTextTrack  = defaultTextTrack
   let hasNonMetaData = false
 
+  const trackElements = Array.from(video.querySelectorAll('track'))
+  const cdnTracksMapping = trackElements.reduce<Record<string, string>>((acc, t) => {
+    acc[t.srclang] = t.src
+    return acc
+  }, {})
+
   const textTracks = (): TextTrack[] => {
     return Array.from(video.textTracks)
   }
 
   const onCueChange = (event: Event & { target: TextTrack }) => {
+    console.log('CUE CHANGE!')
     if (event.target.mode === 'showing') {
       const targetLang = event.target.language || event.target.label
       if (targetLang !== activeTextTrack) {
@@ -34,7 +41,6 @@ export const subtitlesController = (
       } else {
         t.mode = lang === tLang ? 'showing' : 'hidden'
       }
-      console.log(t.label, t.mode)
     })
   }
 
@@ -46,7 +52,7 @@ export const subtitlesController = (
     hasNonMetaData = data.track.kind !== 'metadata'
     dispatch(host, Types.Action.update, {
       textTracks: textTracks().filter(t => hasNonMetaData ? t.kind !== 'metadata' : true).map(t => ({
-        src: t.src || '',
+        src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
         lang: t.language || t.label,
         label: t.label
       }))

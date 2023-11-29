@@ -7,7 +7,6 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
-import { mapCueListToState } from '../../helpers/cue'
 import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
@@ -502,18 +501,6 @@ export class VideoContainer extends LitElement {
     return Array.from(this.videos[0].querySelectorAll('source')).map(s => ({
       type: s.type,
       src: s.src
-    }))
-  }
-
-  get videoTracks() {
-    return Array.from(this.videos[0].querySelectorAll('track'))
-  }
-
-  get videoCues() {
-    return this.videoTracks.map(track => ({
-      src: track.src,
-      lang: track.srclang,
-      label: track.label,
     }))
   }
 
