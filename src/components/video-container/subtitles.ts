@@ -23,8 +23,7 @@ export const subtitlesController = (
   }
 
   const onCueChange = (event: Event & { target: TextTrack }) => {
-    console.log('CUE CHANGE!')
-    if (event.target.mode === 'showing') {
+    if (event.target.mode === 'showing' || event.target.label === activeTextTrack) {
       const targetLang = event.target.language || event.target.label
       if (targetLang !== activeTextTrack) {
         command(Types.Command.enableTextTrack, { lang: targetLang })
@@ -36,7 +35,10 @@ export const subtitlesController = (
   const enableTextTrack = (lang: string) => {
     textTracks().forEach((t) => {
       const tLang = t.language || t.label
-      if (hasNonMetaData && t.kind === 'metadata') {
+      /**
+       * We should hide all tracks to make default cue hidden 
+       */
+      if (hasNonMetaData) {
         t.mode = 'hidden'
       } else {
         t.mode = lang === tLang ? 'showing' : 'hidden'
@@ -50,6 +52,7 @@ export const subtitlesController = (
      * We should skip metadata tracks (uploaded on CDN)
      */
     hasNonMetaData = data.track.kind !== 'metadata'
+    data.track.mode = 'hidden'
     dispatch(host, Types.Action.update, {
       textTracks: textTracks().filter(t => hasNonMetaData ? t.kind !== 'metadata' : true).map(t => ({
         src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
