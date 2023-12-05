@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="/src/index.js"></script>
+  </head>
+  <body>
+      <video
+        preload="metadata"
+        slot="video"
+        title="My test video"
+        poster="https://alpha.uscreencdn.com/video_thumbnails/VRbT3_aS41zh3A.jpg?key1=/gGNqWB2hryMcnePnJwf9zqzLKXuj4oV1J+iiEG33FEWdQ6VvzRehSJE9SGr0K1M&key2=bba1ecd75ecd5d9d0a8013577f4d585f"
+      >
+        <source 
+          src="https://mtoczko.github.io/hls-test-streams/test-vtt-ts-segments/playlist.m3u8"
+          type="application/x-mpegURL"
+        />
+        <track
+          default
+          label="English"
+          kind="subtitles" 
+          srcLang="en"
+          src="../mocks/captions_en.vtt"
+        />
+      </video>
+      <button id="control">play</button>
+  </body>
+</html>

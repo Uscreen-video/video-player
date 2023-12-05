@@ -12,6 +12,7 @@ import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
 import '../buttons/Play'
+import HLS from 'hls.js'
 
 const END_OF_STREAM_SECONDS = 99999
 
@@ -231,23 +232,28 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
-    const HLS = (await import('hls.js/dist/hls.light.min.js')).default
+    // const HLS =  (await import('hls.js/dist/hls.light.min.js')).default
 
-    if (!HLS.isSupported()) return
+    if (!HLS.isSupported()) return  
 
     this.hls?.destroy()
-  
+    
+
+
     this.hls = new HLS({
-      maxMaxBufferLength: 30,
-      enableWorker: true,
-      initialLiveManifestSize: 2,
-      liveSyncDurationCount: 5,
-      fragLoadingMaxRetry: 10,
-      manifestLoadingMaxRetry: 2,
-      levelLoadingMaxRetry: 4,
-      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
-      liveDurationInfinity: true
+      // maxMaxBufferLength: 30,
+      // enableWorker: false,
+      // initialLiveManifestSize: 2,
+      // liveSyncDurationCount: 5,
+      // fragLoadingMaxRetry: 10,
+      // manifestLoadingMaxRetry: 2,
+      // levelLoadingMaxRetry: 4,
+      // backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
+      // liveDurationInfinity: true,
+      // renderTextTracksNatively: true
     })
+
+    console.log('INIT HLS')
     
     if (this.muxData) await connectMuxData(
       this.videos[0],
@@ -265,7 +271,7 @@ export class VideoContainer extends LitElement {
       })
     })
   
-    this.hls.on(HLS.Events.MANIFEST_PARSED, (_: unknown, { levels }: { levels: unknown[] }) => {
+    this.hls.on(HLS.Events.MANIFEST_PARSED, (_: unknown, { levels, ...rest }: { levels: unknown[] }) => {
       dispatch(this, Types.Action.setLevels, {
         qualityLevels: levels.map((level: { height: string }) => ({
           name: level.height || 'auto'
@@ -281,9 +287,14 @@ export class VideoContainer extends LitElement {
           })
         }
       }
+
+      console.log(rest)
     })
     
-    this.hls.loadSource(this.videoSource);
+    this.hls.on(HLS.Events.MEDIA_ATTACHED, () => {
+      this.hls.loadSource(this.videoSources[0].src);
+    })
+
     this.hls.attachMedia(this.videos[0]);
     
     dispatch(this, Types.Action.update, { customHLS: true })
@@ -351,6 +362,7 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleCueChange({ target }: { target: HTMLTrackElement }) {
+    console.log('CUE CHANGE', target.track.label)
     if (target.track.mode === 'showing') {
       const activeTextTrack = target.srclang
 
@@ -434,6 +446,14 @@ export class VideoContainer extends LitElement {
 
     this.initTime = Date.now()
 
+    this.videos[0].textTracks.addEventListener('addtrack', (data) => {
+      console.log('TRACK ADDED', data.track.label)
+      data.track.mode = 'hidden'
+      data.track.addEventListener('cuechange', () => {
+        console.log('CUE CHANGE', data.track.label, data.track.kind)
+      })
+    })
+
     dispatch(this, Types.Action.init, {
       poster,
       duration: getVideoDuration(this.videos[0]),
@@ -502,10 +522,10 @@ export class VideoContainer extends LitElement {
         @loadedmetadata=${this.handleVideoEvent}
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
+        @cuechange=${this.handleCueChange}
         @enterpictureinpicture=${this.handleVideoEvent}
         @leavepictureinpicture=${this.handleVideoEvent}
         @progress=${this.handleVideoEvent}
-        @cuechange=${this.handleCueChange}
         @click=${this.handleClick}
         @dblclick=${this.handleDblClick}
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
