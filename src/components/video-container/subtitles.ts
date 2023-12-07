@@ -54,29 +54,30 @@ export const subtitlesController = (
     t.oncuechange = onCueChange
   })
 
-  // const onTextTrackAdded = (data: TrackEvent) => {
-  //   /**
-  //    * If there is non metadata text track (e.g. included in m3u8 manifest)
-  //    * We should skip metadata tracks (uploaded on CDN)
-  //    */
-  //   console.log('TEXT TRACK ADDED', data.track.label)
-  //   data.track.mode = 'hidden'
-  //   dispatch(host, Types.Action.update, {
-  //     textTracks: textTracks().map(t => ({
-  //       src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
-  //       lang: t.language || t.label,
-  //       label: t.label
-  //     }))
-  //   })
+  const onTextTrackAdded = (data: TrackEvent) => {
+    console.log('TRACK ADDED', data.track.label, data.track.kind, data.track.language)
+    /**
+     * If there is non metadata text track (e.g. included in m3u8 manifest)
+     * We should skip metadata tracks (uploaded on CDN)
+     */
+    // console.log('TEXT TRACK ADDED', data.track.label)
+    // data.track.mode = 'hidden'
+    // dispatch(host, Types.Action.update, {
+    //   textTracks: textTracks().map(t => ({
+    //     src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
+    //     lang: t.language || t.label,
+    //     label: t.label
+    //   }))  
+    // })
 
-  //   textTracks().forEach(track => {
-  //     track.oncuechange = onCueChange
-  //   })
+    // textTracks().forEach(track => {
+    //   track.oncuechange = onCueChange
+    // })
 
-  //   enableTextTrack(activeTextTrack)
-  // }
+    // enableTextTrack(activeTextTrack)
+  }
 
-  // video.textTracks.addEventListener('addtrack', onTextTrackAdded)
+  video.textTracks.addEventListener('addtrack', onTextTrackAdded)
 
   return {
     enableTextTrack: (lang: string) => {
