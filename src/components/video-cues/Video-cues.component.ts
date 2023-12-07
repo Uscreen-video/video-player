@@ -1,4 +1,4 @@
-import { unsafeCSS, LitElement } from 'lit'
+import { unsafeCSS, LitElement, nothing } from 'lit'
 import { unsafeStatic, html } from 'lit/static-html.js'
 import { customElement, property } from 'lit/decorators.js'
 import styles from './Video-cues.styles.css?inline'
@@ -23,8 +23,8 @@ export class VideoCues extends LitElement {
   isIos: true
 
   render() {
-    console.log(this.activeTextTrack, this.cues, 'this.activeTextTrack')
-    if (this.isIos || !this.activeTextTrack) return null
+    console.log(this.isIos, this.activeTextTrack, this.cues, 'this.activeTextTrack')
+    if (this.isIos || !this.activeTextTrack) return nothing
     return this.cues.map(cue => html`
       <div class="cue">
         <span>${unsafeStatic(cue)}</span>

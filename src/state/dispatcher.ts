@@ -12,19 +12,20 @@ export const dispatch = (
   host: ReactiveElement,
   action: Action,
   params?: Partial<State>
-) => new Promise((resolve, reject) =>
-  host.dispatchEvent(
-    new CustomEvent<StateAction>(Event.state, {
-      bubbles: true,
-      cancelable: true,
-      composed: true,
-      detail: {
-        action,
-        params,
-        resolve,
-        reject
-      },
-    })
-  )
+) => new Promise((resolve, reject) => {
+  return host.dispatchEvent(
+      new CustomEvent<StateAction>(Event.state, {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        detail: {
+          action,
+          params,
+          resolve,
+          reject
+        },
+      })
+    )
+  }
 )
 

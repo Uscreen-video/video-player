@@ -17,6 +17,9 @@ export class VideoVolumeControl extends LitElement {
   @state()
   volume: number
 
+  @connect('cues')
+  cues: string[]
+
   @connect('isIos')
   isIos: boolean
 
