@@ -10,7 +10,6 @@ export const subtitlesController = (
 ) => {
   const command = createCommand(host)
   let activeTextTrack  = defaultTextTrack
-  let hasNonMetaData = false
 
   const trackElements = Array.from(video.querySelectorAll('track'))
   const cdnTracksMapping = trackElements.reduce<Record<string, string>>((acc, t) => {
@@ -38,11 +37,8 @@ export const subtitlesController = (
       /**
        * We should hide all tracks to make default cue hidden 
        */
-      if (hasNonMetaData) {
-        t.mode = 'hidden'
-      } else {
+
         t.mode = lang === tLang ? 'showing' : 'hidden'
-      }
     })
   }
 
@@ -51,10 +47,9 @@ export const subtitlesController = (
      * If there is non metadata text track (e.g. included in m3u8 manifest)
      * We should skip metadata tracks (uploaded on CDN)
      */
-    hasNonMetaData = data.track.kind !== 'metadata'
     data.track.mode = 'hidden'
     dispatch(host, Types.Action.update, {
-      textTracks: textTracks().filter(t => hasNonMetaData ? t.kind !== 'metadata' : true).map(t => ({
+      textTracks: textTracks().map(t => ({
         src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
         lang: t.language || t.label,
         label: t.label
@@ -74,6 +69,7 @@ export const subtitlesController = (
     enableTextTrack: (lang: string) => {
       activeTextTrack = lang
       enableTextTrack(lang)
+      dispatch(host, Types.Action.selectTextTrack, { activeTextTrack: lang })
       const activeTrack = textTracks().find(t => t.mode === 'showing')
       if (activeTrack?.activeCues) {
         dispatch(host, Types.Action.cues, { cues: mapCueListToState(activeTrack.activeCues) })

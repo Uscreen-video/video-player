@@ -15,6 +15,7 @@ export const initialState: State = {
   idle: false,
   canPlay: true,
   cues: [],
+  activeTextTrack: '',
   castActivated: false,
   played: false,
   castAvailable: Boolean(window.chrome?.cast),
