@@ -220,6 +220,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
+    console.log('INIT HLS')
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()

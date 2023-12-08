@@ -8,7 +8,6 @@ export const subtitlesController = (
   video: HTMLVideoElement,
   defaultTextTrack?: string
 ) => {
-  // const command = createCommand(host)
   let activeTextTrack  = defaultTextTrack
 
   const trackElements = Array.from(video.querySelectorAll('track'))
@@ -16,10 +15,6 @@ export const subtitlesController = (
   trackElements[0].track
 
   let tracksState: TextTrack[] = trackElements.map(t => t.track)
-  // const cdnTracksMapping = trackElements.reduce<Record<string, string>>((acc, t) => {
-  //   acc[t.srclang] = t.src
-  //   return acc
-  // }, {})
 
   const onCueChange = (event: Event & { target: TextTrack }) => {
     const targetLang = event.target.language || event.target.label
@@ -30,20 +25,9 @@ export const subtitlesController = (
     }
   }
 
-  // const enableTextTrack = (lang: string) => {
-  //   textTracks().forEach((t) => {
-  //     const tLang = t.language || t.label
-  //     /**
-  //      * We should hide all tracks to make default cue hidden 
-  //      */
-
-  //       t.mode = lang === tLang ? 'showing' : 'hidden'
-  //   })
-  // }
-
   dispatch(host, Types.Action.update, {
     textTracks: trackElements.map(t => ({
-      src: t.src, //t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
+      src: t.src,
       lang: t.srclang,
       label: t.label
     }))
@@ -56,25 +40,26 @@ export const subtitlesController = (
 
   const onTextTrackAdded = (data: TrackEvent) => {
     console.log('TRACK ADDED', data.track.label, data.track.kind, data.track.language)
-    /**
-     * If there is non metadata text track (e.g. included in m3u8 manifest)
-     * We should skip metadata tracks (uploaded on CDN)
-     */
-    // console.log('TEXT TRACK ADDED', data.track.label)
-    // data.track.mode = 'hidden'
-    // dispatch(host, Types.Action.update, {
-    //   textTracks: textTracks().map(t => ({
-    //     src: t.kind === 'metadata' ? cdnTracksMapping[t.language] : '',
-    //     lang: t.language || t.label,
-    //     label: t.label
-    //   }))  
-    // })
-
-    // textTracks().forEach(track => {
-    //   track.oncuechange = onCueChange
-    // })
-
-    // enableTextTrack(activeTextTrack)
+    if (data.track.kind !== 'metadata') {
+      tracksState = [
+        ...tracksState.filter(t => t.kind !== 'metadata'),
+        data.track
+      ]
+      dispatch(host, Types.Action.update, {
+        textTracks: tracksState.map(t => ({
+          src: '',
+          lang: t.language || t.label,
+          label: t.label
+        }))
+      })
+      tracksState.forEach(t => {
+        t.mode = 'hidden'
+        t.oncuechange = onCueChange
+      })
+      trackElements.forEach(t => {
+        t.track.mode = 'disabled'
+      })
+    }
   }
 
   video.textTracks.addEventListener('addtrack', onTextTrackAdded)
@@ -82,8 +67,6 @@ export const subtitlesController = (
   return {
     enableTextTrack: (lang: string) => {
       activeTextTrack = lang
-      // enableTextTrack(lang)
-      // dispatch(host, Types.Action.selectTextTrack, { activeTextTrack: lang })
       const activeTrack = tracksState.find(t => (t.language || t.label) === activeTextTrack)
       if (activeTrack?.activeCues) {
         dispatch(host, Types.Action.cues, { cues: mapCueListToState(activeTrack.activeCues) })
