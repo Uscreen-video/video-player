@@ -87,6 +87,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         ${when(!this.disabled, () => html`
           <video-progress value=${100 / this.duration * this.buffered}></video-progress>
         `)}
+        <slot name="tooltip" slot="tooltip"></slot>
       </video-slider>
       <slot></slot>
     `
