@@ -22,6 +22,7 @@ export class ContextConsumer<
     this.host.addController(this);
   }
 
+  connected = false;
   private unsubscribe?: () => void;
 
   hostConnected(): void {
@@ -35,38 +36,43 @@ export class ContextConsumer<
   }
 
   private dispatchRequest() {
-    this.host.dispatchEvent(
-      new ContextEvent(
-        this.context,
-        (value, unsubscribe) => {
-          // some providers will pass an unsubscribe function indicating they may provide future values
-          if (this.unsubscribe) {
-            // if the unsubscribe function changes this implies we have changed provider
-            if (this.unsubscribe !== unsubscribe) {
-              // cleanup the old provider
-              this.unsubscribe();
-            }
+    const event = new ContextEvent(
+      this.context,
+      (value, unsubscribe) => {
+        this.connected = true
+        // some providers will pass an unsubscribe function indicating they may provide future values
+        if (this.unsubscribe) {
+          // if the unsubscribe function changes this implies we have changed provider
+          if (this.unsubscribe !== unsubscribe) {
+            // cleanup the old provider
+            this.unsubscribe();
           }
+        }
 
-          const _host = this.host as any
-          
-          if (!this.field) {
-            _host[this.name] = value;
-          } else if (
-            !isEqual(_host[this.name], value[this.field])
-          ) {
-            _host[this.name] = value[this.field]
-          } else {
-            this.unsubscribe = unsubscribe;
-            return
-          }
-
-          this.host.requestUpdate();
+        const _host = this.host as any
+        
+        if (!this.field) {
+          _host[this.name] = value;
+        } else if (
+          !isEqual(_host[this.name], value[this.field])
+        ) {
+          _host[this.name] = value[this.field]
+        } else {
           this.unsubscribe = unsubscribe;
-        },
-        true
-      )
-    );
+          return
+        }
+
+        this.host.requestUpdate();
+        this.unsubscribe = unsubscribe;
+      },
+      true
+    )
+  
+    this.host.dispatchEvent(event)
+
+    Promise.resolve().then(() => {
+      if (!this.connected) this.host.dispatchEvent(event)
+    })   
   }
 }
 

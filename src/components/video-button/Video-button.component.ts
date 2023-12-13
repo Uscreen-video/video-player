@@ -37,6 +37,7 @@ export class VideoButton extends LitElement {
           name: 'preventOverflow',
           options: {
             boundary: closestElement('video-player', this),
+            padding: 10,
           },
         }, {
           name: 'offset',
