@@ -6,6 +6,7 @@ import { watch } from '../../decorators/watch'
 import { createPopper, Instance as PopperInstance, VirtualElement } from '@popperjs/core'
 import { closestElement } from '../../helpers/closest'
 import { when } from 'lit/directives/when.js'
+import { isDeepAssigned } from '../../helpers/slot'
 
 const generateGetBoundingClientRect = (x = 0, y = 0) => () => new DOMRect(x, y, 0, 0)
 
@@ -45,6 +46,9 @@ export class VideoSlider extends LitElement {
 
   @state()
   isHovered = false
+
+  @state()
+  hasCustomTooltip = false
 
   hoverPosition = '0'
 
@@ -137,6 +141,10 @@ export class VideoSlider extends LitElement {
     emit(this, 'hovering', { position: computedPosition })
   }
 
+  handleSlotChange = (e: Event & { target: HTMLSlotElement }) => {
+    this.hasCustomTooltip = isDeepAssigned(e.target)
+  }
+
   createPopper(element: HTMLElement) {
     this.virtualPopper = {
       getBoundingClientRect: generateGetBoundingClientRect(),
@@ -186,9 +194,10 @@ export class VideoSlider extends LitElement {
         />
         ${when(this.withTooltip && !this.disabled, () => html`
           <div class="tooltip" part="tooltip">
-            <slot name="tooltip">
-              ${this.tooltipText}
-            </slot>
+            <slot name="tooltip" @slotchange=${this.handleSlotChange}></slot>
+            ${when(!this.hasCustomTooltip, () => html`
+              <div class="inner">${this.tooltipText}</div>
+            `)}
           </div>
         `)}
         <slot></slot>

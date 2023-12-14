@@ -341,7 +341,7 @@ export class VideoContainer extends LitElement {
 
   @eventOptions({ capture: true })
   handleClick() {
-    this.togglePlay()
+    this.command(Types.Command.togglePlay)
   }
 
   @listen(Types.Command.setVolume)

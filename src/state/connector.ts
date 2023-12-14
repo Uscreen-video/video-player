@@ -22,7 +22,7 @@ export class ContextConsumer<
     this.host.addController(this);
   }
 
-  connected = false
+  connected = false;
 
   private unsubscribe?: () => void;
 
