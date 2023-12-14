@@ -1,16 +1,18 @@
 import { createCommand, createState, dispatch, listen, Types } from '../../state'
 import { unsafeCSS, LitElement, html, CSSResultGroup } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
-import styles from './Video-player.styles.css?inline'
-import '../video-controls'
-import '../video-container'
-import '../video-chromecast'
 import { FullscreenController } from './controllers/Fullscreen'
 import { IdleController } from './controllers/Idle'
 import { KeyboardController } from './controllers/Keyboard'
 import { emit } from '../../helpers/event'
 import { Action, MuxParams } from '../../types'
 import { watch } from '../../decorators/watch'
+import styles from './Video-player.styles.css?inline'
+
+import '../video-controls'
+import '../video-container'
+import '../video-chromecast'
+import '../video-errors-manager'
 
 @customElement('video-player')
 export class VideoPlayer extends LitElement {
@@ -114,6 +116,9 @@ export class VideoPlayer extends LitElement {
         <slot name="video"></slot>
         <slot name="chromecast">
           <video-chromecast></video-chromecast>
+        </slot>
+        <slot name="errors">
+          <video-errors-manager></video-errors-manager>
         </slot>
       </video-container>
       <slot></slot>
