@@ -7,11 +7,12 @@ import styles from './Video-container.styles.css?inline'
 import type Hls from 'hls.js'
 import { getBufferedEnd } from '../../helpers/buffer'
 import { connectMuxData } from '../../helpers/mux'
-import { mapCueListToState } from '../../helpers/cue'
 import { createProvider, StorageProvider } from '../../helpers/storage'
 import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
 import '../buttons/Play'
+import { subtitlesController, SubtitlesController } from './subtitles'
+import HLS from 'hls.js'
 
 const END_OF_STREAM_SECONDS = 99999
 
@@ -29,15 +30,13 @@ const getVideoDuration = (video: HTMLVideoElement) => video.duration === Infinit
 export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
+  private subtitles: SubtitlesController
 
   hls: Hls
   initTime: number
 
   @queryAssignedElements({ selector: 'video', flatten: true })
   videos: HTMLVideoElement[]
-
-  @connect('activeTextTrack')
-  activeTextTrack: string
 
   @connect('poster')
   poster: string
@@ -173,22 +172,12 @@ export class VideoContainer extends LitElement {
     })
   }
 
-  private _enableTextTrack(lang: string) {
-    this.videoTracks.forEach(({ track, srclang }) => {
-      track.mode = srclang === lang ? 'showing' : 'hidden'
-    })
-  }
-
   @listen(Types.Command.enableTextTrack)
   enableTextTrack({ lang }: { lang: string }) {    
-    this._enableTextTrack(lang)
     dispatch(this, Types.Action.selectTextTrack, {
       activeTextTrack: lang
     })
-    const activeTrack = this.videoTracks.find(t => t.track.mode === 'showing')
-    if (activeTrack) {
-      dispatch(this, Types.Action.cues, { cues: mapCueListToState(activeTrack.track.activeCues) })
-    }
+    this.subtitles.enableTextTrack(lang)
   }
 
   @listen(Types.Command.setPlaybackRate, { canPlay: true })
@@ -231,8 +220,6 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
-    const HLS = (await import('hls.js/dist/hls.light.min.js')).default
-
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()
@@ -281,6 +268,8 @@ export class VideoContainer extends LitElement {
           })
         }
       }
+
+      this.hls.subtitleDisplay = false
     })
     
     this.hls.loadSource(this.videoSource);
@@ -349,20 +338,6 @@ export class VideoContainer extends LitElement {
     }
   }
 
-  @eventOptions({ capture: true })
-  handleCueChange({ target }: { target: HTMLTrackElement }) {
-    if (target.track.mode === 'showing') {
-      const activeTextTrack = target.srclang
-
-      if (activeTextTrack !== this.activeTextTrack) {
-        dispatch(this, Types.Action.selectTextTrack, {
-          activeTextTrack
-        })
-      }
-
-      dispatch(this, Types.Action.cues, { cues: mapCueListToState(target.track.activeCues) })
-    }
-  }
 
   @eventOptions({ capture: true })
   handleClick() {
@@ -417,14 +392,14 @@ export class VideoContainer extends LitElement {
     if (typeof savedSettings.isMuted === 'boolean') {
       this.videos[0].muted = savedSettings.isMuted
     }
-
-    if (typeof savedSettings.activeTextTrack === 'string') {
-      this._enableTextTrack(savedSettings.activeTextTrack)
-    }
-
+    
     if (typeof savedSettings.volume === 'number') {
       this.videos[0].volume = savedSettings.volume
     }
+    
+    setTimeout(() => {
+      this.subtitles = subtitlesController(this, this.videos[0], this.hls, savedSettings.activeTextTrack)
+    }, 500)
 
     const [{
       autoplay, muted, poster,
@@ -446,7 +421,6 @@ export class VideoContainer extends LitElement {
       isMuted: muted,
       playbackRate,
       isSourceSupported: !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource),
-      textTracks: this.videoCues,
       ...savedSettings
     })
 
@@ -505,7 +479,6 @@ export class VideoContainer extends LitElement {
         @enterpictureinpicture=${this.handleVideoEvent}
         @leavepictureinpicture=${this.handleVideoEvent}
         @progress=${this.handleVideoEvent}
-        @cuechange=${this.handleCueChange}
         @click=${this.handleClick}
         @dblclick=${this.handleDblClick}
         @webkitcurrentplaybacktargetiswirelesschanged=${this.handleVideoEvent}
@@ -530,18 +503,6 @@ export class VideoContainer extends LitElement {
     return Array.from(this.videos[0].querySelectorAll('source')).map(s => ({
       type: s.type,
       src: s.src
-    }))
-  }
-
-  get videoTracks() {
-    return Array.from(this.videos[0].querySelectorAll('track'))
-  }
-
-  get videoCues() {
-    return this.videoTracks.map(track => ({
-      src: track.src,
-      lang: track.srclang,
-      label: track.label,
     }))
   }
 

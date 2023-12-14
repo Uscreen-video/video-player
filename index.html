@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite + Lit + TS</title>
+    <script type="module" src="./index.js"></script>
+  </head>
+  <body>
+    <video-player storage-key="uscreen:player" idle-timeout="3000">
+      <video
+        preload="metadata"
+        slot="video"
+        title="My test video"
+        poster="https://alpha.uscreencdn.com/video_thumbnails/VRbT3_aS41zh3A.jpg?key1=/gGNqWB2hryMcnePnJwf9zqzLKXuj4oV1J+iiEG33FEWdQ6VvzRehSJE9SGr0K1M&key2=bba1ecd75ecd5d9d0a8013577f4d585f"
+      >
+        <source 
+          src=" https://mtoczko.github.io/hls-test-streams/test-vtt-ts-segments/playlist.m3u8"
+          type="application/x-mpegURL"
+        />
+        <track
+          label="Spanish "
+          kind="metadata" 
+          srcLang="es_1"
+          src="./mocks/captions_pt.vtt"
+        />
+        <track
+          label="English "
+          kind="metadata" 
+          srcLang="en_1"
+          src="./mocks/captions_jp.vtt"
+        />
+      </video>
+      <video-controls>
+        <video-timeline>
+          <video-timer></video-timer>
+        </video-timeline>
+        <video-play-button>
+        </video-play-button>
+        <video-forward-button>
+        </video-forward-button>
+        <video-backward-button>
+        </video-backward-button>
+        <video-volume-button>
+        </video-volume-button>
+        <video-volume-control></video-volume-control>
+        <hr />
+        <video-subtitles-button>
+        </video-subtitles-button>
+        <video-settings-button>
+        </video-settings-button>
+        <video-airplay-button></video-airplay-button>
+        <video-pip-button>
+        </video-pip-button>
+        <video-chromecast-button>
+        </video-chromecast-button>
+        <video-fullscreen-button>
+        </video-fullscreen-button>
+      </video-controls>
+      <video-cues></video-cues>
+    </video-player>
+  </body>
+</html>

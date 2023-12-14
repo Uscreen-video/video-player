@@ -22,8 +22,11 @@ export class VideoCues extends LitElement {
   @property({ type: Boolean, reflect: true, attribute: 'is-ios' })
   isIos: true
 
+  @connect('isFullscreen')
+  isFullscreen: false
+
   render() {
-    if (this.isIos || !this.activeTextTrack) return null
+    if ((this.isIos && this.isFullscreen) || !this.activeTextTrack) return null
 
     return this.cues.map(cue => html`
       <div class="cue">
