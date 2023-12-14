@@ -195,7 +195,9 @@ export class VideoSlider extends LitElement {
         ${when(this.withTooltip && !this.disabled, () => html`
           <div class="tooltip" part="tooltip">
             <slot name="tooltip" @slotchange=${this.handleSlotChange}></slot>
-            ${when(!this.hasCustomTooltip, () => this.tooltipText)}
+            ${when(!this.hasCustomTooltip, () => html`
+              <div class="inner">${this.tooltipText}</div>
+            `)}
           </div>
         `)}
         <slot></slot>
