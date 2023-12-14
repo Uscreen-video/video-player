@@ -12,7 +12,6 @@ import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
 import '../buttons/Play'
 import { subtitlesController, SubtitlesController } from './subtitles'
-import HLS from 'hls.js'
 
 const END_OF_STREAM_SECONDS = 99999
 
@@ -220,6 +219,8 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
+    const HLS = (await import('hls.js')).default
+
     if (!HLS.isSupported()) return
 
     this.hls?.destroy()
