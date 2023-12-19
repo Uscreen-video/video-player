@@ -31,7 +31,8 @@ export class VideoErrorsManager extends LitElement {
   }
   
   clear = () => {
-    if (this.timeout) clearTimeout(this.timer)
+    if (this.timer) clearTimeout(this.timer)
+    this.timer = 0
     this.message = ''
   }
   
