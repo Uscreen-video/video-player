@@ -85,13 +85,22 @@ export const subtitlesController = (
   
   const onCueChange = (event: Event & { target: TextTrack }) => {
     subtitlesDebug('CUE CHANGE', event.target.label, event.target.kind, event.target.mode)
+    const targetLang = event.target.language || event.target.label
+    
     /**
      * Non native tracks renders via native video cue
      */
     if (!tracksManager.isTrackNative(event.target)) {
+      dispatch(host, Types.Action.cues, { cues: [] })
+      if (event.target.mode === 'showing' && targetLang !== activeTextTrack) {
+        activeTextTrack = targetLang
+        dispatch(host, Types.Action.selectTextTrack, {
+          activeTextTrack: targetLang
+        })
+      }
       return
     }
-    const targetLang = event.target.language || event.target.label
+
     if (targetLang === activeTextTrack) {
       const cues = mapCueListToState(event.target.activeCues)
       dispatch(host, Types.Action.cues, { cues })
