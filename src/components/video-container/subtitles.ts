@@ -45,10 +45,10 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
         const tLang = t.lang || t.name
         if (tLang === lang) {
           hls.subtitleTrack = t.id
+          hls.subtitleDisplay = true
         }
       })
     }
-
     getTracks().forEach(t => {
       if (isTrackNative(t)) {
         t.mode = 'hidden'

@@ -270,7 +270,7 @@ export class VideoContainer extends LitElement {
         }
       }
 
-      this.hls.subtitleDisplay = false
+      this.subtitles = subtitlesController(this, this.videos[0], this.hls, this._storageProvider.get().activeTextTrack)
     })
     
     this.hls.loadSource(this.videoSource);
@@ -398,9 +398,10 @@ export class VideoContainer extends LitElement {
       this.videos[0].volume = savedSettings.volume
     }
     
-    setTimeout(() => {
+    const isSourceSupported = !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource)
+    if (isSourceSupported) {
       this.subtitles = subtitlesController(this, this.videos[0], this.hls, savedSettings.activeTextTrack)
-    }, 500)
+    }
 
     const [{
       autoplay, muted, poster,
@@ -421,7 +422,7 @@ export class VideoContainer extends LitElement {
       isAutoplay: autoplay,
       isMuted: muted,
       playbackRate,
-      isSourceSupported: !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource),
+      isSourceSupported,
       ...savedSettings
     })
 
