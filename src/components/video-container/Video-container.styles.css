@@ -53,6 +53,11 @@ img {
   }
 }
 
+::slotted(video::cue) {
+  font-size: 10px;
+  color: red;
+}
+
 .play-button {
   cursor: pointer;
   position: absolute;

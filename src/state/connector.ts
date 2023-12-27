@@ -23,11 +23,13 @@ export class ContextConsumer<
   }
 
   connected = false;
+
   private unsubscribe?: () => void;
 
   hostConnected(): void {
     this.dispatchRequest();
   }
+
   hostDisconnected(): void {
     if (this.unsubscribe) {
       this.unsubscribe();
