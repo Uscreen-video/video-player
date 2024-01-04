@@ -151,6 +151,7 @@ export class VideoChromecast extends LitElement {
 
       this.targetDevise = this.player?.statusText || ''
     } catch (err) {
+      dispatch(this, Action.setCastStatus, { castAvailable: false })
       console.error(err)
     }
   }
@@ -199,7 +200,7 @@ export class VideoChromecast extends LitElement {
     if (window.chrome?.cast?.isAvailable) {
       this.initChromeCast()
     } else {
-      if (tries++ > 20) dispatch(this, Action.setCastStatus, { castActivated: false })
+      if (tries++ > 20) dispatch(this, Action.setCastStatus, { castAvailable: false })
       else setTimeout(this.handleChromeCastLoad, 250, tries)
     }
 
