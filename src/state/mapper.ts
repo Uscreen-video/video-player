@@ -3,8 +3,8 @@ import { Action, State } from '../types'
 
 export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> = {
   [Action.init]: (s, params) => ({
-    ...s,
     ...initialState,
+    ...s,
     ...params
   }),
   [Action.toggleMuted]: (state) => ({
