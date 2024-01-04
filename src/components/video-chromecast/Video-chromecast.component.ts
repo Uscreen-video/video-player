@@ -151,7 +151,6 @@ export class VideoChromecast extends LitElement {
 
       this.targetDevise = this.player?.statusText || ''
     } catch (err) {
-      dispatch(this, Action.setCastStatus, { castAvailable: false })
       console.error(err)
     }
   }
