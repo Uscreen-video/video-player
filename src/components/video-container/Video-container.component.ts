@@ -55,6 +55,9 @@ export class VideoContainer extends LitElement {
   @connect('castActivated')
   castActivated: string
 
+  @connect('isSourceSupported')
+  isSourceSupported: false
+
   @connect('live')
   live: boolean
 
@@ -246,6 +249,12 @@ export class VideoContainer extends LitElement {
     this.hls.on(HLS.Events.LEVEL_LOADED, () => {
       dispatch(this, Types.Action.canPlay)
     })
+  
+    this.hls.on(HLS.Events.ERROR, (_, error) => {
+      if (error.fatal && error.type === HLS.ErrorTypes.NETWORK_ERROR) {
+        this.command(Types.Command.error, { code: MediaError.MEDIA_ERR_NETWORK })
+      }
+    })
 
     this.hls.on(HLS.Events.LEVEL_UPDATED, (_: unknown, { level }: { level: number }) => {
       dispatch(this, Types.Action.setQualityLevel, {
@@ -282,7 +291,7 @@ export class VideoContainer extends LitElement {
   @eventOptions({ capture: true })
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type
-    const video = e.target
+    const video = this.videos[0]
 
     switch (type) {
       case 'play':
@@ -335,6 +344,12 @@ export class VideoContainer extends LitElement {
         break
       case 'loadedmetadata':
         dispatch(this, Types.Action.canPlay)
+        break
+      case 'error':
+        if (!this.isSourceSupported) return
+        const error = video.error || { code: MediaError.MEDIA_ERR_NETWORK }
+
+        this.command(Types.Command.error, { ...error })
         break
     }
   }
@@ -433,14 +448,6 @@ export class VideoContainer extends LitElement {
         ? savedSettings.playbackRate
         : playbackRate
     })
-
-  }
-
-  @eventOptions({ capture: true })
-  onError(error: { target: HTMLVideoElement }) {
-    if (error.target && error.target.error instanceof MediaError && error.target.error.code === 4) {
-      this.command(Types.Command.initCustomHLS)
-    }
   }
 
   onPlayClick(e: { target: HTMLDivElement }) {
@@ -478,6 +485,8 @@ export class VideoContainer extends LitElement {
         @loadedmetadata=${this.handleVideoEvent}
         @ratechange=${this.handleVideoEvent}
         @volumechange=${this.handleVideoEvent}
+        @error=${this.handleVideoEvent}
+        @abort=${this.handleVideoEvent}
         @enterpictureinpicture=${this.handleVideoEvent}
         @leavepictureinpicture=${this.handleVideoEvent}
         @progress=${this.handleVideoEvent}

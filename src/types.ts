@@ -51,7 +51,10 @@ export enum Command {
   /** Toggles "picture in picture" mode */
   togglePip = 'togglePip',
   /** Toggles live mode */
-  live = 'live'
+  live = 'live',
+  /** Sets error */
+  error = 'error',
+
 }
 
 export enum Action {
