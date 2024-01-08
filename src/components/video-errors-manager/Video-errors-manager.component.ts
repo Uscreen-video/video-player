@@ -1,5 +1,4 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { classMap } from 'lit/directives/class-map.js'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-errors-manager.styles.css?inline'
 import { Types, connect, dispatch, listen } from '../../state'
