@@ -82,7 +82,6 @@ export class VideoSlider extends LitElement {
   protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
     if (!this.withTooltip) return
     this.tooltipPopper?.destroy()
-    this.tooltipPopper = this.createPopper(this.tooltip)
     this.addEventListener('mouseover', this.handleMouseOver)
     this.addEventListener('mouseleave', this.handleMouseLeave)
     this.addEventListener('mousemove', this.handleMouseMove)
@@ -110,12 +109,14 @@ export class VideoSlider extends LitElement {
     if (!this.withTooltip || this.disabled) return
 
     this.isHovered = true
+    this.tooltipPopper = this.createPopper(this.tooltip)
     if (this.overTimeout) {
       window.clearTimeout(this.overTimeout)
     }
 
     this.overTimeout = setTimeout(() => {
       if (!this.isHovered || !this.matches(':hover')) return
+      this.tooltipPopper?.destroy()
       emit(this, 'hoverend')
       this.isHovered = false
     }, 5000)
@@ -123,6 +124,7 @@ export class VideoSlider extends LitElement {
 
   handleMouseLeave() {
     if (!this.withTooltip) return
+    this.tooltipPopper?.destroy()
     emit(this, 'hoverend')
     this.isHovered = false
   }
@@ -155,6 +157,9 @@ export class VideoSlider extends LitElement {
       placement: 'top',
       modifiers: [
         {
+          name: 'flip',
+          enabled: false
+        }, {
           name: 'preventOverflow',
           options: {
             boundary: closestElement('video-player', this),

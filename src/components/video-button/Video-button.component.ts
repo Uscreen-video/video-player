@@ -34,6 +34,10 @@ export class VideoButton extends LitElement {
       placement: this.tooltipPosition,
       modifiers: [
         {
+          name: 'flip',
+          enabled: false
+        },
+        {
           name: 'preventOverflow',
           options: {
             boundary: closestElement('video-player', this),
