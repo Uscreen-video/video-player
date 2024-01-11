@@ -21,6 +21,7 @@ export class VideoProgress extends LitElement {
         value=${ifDefined(this.loading ? undefined : this.value)}
         role="progressbar"
         area-hidden="true"
+        ?inactive=${Number(this.value) <= 0}
       >
         <slot></slot>
       </progress>

@@ -68,14 +68,6 @@ export class VideoSlider extends LitElement {
 
   @watch('value')
   handleValueChange() {
-    if (this.isChanging) return
-    if (this.isPendingUpdate) {
-      setTimeout(() => {
-        this.isPendingUpdate = false
-      }, 200)
-      return
-    }
-  
     this.currentValue = this.value
   }
 
@@ -97,12 +89,10 @@ export class VideoSlider extends LitElement {
 
   handleInput(e: InputEvent & { target: HTMLInputElement }) {
     this.currentValue = this.max * (Number.parseFloat(e.target.value) / 100)
-    this.isChanging = this.isPendingUpdate = true
   }
 
   handleChange() {
     emit(this, 'changed', { value: this.currentValue })
-    this.isChanging = false
   }
 
   handleMouseOver() {

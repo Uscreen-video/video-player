@@ -6,11 +6,19 @@ import { Command } from '../../types'
 import { DependentPropsMixin } from '../../mixins/DependentProps'
 import { timeAsString } from '../../helpers/time'
 import { VideoSlider } from '../video-slider'
+import { classMap } from 'lit/directives/class-map.js'
+import { map } from 'lit/directives/map.js'
+import { watch } from '../../decorators/watch'
 import { when } from 'lit/directives/when.js'
 
 import '../video-progress'
 import '../video-slider'
 
+
+const fractionsConverter = (v: string) => {
+  const values = v.split(',').map(Number).sort((a, b) => a - b)
+  return values[0] ? [0, ...values] : values
+}
 /**
  * @slot - Video-timeline main content
  * */
@@ -21,6 +29,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   @property({ type: Boolean })
   disabled = false
+
+  @property({ type: Array, converter: fractionsConverter })
+  fractions:number[] = [0]
 
   @connect('live')
   live: boolean
@@ -43,7 +54,10 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   @connect('currentTime')
   @state()
-  currentTime: number
+  currentTime = 0
+
+  @state()
+  currentValue = 0
 
   @state()
   isHovering = false
@@ -51,15 +65,43 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @state()
   hoverText = ''
 
+  @state()
+  isChanging?: boolean
+
+  @state()
+  isPendingUpdate?: boolean
+
+  @state()
+  hoverPosition = -1
+
+  @watch('currentTime')
+  handleTimeChange() {
+    if (this.isChanging) return
+    if (this.isPendingUpdate) {
+      setTimeout(() => {
+        this.isPendingUpdate = false
+      }, 200)
+      return
+    }
+    this.currentValue = this.currentTime
+  }
+
+  handleInput(e: InputEvent & { currentTarget: VideoSlider }) {
+    this.currentValue = e.currentTarget.currentValue
+    this.isChanging = this.isPendingUpdate = true
+  }
+
   handleChanged(e: { detail: { value: number } }) {
     const time = e.detail.value
-    this.currentTime = time
     this.command(Command.seek, { time })
+    this.isChanging = false
   }
 
   handleHover = (e: CustomEvent & { target: VideoSlider, detail: { position: number } }) => {
     this.isHovering = true
-    const text = timeAsString(this.duration * (e.detail.position / 100))
+    const hoveredTime = this.duration * (e.detail.position / 100)
+    this.hoverPosition = hoveredTime
+    const text = timeAsString(hoveredTime)
     if (text === this.hoverText) return
     this.hoverText = text
   }
@@ -68,24 +110,42 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
     this.isHovering = false
   }
 
+
   render() {
     const disabled = this.disabled || !this.canPlay
+
     return html`
       <video-slider
         with-tooltip
-        .value=${this.currentTime}
+        .value=${this.currentValue}
         .max=${this.duration}
-        .valueText="${timeAsString(this.currentTime)} of ${timeAsString(this.duration)}"
-        .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentTime)}"
+        .valueText="${timeAsString(this.currentValue)} of ${timeAsString(this.duration)}"
+        .tooltipText="${this.isHovering ? this.hoverText : timeAsString(this.currentValue)}"
         ?disabled=${disabled}
         ?full=${this.live}
         ?loading=${!this.canPlay}
         @changed=${this.handleChanged}
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
+        @input=${this.handleInput}
       >
         ${when(!this.disabled, () => html`
-          <video-progress value=${100 / this.duration * this.buffered}></video-progress>
+        <div class="progress-container" part="progress-container">
+          ${map(this.fractions, (fraction, index) => {
+            const next = this.fractions[index + 1] || this.duration
+            const size = next - fraction
+            return html`
+              <div
+                class="${classMap({ fraction: true, active: this.hoverPosition < next && this.hoverPosition > fraction })}"
+                style="--width: ${100 / this.duration * size}%"
+                data-index=${index}
+              >
+                <video-progress class="buffered" value=${100 / size * (this.buffered - fraction)}></video-progress>
+                <video-progress class="progress" value=${100 / size * (this.currentValue - fraction)}></video-progress>
+              </div>
+            `
+          })}
+        </div>
         `)}
         <slot name="tooltip" slot="tooltip"></slot>
       </video-slider>
