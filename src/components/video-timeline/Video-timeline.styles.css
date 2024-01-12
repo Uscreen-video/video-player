@@ -109,7 +109,8 @@ video-progress {
   position: absolute;
   left: 0;
   top: 50%;
-  transform: translate3d(0, -50%, 0);
+  margin-top: calc(var(--height) / -2);
+  /* transform: translate3d(0, -50%, 0); */
 }
 
 svg {
