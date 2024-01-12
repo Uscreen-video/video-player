@@ -7,7 +7,7 @@ import { ifDefined } from 'lit/directives/if-defined.js'
 export class VideoProgress extends LitElement {
   static styles = unsafeCSS(styles)
 
-  @property({ type: Number })
+  @property({ type: Number, converter: v => Math.min(Math.max(Number(v), 0), 100) })
   value = 0
 
   @property({ type: Boolean })
@@ -21,7 +21,7 @@ export class VideoProgress extends LitElement {
         value=${ifDefined(this.loading ? undefined : this.value)}
         role="progressbar"
         area-hidden="true"
-        ?inactive=${Number(this.value) <= 0}
+        ?inactive=${this.value <= 1}
       >
         <slot></slot>
       </progress>

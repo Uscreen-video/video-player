@@ -37,7 +37,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   live: boolean
 
   @connect('duration')
-  duration: number
+  duration: number = 0
 
   @connect('buffered')
   buffered: number
@@ -113,6 +113,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   render() {
     const disabled = this.disabled || !this.canPlay
+    const fractionShift = 100 / this.clientWidth * 4 // we have 4px margin between fractions
 
     return html`
       <video-slider
@@ -130,22 +131,31 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         @input=${this.handleInput}
       >
         ${when(!this.disabled, () => html`
-        <div class="progress-container" part="progress-container">
-          ${map(this.fractions, (fraction, index) => {
-            const next = this.fractions[index + 1] || this.duration
-            const size = next - fraction
-            return html`
-              <div
-                class="${classMap({ fraction: true, active: this.hoverPosition < next && this.hoverPosition > fraction })}"
-                style="--width: ${100 / this.duration * size}%"
-                data-index=${index}
-              >
-                <video-progress class="buffered" value=${100 / size * (this.buffered - fraction)}></video-progress>
-                <video-progress class="progress" value=${100 / size * (this.currentValue - fraction)}></video-progress>
-              </div>
-            `
-          })}
-        </div>
+          <div class="progress-container" part="progress-container">
+            ${map(this.fractions, (fraction, index) => {
+              const duration = this.duration || 1
+              const next = this.fractions[index + 1] || duration
+              const size = next - fraction
+              return html`
+                <div
+                  style="--width: ${100 / duration * size}%"
+                  class="${classMap({
+                    fraction: true,
+                    active: this.hoverPosition < next && this.hoverPosition > fraction
+                  })}"
+                >
+                  <video-progress
+                    class="buffered"
+                    value=${100 / size * (this.buffered - fraction)}
+                  ></video-progress>
+                  <video-progress
+                    class="progress"
+                    value=${100 / size * (this.currentValue - fraction) - fractionShift * index}
+                  ></video-progress>
+                </div>
+              `
+            })}
+          </div>
         `)}
         <slot name="tooltip" slot="tooltip"></slot>
       </video-slider>
