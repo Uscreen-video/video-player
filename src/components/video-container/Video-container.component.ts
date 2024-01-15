@@ -450,12 +450,6 @@ export class VideoContainer extends LitElement {
     })
   }
 
-  onPlayClick(e: { target: HTMLDivElement }) {
-    if (e.target.nodeName === 'DIV') {
-      this.command(Types.Command.play)
-    }
-  }
-
   _boundingRect: DOMRect
   get boundingRect(): DOMRect {
     this._boundingRect = this._boundingRect || this.getBoundingClientRect()
@@ -501,11 +495,6 @@ export class VideoContainer extends LitElement {
           alt=${this.title} 
           @click=${this.handleClick} 
         />
-      `)}
-      ${when(this.canPlay && !this.played, () => html`
-        <div class="play-button" @click=${this.onPlayClick}>
-          <video-play-button></video-play-button>
-        </div>
       `)}
     `
   }
