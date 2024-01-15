@@ -42,7 +42,7 @@ import './components/Video-condition'
         src={enCaptions}
       />
     </video>
-    <video-condition query="canPlay==true,played!=true">
+    <video-condition query="canPlay==true&&played!=true">
       <video-play-button
         without-tooltip
         slot="true"

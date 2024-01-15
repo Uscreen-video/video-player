@@ -5,9 +5,11 @@ import { connect, context } from '../../state'
 import { State } from '../../types'
 import { ContextEvent } from '@lit/context'
 
-const regex = /^(\w+)\s*([><]=?|==|!=)\s*(\w+)$/
+const comparatorsRegexp = /^(\w+)\s*([><]=?|==|!=)\s*(\w+)$/
+const operatorRegexp = /(\&\&|\|\|)/g
 
 type Comparator = '>' | '>=' | '<=' | '<' | '==' | '!='
+type Operator = '&&' | '||'
 
 type Query = {
   key: keyof State,
@@ -46,16 +48,17 @@ export class VideoCondition extends LitElement {
   isMatching: boolean
 
   _queries: Query[]
+  _operators: Operator[]
   _connected = false
   _unsubscribe: any
 
   connectedCallback(): void {
     super.connectedCallback()
+    this._operators = this.query.match(operatorRegexp) as Operator[]
     this._queries = this.query
-      .split(',')
+      .split(operatorRegexp)
       .map((string): Query => {
-        const match = string.trim().match(regex)
-        console.log(string)
+        const match = string.trim().match(comparatorsRegexp)
         if (!match) return
         
         return {
@@ -67,7 +70,7 @@ export class VideoCondition extends LitElement {
         }
       })
       .filter(i => i)
-    
+
     this.connectContext()
   }
 
@@ -77,16 +80,15 @@ export class VideoCondition extends LitElement {
 
   connectContext() {
     const event = new ContextEvent(context, (value, unsubscribe) => {
-      // some providers will pass an unsubscribe function indicating they may provide future values
-      if (this._unsubscribe) {
-        // if the unsubscribe function changes this implies we have changed provider
-        if (this._unsubscribe !== unsubscribe) {
-          // cleanup the old provider
-          this._unsubscribe();
-        }
+      if (this._unsubscribe && this._unsubscribe !== unsubscribe) {
+        this._unsubscribe()
       }
 
-      const isMatching = this._queries.every(({ key, compare }) => compare(value[key]))
+      const isMatching = this._queries.reduce((acc, { key, compare }, index) => {
+        const eq = compare(value[key])
+        return !index || this._operators[index - 1] === '||' ?  acc || eq : acc && eq
+      }, false)
+
       if (this.isMatching !== isMatching) {
         this.isMatching = isMatching
       } else {
