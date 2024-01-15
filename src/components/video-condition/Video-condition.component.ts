@@ -77,28 +77,26 @@ export class VideoCondition extends LitElement {
 
   connectContext() {
     const event = new ContextEvent(context, (value, unsubscribe) => {
-        // some providers will pass an unsubscribe function indicating they may provide future values
-        if (this._unsubscribe) {
-          // if the unsubscribe function changes this implies we have changed provider
-          if (this._unsubscribe !== unsubscribe) {
-            // cleanup the old provider
-            this._unsubscribe();
-          }
+      // some providers will pass an unsubscribe function indicating they may provide future values
+      if (this._unsubscribe) {
+        // if the unsubscribe function changes this implies we have changed provider
+        if (this._unsubscribe !== unsubscribe) {
+          // cleanup the old provider
+          this._unsubscribe();
         }
+      }
 
-        const isMatching = this._queries.every(({ key, compare }) => compare(value[key]))
-        if (this.isMatching !== isMatching) {
-          this.isMatching = isMatching
-        } else {
-          this._unsubscribe = unsubscribe
-          return
-        }
-
-        this.requestUpdate()
+      const isMatching = this._queries.every(({ key, compare }) => compare(value[key]))
+      if (this.isMatching !== isMatching) {
+        this.isMatching = isMatching
+      } else {
         this._unsubscribe = unsubscribe
-      },
-      true
-    )
+        return
+      }
+
+      this.requestUpdate()
+      this._unsubscribe = unsubscribe
+    }, true)
   
     this.dispatchEvent(event)
     Promise.resolve().then(() => {
