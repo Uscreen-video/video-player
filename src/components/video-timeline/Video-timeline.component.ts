@@ -140,6 +140,10 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
               const duration = this.duration || 1
               const next = this.segments[index + 1] || duration
               const size = next - segment
+              const number = 100 / this.sliderNode?.clientWidth * 16
+              const totalPercents = 100 / duration * this.currentValue 
+              const addendum = (number / 2) * (50 - totalPercents) / 50
+              const progressValue = 100 / size * (this.currentValue - segment) - (segmentShift * index) + addendum
               return html`
                 <div
                   style="--width: ${100 / duration * size}%"
@@ -154,7 +158,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
                   ></video-progress>
                   <video-progress
                     class="progress"
-                    .value=${100 / size * (this.currentValue - segment) - segmentShift * index}
+                    .value=${progressValue}
                   ></video-progress>
                 </div>
               `
