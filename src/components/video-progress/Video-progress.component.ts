@@ -18,9 +18,10 @@ export class VideoProgress extends LitElement {
       <progress
         min="0"
         max="100"
-        value=${ifDefined(this.loading ? undefined : this.value)}
+        value=${ifDefined(this.loading ? undefined : Math.min(Math.max(Number(this.value), 0), 100).toFixed(3))}
         role="progressbar"
         area-hidden="true"
+        ?inactive=${this.value <= 0}
       >
         <slot></slot>
       </progress>

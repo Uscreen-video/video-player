@@ -1,11 +1,15 @@
 :host {
   --radius: var(--border-radius, calc(var(--height) / 2));
-  display: contents;
+  --bar-radius: var(--border-radius, calc(var(--height) / 2));
+
+  display: block;
+  width: 100%;
+  height: var(--height);
 }
 
 progress {
   -webkit-appearance: none;
-  background: transparent;
+  background: var(--background, transparent);
   overflow: hidden;
   border: 0;
   outline: 0;
@@ -19,26 +23,30 @@ progress {
   top: 50%;
   width: 100%;
 
+  &[inactive] {
+    --color: transparent!important;
+  }
+
   &::-webkit-progress-bar {
-    background: transparent;
+    background: var(--background, transparent);
+    border-radius: var(--bar-radius);
   }
 
   &::-webkit-progress-value {
     background: var(--color);
     border-radius: var(--radius);
-    min-width: var(--height);
-    transition: width 0.2s ease;
+    border-radius: var(--bar-radius);
+    min-width: 0;
   }
 
   &::-moz-progress-bar {
     background: var(--color);
     border-radius: var(--radius);
-    min-width: var(--height);
-    transition: width 0.2s ease;
+    border-radius: var(--bar-radius);
+    min-width: 0;
   }
 
   &::-ms-fill {
-    border-radius: var(--radius);
-    transition: width 0.2s ease;
+    border-radius: var(--bar-radius);
   }
 }
