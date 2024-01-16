@@ -35,15 +35,15 @@ progress {
   &::-webkit-progress-value {
     background: var(--color);
     border-radius: var(--radius);
-    min-width: var(--height);
     border-radius: var(--bar-radius);
+    min-width: 0;
   }
 
   &::-moz-progress-bar {
     background: var(--color);
     border-radius: var(--radius);
-    min-width: var(--height);
     border-radius: var(--bar-radius);
+    min-width: 0;
   }
 
   &::-ms-fill {

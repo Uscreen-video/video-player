@@ -1,5 +1,5 @@
 import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property, state } from 'lit/decorators.js'
+import { customElement, property, query, state } from 'lit/decorators.js'
 import styles from './Video-timeline.styles.css?inline'
 import { connect, createCommand } from '../../state'
 import { Command } from '../../types'
@@ -15,10 +15,11 @@ import '../video-progress'
 import '../video-slider'
 
 
-const fractionsConverter = (v: string) => {
+const segmentConverter = (v: string) => {
   const values = v.split(',').map(Number).sort((a, b) => a - b)
   return values[0] ? [0, ...values] : values
 }
+
 /**
  * @slot - Video-timeline main content
  * */
@@ -30,8 +31,8 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @property({ type: Boolean })
   disabled = false
 
-  @property({ type: Array, converter: fractionsConverter })
-  fractions:number[] = [0]
+  @property({ type: Array, converter: segmentConverter })
+  segments:number[] = [0]
 
   @connect('live')
   live: boolean
@@ -51,6 +52,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   @property({ type: Boolean, attribute: 'full-width', reflect: true })
   fullWidth = false
+
+  @query('video-slider')
+  sliderNode: VideoSlider
 
   @connect('currentTime')
   @state()
@@ -113,7 +117,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   render() {
     const disabled = this.disabled || !this.canPlay
-    const fractionShift = 100 / this.clientWidth * 4 // we have 4px margin between fractions
+    const segmentShift = 100 / this.sliderNode?.clientWidth * 4 // we have 4px margin between fractions
 
     return html`
       <video-slider
@@ -132,25 +136,25 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
       >
         ${when(!this.disabled, () => html`
           <div class="progress-container" part="progress-container">
-            ${map(this.fractions, (fraction, index) => {
+            ${map(this.segments, (segment, index) => {
               const duration = this.duration || 1
-              const next = this.fractions[index + 1] || duration
-              const size = next - fraction
+              const next = this.segments[index + 1] || duration
+              const size = next - segment
               return html`
                 <div
                   style="--width: ${100 / duration * size}%"
                   class="${classMap({
                     fraction: true,
-                    active: this.hoverPosition < next && this.hoverPosition > fraction
+                    active: this.hoverPosition < next && this.hoverPosition > segment
                   })}"
                 >
                   <video-progress
                     class="buffered"
-                    .value=${100 / size * (this.buffered - fraction)}
+                    .value=${100 / size * (this.buffered - segment) - segmentShift * index}
                   ></video-progress>
                   <video-progress
                     class="progress"
-                    .value=${100 / size * (this.currentValue - fraction) - fractionShift * index}
+                    .value=${100 / size * (this.currentValue - segment) - segmentShift * index}
                   ></video-progress>
                 </div>
               `
