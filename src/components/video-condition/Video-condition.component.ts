@@ -1,7 +1,6 @@
-import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property, query, state } from 'lit/decorators.js'
-import styles from './Video-condition.styles.css?inline'
-import { connect, context } from '../../state'
+import { LitElement, html } from 'lit'
+import { customElement, property } from 'lit/decorators.js'
+import { context } from '../../state'
 import { State } from '../../types'
 import { ContextEvent } from '@lit/context'
 
@@ -24,7 +23,7 @@ const typeValue = (value: any) => {
   }
 }
 
-const compare = (
+const createCompare = (
   { comparator, value: needed }: { comparator: Comparator, value: any }
 ) => (
   value: any
@@ -39,12 +38,10 @@ const compare = (
 
 @customElement('video-condition')
 export class VideoCondition extends LitElement {
-  static styles = unsafeCSS(styles)
-
   @property()
   query?: string
 
-  @property({ type: Boolean, reflect: true, attribute: 'matching'})
+  @property({ type: Boolean, reflect: true, attribute: 'matching' })
   isMatching: boolean
 
   _queries: Query[]
@@ -59,11 +56,11 @@ export class VideoCondition extends LitElement {
       .split(operatorRegexp)
       .map((string): Query => {
         const match = string.trim().match(comparatorsRegexp)
-        if (!match) return
+        if (!match) return undefined
         
         return {
           key: match[1] as keyof State,
-          compare: compare({
+          compare: createCompare({
             comparator: match[2] as Comparator,
             value: typeValue(match[3])
           }),
@@ -84,20 +81,11 @@ export class VideoCondition extends LitElement {
         this._unsubscribe()
       }
 
-      const isMatching = this._queries.reduce((acc, { key, compare }, index) => {
-        const eq = compare(value[key])
-        return !index || this._operators[index - 1] === '||' ?  acc || eq : acc && eq
-      }, false)
-
-      if (this.isMatching !== isMatching) {
-        this.isMatching = isMatching
-      } else {
-        this._unsubscribe = unsubscribe
-        return
-      }
-
-      this.requestUpdate()
       this._unsubscribe = unsubscribe
+      this.isMatching = this._queries.reduce((acc, { key, compare }, index) => {
+        const isEq = compare(value[key])
+        return !index || this._operators[index - 1] === '||' ?  acc || isEq : acc && isEq
+      }, false)
     }, true)
   
     this.dispatchEvent(event)
