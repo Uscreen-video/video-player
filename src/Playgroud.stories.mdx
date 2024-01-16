@@ -19,6 +19,7 @@ import './components/buttons/Settings'
 import './components/buttons/Airplay'
 import './components/buttons/ChromeCast'
 import './components/buttons/Pip'
+import './components/Video-condition'
 
 <Meta title="Playground" />
 
@@ -41,6 +42,13 @@ import './components/buttons/Pip'
         src={enCaptions}
       />
     </video>
+    <video-condition query="canPlay == true && played != true">
+      <video-play-button
+        without-tooltip
+        slot="true"
+        style={{ position: 'absolute', top: 50, left: 50 }}
+      ></video-play-button>
+    </video-condition>
     <video-controls>
       <video-timeline>
         <video-timer></video-timer>

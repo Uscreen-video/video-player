@@ -1,12 +1,7 @@
 import { Context, ContextType, ContextEvent } from '@lit/context'
 import { ReactiveController, ReactiveElement } from 'lit';
 import { type Interface } from '@lit/reactive-element/decorators/base';
-
-const isEqual = (a: any, b: any) => {
-  if (typeof a !== typeof b) return false
-  if (typeof a === 'object') return Object.is(a, b)
-  return a === b
-}
+import { isEqual } from '../helpers/isEqual';
 
 export class ContextConsumer<
   C extends Context<unknown, unknown>,

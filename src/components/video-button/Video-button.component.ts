@@ -17,6 +17,9 @@ export class VideoButton extends LitElement {
   @property({ type: Number, attribute: 'tooltip-offset' })
   tooltipOffset = 40
 
+  @property({ type: Boolean, attribute: 'without-tooltip' })
+  withoutTooltip = false
+
   @property({ attribute: 'tooltip-position' })
   tooltipPosition: Placement = 'top'
 
@@ -54,7 +57,7 @@ export class VideoButton extends LitElement {
   }
   
   createTooltip() {
-    if (this.tooltip) {
+    if (!this.withoutTooltip && this.tooltip) {
       this.tooltipPopper = this.createPopper(this.tooltip)
     }
   }
