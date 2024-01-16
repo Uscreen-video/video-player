@@ -117,8 +117,6 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   render() {
     const disabled = this.disabled || !this.canPlay
-    const segmentShift = 100 / this.sliderNode?.clientWidth * 4 // we have 4px margin between fractions
-
     return html`
       <video-slider
         with-tooltip
@@ -134,40 +132,44 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         @hoverend=${this.handleHoverEnd}
         @input=${this.handleInput}
       >
-        ${when(!this.disabled, () => html`
-          <div class="progress-container" part="progress-container">
-            ${map(this.segments, (segment, index) => {
-              const duration = this.duration || 1
-              const next = this.segments[index + 1] || duration
-              const size = next - segment
-              const number = 100 / this.sliderNode?.clientWidth * 16
-              const totalPercents = 100 / duration * this.currentValue 
-              const addendum = (number / 2) * (50 - totalPercents) / 50
-              const progressValue = 100 / size * (this.currentValue - segment) - (segmentShift * index) + addendum
-              return html`
-                <div
-                  style="--width: ${100 / duration * size}%"
-                  class="${classMap({
-                    fraction: true,
-                    active: this.hoverPosition < next && this.hoverPosition > segment
-                  })}"
-                >
-                  <video-progress
-                    class="buffered"
-                    .value=${100 / size * (this.buffered - segment) - segmentShift * index}
-                  ></video-progress>
-                  <video-progress
-                    class="progress"
-                    .value=${progressValue}
-                  ></video-progress>
-                </div>
-              `
-            })}
-          </div>
-        `)}
+        ${when(!this.disabled, this.renderBars)}
         <slot name="tooltip" slot="tooltip"></slot>
       </video-slider>
       <slot></slot>
+    `
+  }
+  
+  renderBars = () => {
+    const sliderLength = 100 / this.sliderNode?.clientWidth
+    const segmentShift = sliderLength * 2
+    const thumbSift =  (sliderLength * 16 / 2) * (50 - (100 / this.duration * this.currentValue )) / 50 
+    const duration = this.duration || 1
+
+    return html`
+      <div class="progress-container" part="progress-container">
+        ${map(this.segments, (segment, index) => {
+          const next = this.segments[index + 1] || duration
+          const length = next - segment
+          return html`
+            <div
+              style="--width: ${100 / duration * length}%"
+              class="${classMap({
+                fraction: true,
+                active: this.hoverPosition < next && this.hoverPosition > segment
+              })}"
+            >
+              <video-progress
+                class="buffered"
+                .value=${100 / length * (this.buffered - segment) - segmentShift * index}
+              ></video-progress>
+              <video-progress
+                class="progress"
+                .value=${100 / length * (this.currentValue - segment) - (segmentShift * index) + thumbSift}
+              ></video-progress>
+            </div>
+          `
+        })}
+      </div>
     `
   }
 }
