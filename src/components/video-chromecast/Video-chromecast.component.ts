@@ -189,8 +189,12 @@ export class VideoChromecast extends LitElement {
   }
 
   loadChromeCastFramework() {
+    const existingScript = document.getElementById('uscreen-player-chromecast-framework')
+    if (existingScript) return
+
     const script = document.createElement('script')
     script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'
+    script.id = 'uscreen-player-chromecast-framework'
     script.addEventListener('load', () => this.handleChromeCastLoad(0))
     document.head.appendChild(script)
   }
