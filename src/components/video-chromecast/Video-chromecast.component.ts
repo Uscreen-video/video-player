@@ -185,7 +185,7 @@ export class VideoChromecast extends LitElement {
       .values(cast.framework.RemotePlayerEventType)
       .forEach(event => this.controller.addEventListener(event, this.handleCastEvent))
   
-    dispatch(this, Action.castAvailable)
+    dispatch(this, Action.setCastStatus, { castAvailable: true })
   }
 
   loadChromeCastFramework() {
@@ -199,8 +199,11 @@ export class VideoChromecast extends LitElement {
     if (window.chrome?.cast?.isAvailable) {
       this.initChromeCast()
     } else {
-      if (tries++ > 20) dispatch(this, Action.setCastStatus, { castAvailable: false })
-      else setTimeout(this.handleChromeCastLoad, 250, tries)
+      if (tries++ > 20) {
+        dispatch(this, Action.setCastStatus, { castAvailable: false })
+      } else {
+        setTimeout(this.handleChromeCastLoad, 250, tries)
+      }
     }
 
   }

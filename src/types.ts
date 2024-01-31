@@ -80,7 +80,6 @@ export enum Action {
   updateAirplayStatus = 'updateAirplayStatus',
   toggleAirplay = 'toggleAirplay',
   togglePip = 'togglePip',
-  castAvailable = 'castAvailable',
   setCastStatus = 'setCastStatus',
   setBuffer = 'setBuffer',
   setMuxParams = 'setMuxParams',
