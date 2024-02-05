@@ -185,12 +185,16 @@ export class VideoChromecast extends LitElement {
       .values(cast.framework.RemotePlayerEventType)
       .forEach(event => this.controller.addEventListener(event, this.handleCastEvent))
   
-    dispatch(this, Action.castAvailable)
+    dispatch(this, Action.setCastStatus, { castAvailable: true })
   }
 
   loadChromeCastFramework() {
+    const existingScript = document.getElementById('uscreen-player-chromecast-framework')
+    if (existingScript) return
+
     const script = document.createElement('script')
     script.src = 'https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1'
+    script.id = 'uscreen-player-chromecast-framework'
     script.addEventListener('load', () => this.handleChromeCastLoad(0))
     document.head.appendChild(script)
   }
@@ -199,8 +203,11 @@ export class VideoChromecast extends LitElement {
     if (window.chrome?.cast?.isAvailable) {
       this.initChromeCast()
     } else {
-      if (tries++ > 20) dispatch(this, Action.setCastStatus, { castAvailable: false })
-      else setTimeout(this.handleChromeCastLoad, 250, tries)
+      if (tries++ > 20) {
+        dispatch(this, Action.setCastStatus, { castAvailable: false })
+      } else {
+        setTimeout(this.handleChromeCastLoad, 250, tries)
+      }
     }
 
   }

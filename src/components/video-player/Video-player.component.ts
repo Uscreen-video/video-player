@@ -114,9 +114,7 @@ export class VideoPlayer extends LitElement {
     return html`
       <video-container storage-key=${this.storageKey}>
         <slot name="video"></slot>
-        <slot name="chromecast">
-          <video-chromecast></video-chromecast>
-        </slot>
+        <slot name="chromecast"></slot>
         <slot name="errors">
           <video-errors-manager></video-errors-manager>
         </slot>
