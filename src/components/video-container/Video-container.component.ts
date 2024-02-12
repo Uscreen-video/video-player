@@ -12,6 +12,7 @@ import { MuxParams } from '../../types'
 import { when } from 'lit/directives/when.js'
 import '../buttons/Play'
 import { subtitlesController, SubtitlesController } from './subtitles'
+import { sourcesController, SourcesController } from './sources'
 
 const END_OF_STREAM_SECONDS = 99999
 
@@ -30,6 +31,7 @@ export class VideoContainer extends LitElement {
   static styles = unsafeCSS(styles)
   public command = createCommand(this)
   private subtitles: SubtitlesController
+  private sources: SourcesController
 
   hls: Hls
   initTime: number
@@ -213,6 +215,7 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.init, { isSourceSupported: true })
   initNative() {
+    this.sources.enableSource()
     if (this.muxData) connectMuxData(
       this.videos[0],
       { ...this.muxData, player_init_time: this.initTime }
@@ -282,7 +285,8 @@ export class VideoContainer extends LitElement {
       this.subtitles = subtitlesController(this, this.videos[0], this.hls, this._storageProvider.get().activeTextTrack)
     })
     
-    this.hls.loadSource(this.videoSource);
+    this.sources.enableSource()
+    this.hls.loadSource(this.sources.getSrc());
     this.hls.attachMedia(this.videos[0]);
     
     dispatch(this, Types.Action.update, { customHLS: true })
@@ -413,10 +417,13 @@ export class VideoContainer extends LitElement {
       this.videos[0].volume = savedSettings.volume
     }
     
-    const isSourceSupported = !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : Boolean(this.supportedSource)
+    this.sources = sourcesController(this.videos[0])
+  
+    const isSourceSupported = !INIT_NATIVE_HLS_RE.test(navigator.userAgent) ? false : this.sources.isSourceSupported()
     if (isSourceSupported) {
       this.subtitles = subtitlesController(this, this.videos[0], this.hls, savedSettings.activeTextTrack)
     }
+
 
     const [{
       autoplay, muted, poster,
@@ -432,8 +439,8 @@ export class VideoContainer extends LitElement {
       currentTime,
       volume,
       title,
-      sources: this.videoSources,
-      src: this.videoSource,
+      sources: this.sources.allSources(),
+      src: this.sources.getSrc(),
       isAutoplay: autoplay,
       isMuted: muted,
       playbackRate,
@@ -441,13 +448,15 @@ export class VideoContainer extends LitElement {
       ...savedSettings
     })
 
-    this.command(Types.Command.init)
-
     this.command(Types.Command.setPlaybackRate, {
       playbackRate: typeof savedSettings.playbackRate === 'number'
         ? savedSettings.playbackRate
         : playbackRate
     })
+
+    if (this.sources.isLazy()) return
+
+    this.command(Types.Command.init)
   }
 
   _boundingRect: DOMRect
@@ -497,23 +506,5 @@ export class VideoContainer extends LitElement {
         />
       `)}
     `
-  }
-
-  get videoSources(): State['sources'] {
-    return Array.from(this.videos[0].querySelectorAll('source')).map(s => ({
-      type: s.type,
-      src: s.src
-    }))
-  }
-
-  get videoSource() {
-    return this.videos[0].currentSrc ||
-      this.supportedSource?.src ||
-      this.videoSources[0].src
-  }
-
-  get supportedSource() {
-    const [video] = this.videos
-    return this.videoSources.find(s => video.canPlayType(s.type))
   }
 }
