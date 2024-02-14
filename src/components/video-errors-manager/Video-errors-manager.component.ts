@@ -1,4 +1,4 @@
-import { unsafeCSS, LitElement, html } from 'lit'
+import { unsafeCSS, LitElement, html, TemplateResult } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import styles from './Video-errors-manager.styles.css?inline'
 import { Types, connect, dispatch, listen } from '../../state'
@@ -10,13 +10,13 @@ export class VideoErrorsManager extends LitElement {
   timer = 0
 
   @property({ type: Number })
-  timeout = 5000
+  timeout = 10000
 
   @connect('src')
   src: string
 
   @state()
-  message = ''
+  message: string | TemplateResult<any> = ''
 
   @listen(Types.Command.error)
   handleErrors(error: MediaError) {
@@ -25,7 +25,7 @@ export class VideoErrorsManager extends LitElement {
       dispatch(this, Types.Action.update, { canPlay: false })
       this.requestSrc(5)
         .then(() => dispatch(this, Types.Action.update, { canPlay: true, src: this.src + '#' + Math.random().toString(36).slice(2, 7) }))
-        .catch(() => this.print('Maximum connection attempts. Please reload this page', true))
+        .catch(() => this.print(html`The stream could not be fetched after the maximum allowed connection attempts.<br> Please reload this page to try again.`, true))
     }
   }
   
@@ -35,7 +35,7 @@ export class VideoErrorsManager extends LitElement {
     this.message = ''
   }
   
-  print = (message: string, persist = false) => {
+  print = (message: string | TemplateResult<any>, persist = false) => {
     this.message = message
     if (!persist) this.timer = setTimeout(this.clear, this.timeout)
   }
@@ -43,7 +43,7 @@ export class VideoErrorsManager extends LitElement {
   requestSrc = async (attempts: number) => {
     if (!attempts) throw new Error('Video is not available')
   
-    this.print('This stream is currently inactive. Connecting...')
+    this.print(html`The stream is currently not active.<br> Attempting to establish a connection...`)
     await new Promise((resolve) => setTimeout(resolve, this.timeout))
     const { ok } = await fetch(this.src)
     if (!ok) await this.requestSrc(attempts - 1)

@@ -292,7 +292,6 @@ export class VideoContainer extends LitElement {
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type
     const video = this.videos[0]
-
     switch (type) {
       case 'play':
         dispatch(this, Types.Action.play)
