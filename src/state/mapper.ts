@@ -29,10 +29,6 @@ export const stateMapper: Partial<Record<Action, (s: State, v: any) => State>> =
     ...state,
     airplayActivated: !state.airplayActivated
   }),
-  [Action.castAvailable]: (state) => ({
-    ...state,
-    castAvailable: true
-  }),
   [Action.canPlay]: (state) => ({
     ...state,
     canPlay: true

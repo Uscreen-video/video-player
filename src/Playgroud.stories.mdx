@@ -3,6 +3,7 @@ import { Meta, Canvas } from '@storybook/blocks'
 import enCaptions from '../mocks/captions_en.vtt?url'
 
 import './components/video-player'
+import './components/video-chromecast'
 import './components/video-controls'
 import './components/video-timeline'
 import './components/video-timer'
@@ -44,6 +45,7 @@ import './components/Video-condition'
         src={enCaptions}
       />
     </video>
+    <video-chromecast slot="chromecast"></video-chromecast>
     <video-condition query="canPlay == true && played != true">
       <video-play-button
         without-tooltip
