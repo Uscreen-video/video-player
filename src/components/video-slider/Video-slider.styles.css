@@ -28,6 +28,7 @@
 input[type="range"] {
   appearance: none;
   position: relative;
+  font-size: 16px;
   z-index: 2;
   width: 100%;
   height: var(--height);
