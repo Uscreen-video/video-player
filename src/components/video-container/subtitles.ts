@@ -77,6 +77,12 @@ export const subtitlesController = (
   hls: Hls,
   defaultTextTrack?: string
 ) => {
+  if (hls) {
+    // Disable subtitles by default
+    hls.subtitleTrack = -1
+    hls.subtitleDisplay = false
+  }
+
   let activeTextTrack = defaultTextTrack
 
   const tracksManager = videoTextTtracksManager(video, hls)
