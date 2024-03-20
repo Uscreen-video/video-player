@@ -34,7 +34,8 @@
     "build:lib": "vite build",
     "build:types": "tsc --declaration --emitDeclarationOnly",
     "postinstall": "pnpm run manifest",
-    "prepare": "husky"
+    "prepare": "husky",
+    "commitlint": "commitlint --edit"
   },
   "keywords": [
     "lit",
