@@ -14,10 +14,9 @@ export default {
     "@semantic-release/release-notes-generator",
     // "@semantic-release/npm",
     [
-      "@semantic-release/git",
+      "@semantic-release/github",
       {
-        assets: ["package.json", "CHANGELOG.md"],
-        message: "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        assets: ["package.json", "CHANGELOG.md", "dist/**", "types/**"],
       }
     ]
   ]
