@@ -3,6 +3,7 @@
   "description": "Web-components based video player",
   "version": "0.2.0",
   "license": "MIT",
+  "keywords": ["hls", "html5 video", "lit", "player", "video-player", "web-component"],
   "homepage": "https://github.com/Uscreen-video/video-player#readme",
   "author": "Uscreen <support@uscreen.tv> (https://www.uscreen.tv)",
   "bugs": {
@@ -26,7 +27,14 @@
     "dist/**/*",
     "types/**/*"
   ],
-  "keywords": ["hls", "html5 video", "lit", "player", "video-player", "web-component"],
+  "engines": {
+    "node": "^18",
+    "pnpm": "^8"
+  },
+  "packageManager": "pnpm@8.6.0",
+  "cacheDirectories": [
+    ".pnpm-store"
+  ],
   "scripts": {
     "build": "pnpm run clean && pnpm run build:types && pnpm run build:lib",
     "build:lib": "vite build",
