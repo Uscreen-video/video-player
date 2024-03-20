@@ -31,27 +31,51 @@ export class VideoPlayer extends LitElement {
   public state = createState(this);
   public fullscreen = new FullscreenController(this);
 
+  /**
+   * The ID of the element to be used as the fullscreen container.
+   */
   @property({ type: String, attribute: "fullscreen-element" })
   fullscreenContainer: string;
 
+  /**
+   * Indicates whether the player is in idle mode.
+   */
   @property({ type: Boolean, reflect: true })
   idle = false;
 
+  /**
+   * Parameters to be passed to Mux for analytics.
+   */
   @property({ type: Object, attribute: "mux-data" })
   muxData: MuxParams;
 
+  /**
+   * Indicates whether the player should automatically focus on load.
+   */
   @property({ type: Boolean })
   autofocus = false;
 
+  /**
+   * The duration of inactivity before the player enters idle mode (in milliseconds).
+   */
   @property({ type: Number, attribute: "idle-timeout" })
   idleTimeout = 9000;
 
+  /**
+   * The tabindex of the player for keyboard navigation.
+   */
   @property({ type: Number, attribute: true, reflect: true })
   tabindex = 0;
 
+  /**
+   * The key used for storing player state in local storage.
+   */
   @property({ type: String, attribute: "storage-key" })
   storageKey: string;
 
+  /**
+   * The time offset (in seconds) to seek the video to.
+   */
   @property({ type: Number })
   offset: number;
 

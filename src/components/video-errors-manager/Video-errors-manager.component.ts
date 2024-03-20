@@ -9,6 +9,10 @@ export class VideoErrorsManager extends LitElement {
 
   timer = 0;
 
+  /**
+   * The timeout duration (in milliseconds) for displaying error messages before clearing.
+   * If set to 0, error messages will persist until manually cleared.
+   */
   @property({ type: Number })
   timeout = 10000;
 

@@ -37,9 +37,30 @@ const createCompare =
 
 @customElement("video-condition")
 export class VideoCondition extends LitElement {
+  /**
+   * A query string specifying conditions to be evaluated against the application state.
+   * The query string consists of one or more comparison expressions separated by logical operators (&& or ||).
+   * Each comparison expression follows the pattern: "key comparator value", where:
+   * - key: The key of a property in the application state to be compared.
+   * - comparator: The comparison operator (>, >=, <, <=, ==, or !=).
+   * - value: The value to compare against the property in the application state.
+   * Examples of valid comparison expressions:
+   *   - "isActive == true"
+   *   - "volume >= 50"
+   *   - "currentTime < 100"
+   *   - "isMuted != false"
+   * Multiple comparison expressions can be combined using logical operators:
+   *   - "isActive == true && volume >= 50"
+   *   - "currentTime < 100 || isMuted != false"
+   */
   @property()
   query?: string;
 
+  /**
+   * Indicates whether the conditions specified by the query are currently matching the state of the application.
+   * This property reflects the result of evaluating the query against the application state.
+   * If the conditions specified in the query match the state, this property is set to true; otherwise, it is false.
+   */
   @property({ type: Boolean, reflect: true, attribute: "matching" })
   isMatching: boolean;
 

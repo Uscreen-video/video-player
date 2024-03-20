@@ -5,11 +5,17 @@ import styles from "./Video-menu.styles.css?inline";
 import { eventCode, emit } from "../../helpers/event";
 
 type MenuItem = {
+  // The value associated with the menu item
   value: string | number;
+  // The text label of the menu item
   label: string;
+  // Indicates whether the menu item is currently active
   isActive?: boolean;
+  // Icon to display before the label
   iconBefore?: any;
+  // Icon to display after the label
   iconAfter?: any;
+  // Keyboard shortcut for the menu item
   key?: string;
 };
 
@@ -17,9 +23,15 @@ type MenuItem = {
 export class VideoMenu extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * An array of menu items to display.
+   */
   @property({ type: Array })
   items: MenuItem[] = [];
 
+  /**
+   * The title of the menu.
+   */
   @property()
   title: string;
 

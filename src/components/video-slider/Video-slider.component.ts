@@ -21,30 +21,57 @@ const generateGetBoundingClientRect =
 export class VideoSlider extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * The current value of the slider
+   */
   @property({ type: Number })
   value = 0;
 
+  /**
+   * The maximum value allowed on the slider
+   */
   @property({ type: Number })
   max = 1;
 
+  /**
+   * Indicates whether the slider is disabled.
+   */
   @property({ type: Boolean, reflect: true })
   disabled = false;
 
+  /**
+   * Indicates whether the slider should take up full width.
+   */
   @property({ type: Boolean, reflect: true })
   full = false;
 
+  /**
+   * Indicates whether the slider is in a loading state.
+   */
   @property({ type: Boolean, reflect: true })
   loading = false;
 
+  /**
+   * Text to display as the value of the slider.
+   */
   @property({ attribute: "value-text" })
   valueText = "";
 
+  /**
+   * Text to display in the tooltip.
+   */
   @property({ attribute: "tooltip-text" })
   tooltipText = "";
 
+  /**
+   * Determines whether the slider should have a tooltip.
+   */
   @property({ type: Boolean, attribute: "with-tooltip" })
   withTooltip = false;
 
+  /**
+   * Offset for positioning the tooltip relative to the slider.
+   */
   @property({ type: Number, attribute: "tooltip-offset" })
   tooltipOffset = -11;
 

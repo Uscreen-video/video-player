@@ -67,6 +67,11 @@ export class VideoContainer extends LitElement {
   @connect("live")
   live: boolean;
 
+  /**
+   * A unique identifier used for storing and retrieving user preferences related to video playback.
+   * These preferences include volume level, selected quality level, active text track, playback rate, and mute status.
+   * When provided, these preferences are stored in the browser's local storage to maintain user settings across sessions.
+   */
   @property({ type: String, attribute: "storage-key" })
   storageKey: string;
 

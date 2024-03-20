@@ -7,9 +7,16 @@ import { ifDefined } from "lit/directives/if-defined.js";
 export class VideoProgress extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * The current value of the progress bar.
+   * Should be a number between 0 and 100.
+   */
   @property({ type: Number })
   value = 0;
 
+  /**
+   * Indicates whether the progress bar is in a loading state.
+   */
   @property({ type: Boolean })
   loading = false;
 

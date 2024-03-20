@@ -8,6 +8,12 @@ import { timeAsString } from "../../helpers/time";
 export class VideoTimer extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * Specifies the format in which the time information should be displayed by the video timer component.
+   * `left`: Displays the time remaining until the end of the video.
+   * `past`: Displays the time elapsed since the beginning of the video.
+   * `total`: Displays the total duration of the video.
+   */
   @property()
   format: "left" | "past" | "total" = "left";
 

@@ -8,6 +8,9 @@ import { createCommand, connect } from "../../state";
 export class VideoLiveSign extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * Indicates whether the video stream is live.
+   */
   @connect("live")
   live: boolean;
 

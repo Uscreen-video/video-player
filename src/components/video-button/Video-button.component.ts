@@ -18,12 +18,23 @@ export class VideoButton extends LitElement {
   static styles = unsafeCSS(styles);
   public command = createCommand(this);
 
+  /**
+   * Specifies the offset distance of the tooltip from the button.
+   */
   @property({ type: Number, attribute: "tooltip-offset" })
   tooltipOffset = 40;
 
+  /**
+   * Determines whether the button should display a tooltip.
+   * If set to `true`, the tooltip will not be displayed.
+   * Defaults to `false`, meaning the tooltip will be shown by default.
+   */
   @property({ type: Boolean, attribute: "without-tooltip" })
   withoutTooltip = false;
 
+  /**
+   * Specifies the preferred position of the tooltip relative to the button.
+   */
   @property({ attribute: "tooltip-position" })
   tooltipPosition: Placement = "top";
 

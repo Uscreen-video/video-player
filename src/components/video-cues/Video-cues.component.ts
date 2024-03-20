@@ -8,20 +8,35 @@ import { connect } from "../../state";
 export class VideoCues extends LitElement {
   static styles = unsafeCSS(styles);
 
+  /**
+   * Indicates whether the video player is in idle mode.
+   */
   @connect("idle")
   @property({ type: Boolean, reflect: true })
   idle: boolean;
 
+  /**
+   * The currently active text track (e.g., subtitles or captions).
+   */
   @connect("activeTextTrack")
   activeTextTrack: string;
 
+  /**
+   * An array of cues or subtitles to be displayed during video playback.
+   */
   @connect("cues")
   cues: string[];
 
+  /**
+   * Indicates whether the device is an iOS device.
+   */
   @connect("isIos")
   @property({ type: Boolean, reflect: true, attribute: "is-ios" })
   isIos: true;
 
+  /**
+   * Indicates whether the video player is in fullscreen mode.
+   */
   @connect("isFullscreen")
   isFullscreen: false;
 

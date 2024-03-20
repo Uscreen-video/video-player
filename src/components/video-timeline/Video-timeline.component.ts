@@ -30,9 +30,18 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   static styles = unsafeCSS(styles);
   public command = createCommand(this);
 
+  /**
+   * Indicates whether the video timeline is disabled or not.
+   */
   @property({ type: Boolean })
   disabled = false;
 
+  /**
+   * The segments property provides a flexible
+   * mechanism for dividing the video timeline into distinct segments,
+   * enabling enhanced visualization and navigation of the video content
+   * based on different temporal divisions or events.
+   */
   @property({ type: Array, converter: segmentConverter })
   segments: number[] = [0];
 
