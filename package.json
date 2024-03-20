@@ -81,6 +81,6 @@
     "debug": "^4.3.4"
   },
   "lint-staged": {
-    "**/*.js": "prettier --write --ignore-unknown"
+    "src/**/*.ts": "prettier --write --ignore-unknown"
   }
 }
