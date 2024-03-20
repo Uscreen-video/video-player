@@ -96,6 +96,7 @@ export const DependentPropsMixin = <T extends Constructor<LitElement>>(
         dependencyProp.linked.forEach((linkedProp) => {
           // @ts-ignore
           this[linkedProp.propName] =
+            // @ts-ignore
             this[propName] === dependencyProp.value
               ? linkedProp.linkedValue
               : linkedProp.defaultValue;
