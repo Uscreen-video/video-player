@@ -5,7 +5,7 @@ export default {
   branches: [
     "main",
     {
-      name: "rc",
+      name: "next",
       prerelease: true
     }
   ],
