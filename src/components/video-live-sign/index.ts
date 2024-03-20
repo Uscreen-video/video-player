@@ -1,1 +1,1 @@
-export * from './Video-live-sign.component'
+export * from "./Video-live-sign.component";

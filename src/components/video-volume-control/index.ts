@@ -1,1 +1,1 @@
-export * from './Video-volume-control.component'
+export * from "./Video-volume-control.component";

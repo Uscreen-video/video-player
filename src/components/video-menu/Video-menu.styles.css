@@ -14,7 +14,8 @@
 }
 
 .menu {
-  &, & li {
+  &,
+  & li {
     margin: 0;
     padding: 0;
   }
@@ -66,7 +67,7 @@ code {
   font-size: 12px;
   outline: 1px solid var(--menu-item-color);
   box-sizing: border-box;
-  .item:hover &{
+  .item:hover & {
     outline-color: var(--menu-item-color-hover);
   }
 }

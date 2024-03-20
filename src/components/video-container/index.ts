@@ -1,1 +1,1 @@
-export * from './Video-container.component'
+export * from "./Video-container.component";

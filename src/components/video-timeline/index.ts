@@ -1,1 +1,1 @@
-export * from './Video-timeline.component'
+export * from "./Video-timeline.component";

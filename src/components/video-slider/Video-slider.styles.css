@@ -15,8 +15,9 @@
   width: 100%;
 }
 
-:host([disabled]), :host([full]) {
-  --thumb-size: 0!important;
+:host([disabled]),
+:host([full]) {
+  --thumb-size: 0 !important;
 }
 
 .container {
@@ -55,12 +56,13 @@ input[type="range"] {
 
   :host([loading]) & {
     background: linear-gradient(
-      to right, 
-      var(--active-color) 35%, 
-      var(--background-color) 37%, 
+      to right,
+      var(--active-color) 35%,
+      var(--background-color) 37%,
       var(--background-color) 40%,
       var(--active-color) 46%,
-      var(--active-color));
+      var(--active-color)
+    );
     background-size: 200% 200%;
     animation: gradient 3s ease-in-out infinite;
     animation-delay: 2s;
@@ -119,12 +121,14 @@ input[type="range"] {
     user-select: none;
 
     background-image: linear-gradient(
-      to right, 
-      currentColor var(--value, 0%), 
+      to right,
+      currentColor var(--value, 0%),
       transparent var(--value, 0%)
     );
 
-    :host([disabled]) &, :host([loading]) &, :host([full]) & {
+    :host([disabled]) &,
+    :host([loading]) &,
+    :host([full]) & {
       background-image: none;
     }
   }
@@ -161,7 +165,7 @@ input[type="range"] {
   user-select: none;
   pointer-events: none;
   display: none;
-  :host(:hover) &{
+  :host(:hover) & {
     display: block;
   }
 }
@@ -178,10 +182,10 @@ input[type="range"] {
 }
 
 @keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }

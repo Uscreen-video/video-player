@@ -16,7 +16,7 @@
 }
 
 ::slotted(*) {
-  margin-inline-start: .5rem;
+  margin-inline-start: 0.5rem;
 }
 
 video-slider {
@@ -30,7 +30,7 @@ video-slider {
   padding-top: 20px;
 
   &[disabled] {
-    --height: 0.25rem!important;
+    --height: 0.25rem !important;
     --active-color: var(--progress-color);
   }
 
@@ -49,7 +49,7 @@ video-slider {
   --bar-radius: calc(var(--height) / 2) 0 0 calc(var(--height) / 2);
 }
 
-.loading{
+.loading {
   display: block;
   position: relative;
   margin-right: 20px;
@@ -60,7 +60,7 @@ video-slider {
 }
 
 .progress-container {
-  --height: .25rem;
+  --height: 0.25rem;
   position: absolute;
   top: 0;
   width: 100%;
@@ -73,13 +73,14 @@ video-slider {
   height: 100%;
   margin: 0 2px;
   width: calc(var(--width) - 4px);
-  &:first-child, &:last-child {
+  &:first-child,
+  &:last-child {
     width: calc(var(--width) - 2px);
   }
-  &:first-child{
+  &:first-child {
     margin: 0 2px 0 0;
   }
-  &:last-child{
+  &:last-child {
     margin: 0 0 0 2px;
   }
   &:only-child {
@@ -98,10 +99,10 @@ video-slider {
 }
 
 video-slider:hover .active {
-  --height: .5rem;
+  --height: 0.5rem;
 }
 
-video-timer{
+video-timer {
   --text-color: white;
 }
 

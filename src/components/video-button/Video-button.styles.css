@@ -39,7 +39,7 @@ button {
   width: var(--size);
   height: var(--size);
   opacity: 0.8;
-  transition: opacity .2s ease;
+  transition: opacity 0.2s ease;
   & svg {
     display: block;
     width: 100%;
@@ -49,7 +49,7 @@ button {
     opacity: 1;
   }
   &:before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -59,7 +59,8 @@ button {
   }
 }
 
-.tooltip, .menu {
+.tooltip,
+.menu {
   z-index: 1;
   font-family: var(--font);
   position: absolute;

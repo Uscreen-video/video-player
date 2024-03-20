@@ -1,20 +1,20 @@
-import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import styles from './Video-progress.styles.css?inline'
-import { ifDefined } from 'lit/directives/if-defined.js'
+import { unsafeCSS, LitElement, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import styles from "./Video-progress.styles.css?inline";
+import { ifDefined } from "lit/directives/if-defined.js";
 
-@customElement('video-progress')
+@customElement("video-progress")
 export class VideoProgress extends LitElement {
-  static styles = unsafeCSS(styles)
+  static styles = unsafeCSS(styles);
 
   @property({ type: Number })
-  value = 0
+  value = 0;
 
   @property({ type: Boolean })
-  loading = false
+  loading = false;
 
   render() {
-    const value = Math.min(Math.max(Number(this.value), 0), 100).toFixed(3)
+    const value = Math.min(Math.max(Number(this.value), 0), 100).toFixed(3);
     return html`
       <progress
         min="0"
@@ -26,6 +26,6 @@ export class VideoProgress extends LitElement {
       >
         <slot></slot>
       </progress>
-    `
+    `;
   }
 }

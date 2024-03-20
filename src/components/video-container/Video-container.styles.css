@@ -1,4 +1,3 @@
-
 :host {
   --aspect-ratio: 9 / 16;
 
@@ -13,8 +12,8 @@ img {
   background: black;
   top: 0;
   left: 0;
-  height: 100%!important;
-  width: 100%!important;
+  height: 100% !important;
+  width: 100% !important;
 }
 
 ::slotted(video) {
@@ -24,24 +23,24 @@ img {
   background: black;
   top: 0;
   left: 0;
-  height: 100%!important;
-  width: 100%!important;
-  max-height: auto!important;
-  max-width: auto!important;
+  height: 100% !important;
+  width: 100% !important;
+  max-height: auto !important;
+  max-width: auto !important;
 
   &::-webkit-media-controls-panel {
     appearance: none;
-    display: none!important;
+    display: none !important;
   }
-  
+
   &::--webkit-media-controls-play-button {
     appearance: none;
-    display: none!important;
+    display: none !important;
   }
-  
+
   &::-webkit-media-controls-start-playback-button {
     appearance: none;
-    display: none!important;
+    display: none !important;
   }
 
   :not(:host([is-ios])) & {

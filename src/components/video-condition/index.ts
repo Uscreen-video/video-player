@@ -1,1 +1,1 @@
-export * from './Video-condition.component'
+export * from "./Video-condition.component";
