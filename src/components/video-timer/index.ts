@@ -1,1 +1,1 @@
-export * from './Video-timer.component'
+export * from "./Video-timer.component";

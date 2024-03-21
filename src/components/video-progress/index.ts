@@ -1,1 +1,1 @@
-export * from './Video-progress.component'
+export * from "./Video-progress.component";

@@ -24,7 +24,7 @@ progress {
   width: 100%;
 
   &[inactive] {
-    --color: transparent!important;
+    --color: transparent !important;
   }
 
   &::-webkit-progress-bar {

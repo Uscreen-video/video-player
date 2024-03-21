@@ -1,19 +1,19 @@
 export const getBufferedEnd = (video: HTMLVideoElement) => {
-  const { buffered, currentTime } = video
-  let match = 0
-  let i = 0
+  const { buffered, currentTime } = video;
+  let match = 0;
+  let i = 0;
 
-  if (!buffered) return match
+  if (!buffered) return match;
 
   while (!match && i < buffered.length) {
-    const start = buffered.start(i)
-    const end = buffered.end(i)
+    const start = buffered.start(i);
+    const end = buffered.end(i);
 
-    i++
+    i++;
     if (end > currentTime && (currentTime > start || !currentTime)) {
-      match = end
+      match = end;
     }
   }
-  
-  return match
-}
+
+  return match;
+};

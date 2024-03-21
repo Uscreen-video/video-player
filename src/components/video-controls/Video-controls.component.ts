@@ -1,32 +1,45 @@
-import { connect } from '../../state'
-import { unsafeCSS, LitElement, html } from 'lit'
-import { customElement, property } from 'lit/decorators.js'
-import { DependentPropsMixin } from '../../mixins/DependentProps'
-import styles from './Video-controls.styles.css?inline'
+import { connect } from "../../state";
+import { unsafeCSS, LitElement, html } from "lit";
+import { customElement, property } from "lit/decorators.js";
+import { DependentPropsMixin } from "../../mixins/DependentProps";
+import styles from "./Video-controls.styles.css?inline";
 
 /**
  * @slot - Video-controls main content
  * */
-@customElement('video-controls')
+@customElement("video-controls")
 export class VideoControls extends DependentPropsMixin(LitElement) {
-  static styles = unsafeCSS(styles)
+  static styles = unsafeCSS(styles);
 
-  @connect('idle')
+  /**
+   * Indicates whether the video player is in idle mode.
+   */
+  @connect("idle")
   @property({ type: Boolean, reflect: true })
-  idle: boolean
-  
-  @connect('isPlaying')
+  idle: boolean;
+
+  /**
+   * Indicates whether the video is currently playing.
+   */
+  @connect("isPlaying")
   @property({ type: Boolean, reflect: true })
-  playing: boolean
-  
-  @connect('isFullscreen')
+  playing: boolean;
+
+  /**
+   * Indicates whether the video player is in fullscreen mode.
+   */
+  @connect("isFullscreen")
   @property({ type: Boolean, reflect: true })
-  fullscreen: boolean
-  
+  fullscreen: boolean;
+
+  /**
+   * Indicates whether the video controls are customized.
+   * If true, the controls are custom; if false, they are default.
+   */
   @property({ type: Boolean, reflect: true })
-  custom = false
+  custom = false;
 
   render() {
-    return html`<slot></slot>`
+    return html`<slot></slot>`;
   }
 }

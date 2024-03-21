@@ -11,8 +11,7 @@
 //  handlePropChange(oldValue, newValue) {
 //    ...
 //  }
-
-import type { LitElement } from 'lit';
+import type { LitElement } from "lit";
 
 type UpdateHandler = (prev?: unknown, next?: unknown) => void;
 
@@ -32,25 +31,31 @@ interface WatchOptions {
 export function watch(propName: string, options?: WatchOptions) {
   const resolvedOptions: Required<WatchOptions> = {
     waitUntilFirstUpdate: false,
-    ...options
+    ...options,
   };
   return <ElemClass extends LitElement>(
     proto: ElemClass,
-    decoratedFnName: UpdateHandlerFunctionKeys<ElemClass>
+    decoratedFnName: UpdateHandlerFunctionKeys<ElemClass>,
   ): void => {
     // @ts-expect-error -- update is a protected property
     const { update } = proto;
     if (propName in proto) {
       const propNameKey = propName as keyof ElemClass;
       // @ts-expect-error -- update is a protected property
-      proto.update = function (this: ElemClass, changedProps: Map<keyof ElemClass, ElemClass[keyof ElemClass]>) {
+      proto.update = function (
+        this: ElemClass,
+        changedProps: Map<keyof ElemClass, ElemClass[keyof ElemClass]>,
+      ) {
         if (changedProps.has(propNameKey)) {
           const oldValue = changedProps.get(propNameKey);
           const newValue = this[propNameKey];
 
           if (oldValue !== newValue) {
             if (!resolvedOptions.waitUntilFirstUpdate || this.hasUpdated) {
-              (this[decoratedFnName] as unknown as UpdateHandler)(oldValue, newValue);
+              (this[decoratedFnName] as unknown as UpdateHandler)(
+                oldValue,
+                newValue,
+              );
             }
           }
         }

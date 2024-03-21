@@ -34,13 +34,13 @@
 }
 
 @keyframes blink {
-	0% {
-		opacity: .2;
-	}
-	50% {
-		opacity: 1;
-	}
-	100% {
-		opacity: .2;
-	}
+  0% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
 }

@@ -1,10 +1,9 @@
-import { html, fixture, expect } from '@open-wc/testing'
-import type { Button } from './Video-button.component'
-import './Button.component'
+import { html, fixture, expect } from "@open-wc/testing";
+import type { VideoButton } from "./Video-button.component";
 
-describe('<ds-button>', () => {
-  it('with default parameters', async () => {
-    const el: Button = await fixture(html`<ds-button></ds-button>`)
-    expect(el.disabled).equal(undefined)
-  })
-})
+describe("video-button", () => {
+  it("with default parameters", async () => {
+    const el: VideoButton = await fixture(html`<video-button></video-button>`);
+    expect(el.disabled).equal(undefined);
+  });
+});

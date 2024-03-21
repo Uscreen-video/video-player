@@ -1,1 +1,1 @@
-export * from './Video-chromecast.component'
+export * from "./Video-chromecast.component";

@@ -1,95 +1,110 @@
-import type { LitElement, PropertyValueMap } from 'lit'
-import { property } from 'lit/decorators.js'
+import type { LitElement, PropertyValueMap } from "lit";
+import { property } from "lit/decorators.js";
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
-
-
 export declare class WithDependentPropsInterface {
-  when: string
+  when: string;
 }
 
 const parseValue = (val: string): any => {
   try {
-    const parsed = JSON.parse(val)
-    return parsed
+    const parsed = JSON.parse(val);
+    return parsed;
   } catch (err) {
-    return val
+    return val;
   }
-}
+};
 
-const dashSeparatorRe = new RegExp('-\\w{1}', 'g')
-const formatName = (name: string) => name.replace(dashSeparatorRe, m => m.replace('-', '').toUpperCase())
+const dashSeparatorRe = new RegExp("-\\w{1}", "g");
+const formatName = (name: string) =>
+  name.replace(dashSeparatorRe, (m) => m.replace("-", "").toUpperCase());
 
 const parsePropNameValue = (prop: string): [string, unknown] => {
-  const [name, val] = prop.split('=')
-  return [formatName(name), parseValue(val)]
-}
+  const [name, val] = prop.split("=");
+  return [formatName(name), parseValue(val)];
+};
 
 type LinkedProps = {
-  propName: string,
-  defaultValue: unknown,
-  linkedValue: unknown
-}
+  propName: string;
+  defaultValue: unknown;
+  linkedValue: unknown;
+};
 
-export const DependentPropsMixin = <T extends Constructor<LitElement>>(superClass: T) => {
+export const DependentPropsMixin = <T extends Constructor<LitElement>>(
+  superClass: T,
+) => {
   class WithDependentPropsElement extends superClass {
     /**
      * fullscreen=true->custom=false,time=true;
      */
     @property()
-    when: string
+    when: string;
 
-    private _parsedWhen: Record<string, {
-      value: unknown,
-      linked: LinkedProps[]
-    }>
+    private _parsedWhen: Record<
+      string,
+      {
+        value: unknown;
+        linked: LinkedProps[];
+      }
+    >;
 
     connectedCallback() {
       super.connectedCallback();
       if (this.when) {
-        this._parsedWhen = this.when.split(';').reduce<typeof this._parsedWhen>((acc, val) => {
-          const [dependency, linkedProps] = val.split('->')
-          
-          const [depName, depValue] = parsePropNameValue(dependency)
+        this._parsedWhen = this.when
+          .split(";")
+          .reduce<typeof this._parsedWhen>((acc, val) => {
+            const [dependency, linkedProps] = val.split("->");
 
-          const parsedLinkedProps: LinkedProps[] = linkedProps.split(',').map((prop) => {
-            const [propName, propVal] = parsePropNameValue(prop)
-            return {
-              propName: propName,
-              // @ts-ignore
-              defaultValue: this[propName],
-              linkedValue: propVal
-            }
-          })
+            const [depName, depValue] = parsePropNameValue(dependency);
 
-          acc[depName] = {
-            value: depValue,
-            linked: parsedLinkedProps
-          }
+            const parsedLinkedProps: LinkedProps[] = linkedProps
+              .split(",")
+              .map((prop) => {
+                const [propName, propVal] = parsePropNameValue(prop);
+                return {
+                  propName: propName,
+                  // @ts-ignore
+                  defaultValue: this[propName],
+                  linkedValue: propVal,
+                };
+              });
 
-          return acc
-        }, {})
+            acc[depName] = {
+              value: depValue,
+              linked: parsedLinkedProps,
+            };
+
+            return acc;
+          }, {});
       }
     }
 
-    protected updated(_changedProps: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+    protected updated(
+      _changedProps: PropertyValueMap<any> | Map<PropertyKey, unknown>,
+    ): void {
       if (super.updated) {
-        super.updated(_changedProps)
+        super.updated(_changedProps);
       }
 
-      if (!this._parsedWhen) return
+      if (!this._parsedWhen) return;
 
       for (const propName of _changedProps.keys()) {
-        const dependencyProp = this._parsedWhen[propName as string]
-        if (!dependencyProp) return
+        const dependencyProp = this._parsedWhen[propName as string];
+        if (!dependencyProp) return;
         dependencyProp.linked.forEach((linkedProp) => {
           // @ts-ignore
-          this[linkedProp.propName] = this[propName] === dependencyProp.value ? linkedProp.linkedValue : linkedProp.defaultValue
-        })
-      }    
+          this[linkedProp.propName] =
+            // @ts-ignore
+            this[propName] === dependencyProp.value
+              ? linkedProp.linkedValue
+              : linkedProp.defaultValue;
+        });
+      }
     }
   }
 
-  return WithDependentPropsElement as Constructor<WithDependentPropsInterface> & T
-}
+  return WithDependentPropsElement as Constructor<WithDependentPropsInterface> &
+    T;
+};

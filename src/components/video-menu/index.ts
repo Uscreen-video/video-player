@@ -1,1 +1,1 @@
-export * from './Video-menu.component'
+export * from "./Video-menu.component";

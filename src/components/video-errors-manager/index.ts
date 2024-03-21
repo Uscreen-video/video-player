@@ -1,1 +1,1 @@
-export * from './Video-errors-manager.component'
+export * from "./Video-errors-manager.component";

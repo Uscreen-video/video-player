@@ -1,41 +1,43 @@
-import { html } from 'lit'
-import { unsafeSVG } from 'lit/directives/unsafe-svg.js';
-import { customElement } from 'lit/decorators.js'
-import { connect, Types } from '../../state'
-import { VideoButton } from '../video-button'
+import { html } from "lit";
+import { unsafeSVG } from "lit/directives/unsafe-svg.js";
+import { customElement } from "lit/decorators.js";
+import { connect, Types } from "../../state";
+import { VideoButton } from "../video-button";
 
-import _pipIcon from '../../icons/play-in-window-outline.svg?raw'
-import _pipActiveIcon from '../../icons/play-in-window-solid.svg?raw'
+import _pipIcon from "../../icons/play-in-window-outline.svg?raw";
+import _pipActiveIcon from "../../icons/play-in-window-solid.svg?raw";
 
-const pipIcon = unsafeSVG(_pipIcon)
-const pipActiveIcon = unsafeSVG(_pipActiveIcon)
+const pipIcon = unsafeSVG(_pipIcon);
+const pipActiveIcon = unsafeSVG(_pipActiveIcon);
 
-@customElement('video-pip-button')
+@customElement("video-pip-button")
 export class PipButton extends VideoButton {
-  @connect('pipAvailable')
-  pipAvailable: boolean
+  @connect("pipAvailable")
+  pipAvailable: boolean;
 
-  @connect('pipActivated')
-  pipActivated: boolean
+  @connect("pipActivated")
+  pipActivated: boolean;
 
   override handleClick() {
-    this.command(Types.Command.togglePip)
+    this.command(Types.Command.togglePip);
   }
 
   override renderContent() {
-    if (!this.pipAvailable) return null
+    if (!this.pipAvailable) return null;
     return html`
-      <slot name="icon:${this.pipActivated ? 'enabled' : 'disabled'}">
+      <slot name="icon:${this.pipActivated ? "enabled" : "disabled"}">
         ${this.pipActivated ? pipActiveIcon : pipIcon}
       </slot>
-    `
+    `;
   }
 
   override renderTooltip() {
     return html`
-      <slot name="tooltip:${this.pipActivated ? 'enabled' : 'disabled'}">
-        ${this.pipActivated ? 'Disable picture in picture' : 'Enable picture in picture'}
+      <slot name="tooltip:${this.pipActivated ? "enabled" : "disabled"}">
+        ${this.pipActivated
+          ? "Disable picture in picture"
+          : "Enable picture in picture"}
       </slot>
-    `
+    `;
   }
 }
