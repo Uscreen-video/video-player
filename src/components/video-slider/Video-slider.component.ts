@@ -184,7 +184,7 @@ export class VideoSlider extends LitElement {
       y,
     );
     this.tooltipPopper.update();
-    emit(this, "hovering", { position: x });
+    emit(this, "hovering", { position: percents });
   };
 
   handleSlotChange = (e: Event & { target: HTMLSlotElement }) => {
@@ -195,8 +195,12 @@ export class VideoSlider extends LitElement {
     const { clientX, target, touches } = e;
     const { y, x, width } = target.getBoundingClientRect();
     const xPosition = touches?.[0]?.clientX || clientX;
-    const percents = ((100 / width) * (xPosition - x)).toFixed(3);
-    return [Math.min(width + x, Math.max(x, xPosition)), y, String(percents)];
+    const percents = Number(((100 / width) * (xPosition - x)).toFixed(3));
+    return [
+      Math.min(width + x, Math.max(x, xPosition)),
+      y,
+      String(Math.min(100, Math.max(0, percents))),
+    ];
   }
 
   createPopper(element: HTMLElement) {
