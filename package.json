@@ -1,7 +1,7 @@
 {
   "name": "@uscreentv/video-player",
   "description": "Web-components based video player",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "license": "MIT",
   "keywords": [
     "hls",
