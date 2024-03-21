@@ -12,6 +12,9 @@ import { closestElement } from "../../helpers/closest";
 import { when } from "lit/directives/when.js";
 import { isDeepAssigned } from "../../helpers/slot";
 
+type CombinedEventType = PointerEvent &
+  TouchEvent & { target: HTMLInputElement };
+
 const generateGetBoundingClientRect =
   (x = 0, y = 0) =>
   () =>
@@ -75,11 +78,11 @@ export class VideoSlider extends LitElement {
   @property({ type: Number, attribute: "tooltip-offset" })
   tooltipOffset = -11;
 
-  @state()
-  currentValue?: number;
+  @property({ type: Boolean, reflect: true, attribute: "hovered" })
+  isHovered = false;
 
   @state()
-  isHovered = false;
+  currentValue?: number;
 
   @state()
   hasCustomTooltip = false;
@@ -110,16 +113,22 @@ export class VideoSlider extends LitElement {
   ): void {
     if (!this.withTooltip) return;
     this.tooltipPopper?.destroy();
-    this.addEventListener("mouseover", this.handleMouseOver);
-    this.addEventListener("mouseleave", this.handleMouseLeave);
-    this.addEventListener("mousemove", this.handleMouseMove);
+    this.addEventListener("mouseover", this.handlePointerOver);
+    this.addEventListener("mouseleave", this.handlePointerLeave);
+    this.addEventListener("mousemove", this.handlePointerMove);
+    this.addEventListener("touchstart", this.handlePointerOver);
+    this.addEventListener("touchend", this.handlePointerLeave);
+    this.addEventListener("touchmove", this.handlePointerMove);
   }
 
   disconnectedCallback(): void {
     this.tooltipPopper?.destroy();
-    this.removeEventListener("mouseover", this.handleMouseOver);
-    this.removeEventListener("mouseleave", this.handleMouseLeave);
-    this.removeEventListener("mousemove", this.handleMouseMove);
+    this.removeEventListener("mouseover", this.handlePointerOver);
+    this.removeEventListener("mouseleave", this.handlePointerLeave);
+    this.removeEventListener("mousemove", this.handlePointerMove);
+    this.removeEventListener("touchstart", this.handlePointerOver);
+    this.removeEventListener("touchend", this.handlePointerLeave);
+    this.removeEventListener("touchmove", this.handlePointerMove);
     super.disconnectedCallback();
   }
 
@@ -131,11 +140,18 @@ export class VideoSlider extends LitElement {
     emit(this, "changed", { value: this.currentValue });
   }
 
-  handleMouseOver() {
+  handlePointerOver(e: CombinedEventType) {
     if (!this.withTooltip || this.disabled) return;
 
+    const [x, y, percents] = this.getCursorPosition(e);
     this.isHovered = true;
+    this.hoverPosition = percents;
     this.tooltipPopper = this.createPopper(this.tooltip);
+    this.virtualPopper.getBoundingClientRect = generateGetBoundingClientRect(
+      x,
+      y,
+    );
+
     if (this.overTimeout) {
       window.clearTimeout(this.overTimeout);
     }
@@ -148,33 +164,40 @@ export class VideoSlider extends LitElement {
     }, 5000);
   }
 
-  handleMouseLeave() {
+  handlePointerLeave() {
     if (!this.withTooltip) return;
     this.tooltipPopper?.destroy();
     emit(this, "hoverend");
     this.isHovered = false;
   }
 
-  handleMouseMove = (e: MouseEvent & { target: HTMLInputElement }) => {
+  handlePointerMove = (e: CombinedEventType) => {
     window.clearTimeout(this.overTimeout);
     if (!this.withTooltip || !this.isHovered) return;
-    const { clientX, target } = e;
-    const { y, x, width } = target.getBoundingClientRect();
-    const computedPosition = ((100 / width) * (clientX - x)).toFixed(3);
-    if (computedPosition === this.hoverPosition) return;
+    const [x, y, percents] = this.getCursorPosition(e);
 
-    this.hoverPosition = computedPosition;
+    if (percents === this.hoverPosition) return;
+
+    this.hoverPosition = percents;
     this.virtualPopper.getBoundingClientRect = generateGetBoundingClientRect(
-      clientX,
+      x,
       y,
     );
     this.tooltipPopper.update();
-    emit(this, "hovering", { position: computedPosition });
+    emit(this, "hovering", { position: x });
   };
 
   handleSlotChange = (e: Event & { target: HTMLSlotElement }) => {
     this.hasCustomTooltip = isDeepAssigned(e.target);
   };
+
+  getCursorPosition(e: CombinedEventType): [number, number, string] {
+    const { clientX, target, touches } = e;
+    const { y, x, width } = target.getBoundingClientRect();
+    const xPosition = touches?.[0]?.clientX || clientX;
+    const percents = ((100 / width) * (xPosition - x)).toFixed(3);
+    return [Math.min(width + x, Math.max(x, xPosition)), y, String(percents)];
+  }
 
   createPopper(element: HTMLElement) {
     this.virtualPopper = {

@@ -165,7 +165,7 @@ input[type="range"] {
   user-select: none;
   pointer-events: none;
   display: none;
-  :host(:hover) & {
+  :host([hovered]) & {
     display: block;
   }
 }
