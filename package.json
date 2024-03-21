@@ -56,7 +56,7 @@
     "manifest": "custom-elements-manifest analyze",
     "manifest:watch": "pnpm manifest --watch",
     "postinstall": "pnpm run manifest",
-    "prepare": "pnpm dlx playwright install",
+    "prepare": "pnpm dlx playwright install chromium",
     "test": "web-test-runner"
   },
   "dependencies": {
