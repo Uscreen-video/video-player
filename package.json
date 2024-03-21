@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:Uscreen-video/video-player.git"
+    "url": "git+ssh://git@github.com/Uscreen-video/video-player.git"
   },
   "type": "module",
   "main": "./dist/index.js",
