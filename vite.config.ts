@@ -6,14 +6,12 @@ export default defineConfig(({ mode }) => ({
     'process.env.NODE_ENV': JSON.stringify(mode),
   },
   build: {
-    sourcemap: true,
-    lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'video-player',
-      fileName: 'video-player',
-    },
     rollupOptions: {
-      external: ['lit', 'hls.js', 'mux-embed'],
-    },
+      input: resolve(__dirname, 'src/index.ts'),
+      output: {
+        chunkFileNames: '[name].js',
+        entryFileNames: '[name].js',
+      },
+    }
   }
 }))

@@ -21,17 +21,18 @@
     "url": "git@github.com:Uscreen-video/video-player.git"
   },
   "type": "module",
-  "main": "./dist/video-player.umd.cjs",
-  "module": "./dist/video-player.js",
+  "main": "./dist/index.js",
+  "module": "./lib/video-player.js",
   "customElements": "custom-elements.json",
   "exports": {
     ".": {
-      "import": "./dist/video-player.js",
-      "require": "./dist/video-player.umd.cjs"
+      "import": "./lib/video-player.js",
+      "require": "./lib/video-player.umd.cjs"
     }
   },
   "files": [
     "dist/**/*",
+    "lib/**/*",
     "types/**/*"
   ],
   "engines": {
@@ -43,8 +44,10 @@
     ".pnpm-store"
   ],
   "scripts": {
-    "build": "pnpm run clean && pnpm run build:types && pnpm run build:lib",
-    "build:lib": "vite build",
+    "verify": "npm run prettier:check && npm run lint && npm run build && npm run test",
+    "build": "pnpm run clean && pnpm run /^build:/",
+    "build:dist": "vite build",
+    "build:lib": "vite build -c vite.lib.config.ts",
     "build:types": "tsc --declaration --emitDeclarationOnly",
     "clean": "rm -rf dist types",
     "commitlint": "commitlint --edit",
@@ -53,8 +56,8 @@
     "manifest": "custom-elements-manifest analyze",
     "manifest:watch": "pnpm manifest --watch",
     "postinstall": "pnpm run manifest",
-    "prepare": "husky",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "prepare": "pnpm dlx playwright install",
+    "test": "web-test-runner"
   },
   "dependencies": {
     "@lit/context": "^1.1.0",
@@ -66,10 +69,17 @@
     "@commitlint/cli": "^19.2.1",
     "@commitlint/config-conventional": "^19.1.0",
     "@custom-elements-manifest/analyzer": "^0.9.3",
+    "@esm-bundle/chai": "4.3.4-fix.0",
     "@open-wc/lit-helpers": "0.7.0",
+    "@open-wc/testing": "^4.0.0",
+    "@open-wc/testing-helpers": "^3.0.0",
     "@types/chromecast-caf-sender": "^1.0.9",
     "@types/debug": "^4.1.12",
+    "@types/mocha": "^10.0.6",
     "@types/node": "^20.11.30",
+    "@web/dev-server-esbuild": "^1.0.2",
+    "@web/test-runner": "^0.18.1",
+    "@web/test-runner-playwright": "^0.11.0",
     "cem-plugin-better-lit-types": "0.2.1",
     "husky": "^9.0.11",
     "hygen": "^6.2.11",
