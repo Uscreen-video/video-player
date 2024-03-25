@@ -6,7 +6,7 @@ export const connectMuxData = async (
   options?: MuxOptions,
 ) => {
   const mux = await import("mux-embed");
-  mux.monitor(element, {
+  mux.default.monitor(element, {
     ...options,
     data: {
       ...data,
