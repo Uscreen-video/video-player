@@ -1,0 +1,11 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+header.header {
+  @apply backdrop-blur-md bg-white/80 dark:bg-black/80 border-none shadow;
+}
+
+body {
+  @apply bg-gradient-to-t from-slate-50 via-slate-100 to-gray-50;
+}

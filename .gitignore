@@ -85,6 +85,7 @@ typings/
 dist
 lib
 types
+.astro/
 
 # Gatsby files
 .cache/
