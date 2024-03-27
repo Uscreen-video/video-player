@@ -5,6 +5,7 @@ import tailwind from '@astrojs/tailwind';
 // https://astro.build/config
 export default defineConfig({
 	srcDir: './docs',
+	outDir: './docs_dist',
 	integrations: [
 		tailwind({ applyBaseStyles: false }),
 		starlight({
@@ -19,17 +20,17 @@ export default defineConfig({
 			sidebar: [
 				{
 					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', link: '/guides/example/' },
-					],
+					autogenerate: { directory: 'guides' },
 				},
 				{
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
 				},
 			],
-			customCss: ['./docs/styles.css'],
+			customCss: [
+				'@fontsource/manrope/600.css',
+				'./docs/styles.css',
+			],
 		}),
 	],
 });

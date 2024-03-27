@@ -8,4 +8,10 @@ header.header {
 
 body {
   @apply bg-gradient-to-t from-slate-50 via-slate-100 to-gray-50;
+
+  --sl-color-text-accent: #006AFF;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-title;
 }

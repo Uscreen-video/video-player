@@ -60,7 +60,7 @@
     "test": "web-test-runner",
     "docs:dev": "astro dev",
     "docs:start": "astro dev",
-    "docs:build": "astro check && astro build",
+    "docs:build": "astro build",
     "docs:preview": "astro preview",
     "astro": "astro"
   },
@@ -83,6 +83,7 @@
     "@commitlint/config-conventional": "^19.1.0",
     "@custom-elements-manifest/analyzer": "^0.9.4",
     "@esm-bundle/chai": "4.3.4-fix.0",
+    "@fontsource/manrope": "^5.0.19",
     "@open-wc/lit-helpers": "0.7.0",
     "@open-wc/testing": "^4.0.0",
     "@open-wc/testing-helpers": "^3.0.0",

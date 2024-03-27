@@ -11,6 +11,9 @@ export default {
 				black: '#18181B',
 			},
 		},
+		fontFamily: {
+			title: ['Manrope', 'sans-serif'],
+		}
 	},
 	plugins: [starlightPlugin()],
 };

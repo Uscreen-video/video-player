@@ -86,6 +86,7 @@ dist
 lib
 types
 .astro/
+docs_dist
 
 # Gatsby files
 .cache/
