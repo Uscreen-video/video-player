@@ -1,9 +1,7 @@
 ---
-title: Getting Started
+title: Getting started
 description: Learn how to integrate Uscreen Video Player
 ---
-
-The Uscreen Video Player stands out as a highly adaptable and versatile solution designed to seamlessly integrate into any website or application. This state-of-the-art player offers an extensive range of features aimed at enriching the viewing experience while providing developers with unprecedented flexibility.
 
 ### Installing from CDN
 

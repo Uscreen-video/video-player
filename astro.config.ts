@@ -1,6 +1,8 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import tailwind from '@astrojs/tailwind';
+import meta from './docs/meta'
+import { StarlightUserConfigWithPlugins } from '@astrojs/starlight/utils/plugins';
 
 // https://astro.build/config
 export default defineConfig({
@@ -13,24 +15,19 @@ export default defineConfig({
 			social: {
 				github: 'https://github.com/Uscreen-video/video-player',
 			},
-			components: {
-				'Hero': './docs/components/Hero.astro',
-				'Header': './docs/components/Header.astro'
-			},
-			sidebar: [
-				{
-					label: 'Guides',
-					autogenerate: { directory: 'guides' },
-				},
-				{
-					label: 'Reference',
-					autogenerate: { directory: 'reference' },
-				},
-			],
 			customCss: [
 				'@fontsource/manrope/600.css',
 				'./docs/styles.css',
 			],
+			expressiveCode: {
+        frames: {
+          showCopyToClipboardButton: true
+        },
+        useStarlightDarkModeSwitch: true,
+        useStarlightUiThemeColors: true
+      },
+			
+			...(meta as Partial<StarlightUserConfigWithPlugins>)
 		}),
 	],
 });
