@@ -26,14 +26,7 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
 
   const getTracks = (): TextTrack[] => {
     const textTracks = Array.from(video.textTracks);
-    const hasNonNative = textTracks.length > trackElements.length;
-    /**
-     * If non native track presented
-     * we need to return only non native tracks
-     */
-    return hasNonNative
-      ? textTracks.filter((t) => !isTrackNative(t))
-      : textTracks;
+    return textTracks
   };
 
   const tracksToStoreState = () => ({
@@ -55,24 +48,28 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
       });
     }
     getTracks().forEach((t) => {
-      if (isTrackNative(t)) {
-        t.mode = "hidden";
-        return;
-      }
       const tLang = t.language || t.label;
       if (tLang === lang) {
-        t.mode = "showing";
-      } else {
         t.mode = "hidden";
+      } else {
+        t.mode = "disabled";
       }
     });
   };
+
+  const removeNativeTextTracks = () => {
+    trackElements.forEach(t => t.remove())
+  }
+
+  const hasNonNative = () => getTracks().some(t => !isTrackNative(t))
 
   return {
     getTracks,
     tracksToStoreState,
     showTracks,
     isTrackNative,
+    removeNativeTextTracks,
+    hasNonNative
   };
 };
 
@@ -92,6 +89,10 @@ export const subtitlesController = (
 
   const tracksManager = videoTextTtracksManager(video, hls);
 
+  if (tracksManager.hasNonNative()) {
+    tracksManager.removeNativeTextTracks()
+  }
+
   dispatch(host, Types.Action.update, tracksManager.tracksToStoreState());
 
   const onCueChange = (event: Event & { target: TextTrack }) => {
@@ -103,18 +104,11 @@ export const subtitlesController = (
     );
     const targetLang = event.target.language || event.target.label;
 
-    /**
-     * Non native tracks renders via native video cue
-     */
-    if (!tracksManager.isTrackNative(event.target)) {
-      dispatch(host, Types.Action.cues, { cues: [] });
-      if (event.target.mode === "showing" && targetLang !== activeTextTrack) {
-        activeTextTrack = targetLang;
-        dispatch(host, Types.Action.selectTextTrack, {
-          activeTextTrack: targetLang,
-        });
-      }
-      return;
+    if (event.target.mode === "showing" && targetLang !== activeTextTrack) {
+      activeTextTrack = targetLang;
+      dispatch(host, Types.Action.selectTextTrack, {
+        activeTextTrack: targetLang,
+      });
     }
 
     if (targetLang === activeTextTrack) {
@@ -137,6 +131,7 @@ export const subtitlesController = (
       data.track.kind,
     );
     if (!tracksManager.isTrackNative(data.track)) {
+      tracksManager.removeNativeTextTracks()
       data.track.oncuechange = onCueChange;
       tracksManager.showTracks(activeTextTrack);
       dispatch(host, Types.Action.update, tracksManager.tracksToStoreState());
@@ -152,11 +147,7 @@ export const subtitlesController = (
       const activeTrack = tracksManager
         .getTracks()
         .find((t) => (t.language || t.label) === activeTextTrack);
-      if (
-        activeTrack &&
-        tracksManager.isTrackNative(activeTrack) &&
-        activeTrack.activeCues
-      ) {
+      if (activeTrack && activeTrack.activeCues) {
         dispatch(host, Types.Action.cues, {
           cues: mapCueListToState(activeTrack.activeCues),
         });
