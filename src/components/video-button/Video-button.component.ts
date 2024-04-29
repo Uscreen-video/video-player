@@ -9,7 +9,7 @@ import styles from "./Video-button.styles.css?inline";
 import { closestElement } from "../../helpers/closest";
 import { when } from "lit/directives/when.js";
 import { ifDefined } from "lit/directives/if-defined.js";
-import { createCommand } from "../../state";
+import { createCommand, connect } from "../../state";
 import { eventCode } from "../../helpers/event";
 import { isMobile } from "../../helpers/ismobile";
 
@@ -22,7 +22,7 @@ export class VideoButton extends LitElement {
    * Specifies the offset distance of the tooltip from the button.
    */
   @property({ type: Number, attribute: "tooltip-offset" })
-  tooltipOffset = 40;
+  tooltipOffset = isMobile() ? 30 : 40;
 
   /**
    * Determines whether the button should display a tooltip.
@@ -37,6 +37,10 @@ export class VideoButton extends LitElement {
    */
   @property({ attribute: "tooltip-position" })
   tooltipPosition: Placement = "top";
+
+  @connect('isFullscreen')
+  @property({ type: Boolean, attribute: 'is-fullscreen', reflect: true })
+  isFullscreen: Boolean
 
   @query(".tooltip")
   tooltip: HTMLElement;

@@ -81,6 +81,13 @@ button {
   }
 }
 
+@media (max-width: 640px) {
+  :host(:not([is-fullscreen])) .menu {
+    max-height: 150px;
+    overflow: auto;
+  }
+}
+
 .menu .inner {
   padding: 0;
 }
