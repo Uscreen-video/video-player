@@ -21,7 +21,7 @@ The **Uscreen Video Player** is an ultra-customizable and extendable video playe
 
 - **Accessibility**: Comply with accessibility standards and ensure all users can enjoy your content with comprehensive accessibility features.
 
-- **Analytics Integration**:  Seamlessly integrate with Mux Data for comprehensive analytics, providing valuable insights into viewer behavior and engagement.
+- **Analytics Integration**:  Seamlessly integrate with Mux Data for comprehensive analytics, providing valuable insights into viewer behavior and engagement. 
 
 ## Installation
 
