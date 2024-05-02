@@ -29,7 +29,8 @@ video-slider {
   height: 1rem;
   padding-top: 20px;
 
-  &[disabled] {
+  &[disabled],
+  &[full] {
     --height: 0.25rem !important;
     --active-color: var(--progress-color);
   }
