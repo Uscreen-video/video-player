@@ -180,12 +180,12 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
             >
               <video-progress
                 class="buffered"
-                .value=${(100 / length) * (this.buffered - segment) -
+                .value=${this.live ? 100 : (100 / length) * (this.buffered - segment) -
                 segmentShift * index}
               ></video-progress>
               <video-progress
                 class="progress"
-                .value=${(100 / length) * (this.currentValue - segment) -
+                .value=${this.live ? 100 : (100 / length) * (this.currentValue - segment) -
                 segmentShift * index +
                 thumbSift}
               ></video-progress>
