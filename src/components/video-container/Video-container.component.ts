@@ -248,15 +248,99 @@ export class VideoContainer extends LitElement {
     this.hls?.destroy();
 
     this.hls = new HLS({
+      debug: false,
+      capLevelToPlayerSize: true,
+      ignoreDevicePixelRatio: true,
+      abrMaxWithRealBitrate: true,
+      useMediaCapabilities: true,
+      preferManagedMediaSource: true,
       maxMaxBufferLength: 30,
-      enableWorker: true,
-      initialLiveManifestSize: 2,
-      liveSyncDurationCount: 5,
-      fragLoadingMaxRetry: 10,
-      manifestLoadingMaxRetry: 2,
-      levelLoadingMaxRetry: 4,
-      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
-      liveDurationInfinity: true,
+      maxBufferSize: 60000000,
+      backBufferLength: 30,
+      minAutoBitrate: 0,
+      enableCEA708Captions: true,
+      enableWebVTT: true,
+      enableIMSC1: true,
+      renderTextTracksNatively: true,
+      captionsTextTrack1Label: "CC1",
+      captionsTextTrack1LanguageCode: "cc1",
+      captionsTextTrack2Label: "CC2",
+      captionsTextTrack2LanguageCode: "cc2",
+      captionsTextTrack3Label: "CC3",
+      captionsTextTrack3LanguageCode: "cc3",
+      captionsTextTrack4Label: "CC4",
+      captionsTextTrack4LanguageCode: "cc4",
+      enableDateRangeMetadataCues: true,
+      enableEmsgMetadataCues: true,
+      enableID3MetadataCues: true,
+      manifestLoadPolicy: {
+        default: {
+          maxTimeToFirstByteMs: null,
+          maxLoadTimeMs: 20000,
+          timeoutRetry: {
+            maxNumRetry: 2,
+            retryDelayMs: 0,
+            maxRetryDelayMs: 0,
+          },
+          errorRetry: {
+            maxNumRetry: 1,
+            retryDelayMs: 1000,
+            maxRetryDelayMs: 8000,
+          },
+        },
+      },
+      playlistLoadPolicy: {
+        default: {
+          maxTimeToFirstByteMs: 10000,
+          maxLoadTimeMs: 20000,
+          timeoutRetry: {
+            maxNumRetry: 2,
+            retryDelayMs: 0,
+            maxRetryDelayMs: 0,
+          },
+          errorRetry: {
+            maxNumRetry: 2,
+            retryDelayMs: 1000,
+            maxRetryDelayMs: 8000,
+          },
+        },
+      },
+      fragLoadPolicy: {
+        default: {
+          maxTimeToFirstByteMs: 10000,
+          maxLoadTimeMs: 12000,
+          timeoutRetry: {
+            maxNumRetry: 4,
+            retryDelayMs: 0,
+            maxRetryDelayMs: 0,
+          },
+          errorRetry: {
+            maxNumRetry: 6,
+            retryDelayMs: 1000,
+            maxRetryDelayMs: 8000,
+          },
+        },
+      },
+      steeringManifestLoadPolicy: {
+        default: {
+          maxTimeToFirstByteMs: 10000,
+          maxLoadTimeMs: 20000,
+          timeoutRetry: {
+            maxNumRetry: 2,
+            retryDelayMs: 0,
+            maxRetryDelayMs: 0,
+          },
+          errorRetry: {
+            maxNumRetry: 1,
+            retryDelayMs: 1000,
+            maxRetryDelayMs: 8000,
+          },
+        },
+      },
+      startLevel: -1,
+      testBandwidth: false,
+      abrEwmaDefaultEstimateMax: 10000000,
+      abrEwmaDefaultEstimate: 10000000,
     });
 
     if (this.muxData)
