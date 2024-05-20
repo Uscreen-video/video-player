@@ -84,13 +84,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
-      const shouldRewindToEnd = !this.played && this.live;
       await this.videos[0].play();
-      if (shouldRewindToEnd) {
-        window.requestAnimationFrame(() => {
-          this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-        });
-      }
     } catch (e) {
       if (e.toString().includes("source")) {
         this.command(Types.Command.initCustomHLS);
@@ -179,13 +173,13 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.live, { canPlay: true, initialized: true })
   enableLiveMode() {
-    dispatch(this, Types.Action.live, {
-      live: true,
-    });
-    window.requestAnimationFrame(() => {
-      this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-      if (this.videos[0].paused && !this.castActivated) this.play();
-    });
+    dispatch(this, Types.Action.live, { live: true });
+    if (this.played) {
+      window.requestAnimationFrame(() => {
+        this.videos[0].currentTime = END_OF_STREAM_SECONDS;
+        this.play();
+      });
+    }
   }
 
   @listen(Types.Command.enableTextTrack)
@@ -248,99 +242,15 @@ export class VideoContainer extends LitElement {
     this.hls?.destroy();
 
     this.hls = new HLS({
-      debug: false,
-      capLevelToPlayerSize: true,
-      ignoreDevicePixelRatio: true,
-      abrMaxWithRealBitrate: true,
-      useMediaCapabilities: true,
-      preferManagedMediaSource: true,
       maxMaxBufferLength: 30,
-      maxBufferSize: 60000000,
-      backBufferLength: 30,
-      minAutoBitrate: 0,
-      enableCEA708Captions: true,
-      enableWebVTT: true,
-      enableIMSC1: true,
-      renderTextTracksNatively: true,
-      captionsTextTrack1Label: "CC1",
-      captionsTextTrack1LanguageCode: "cc1",
-      captionsTextTrack2Label: "CC2",
-      captionsTextTrack2LanguageCode: "cc2",
-      captionsTextTrack3Label: "CC3",
-      captionsTextTrack3LanguageCode: "cc3",
-      captionsTextTrack4Label: "CC4",
-      captionsTextTrack4LanguageCode: "cc4",
-      enableDateRangeMetadataCues: true,
-      enableEmsgMetadataCues: true,
-      enableID3MetadataCues: true,
-      manifestLoadPolicy: {
-        default: {
-          maxTimeToFirstByteMs: null,
-          maxLoadTimeMs: 20000,
-          timeoutRetry: {
-            maxNumRetry: 2,
-            retryDelayMs: 0,
-            maxRetryDelayMs: 0,
-          },
-          errorRetry: {
-            maxNumRetry: 1,
-            retryDelayMs: 1000,
-            maxRetryDelayMs: 8000,
-          },
-        },
-      },
-      playlistLoadPolicy: {
-        default: {
-          maxTimeToFirstByteMs: 10000,
-          maxLoadTimeMs: 20000,
-          timeoutRetry: {
-            maxNumRetry: 2,
-            retryDelayMs: 0,
-            maxRetryDelayMs: 0,
-          },
-          errorRetry: {
-            maxNumRetry: 2,
-            retryDelayMs: 1000,
-            maxRetryDelayMs: 8000,
-          },
-        },
-      },
-      fragLoadPolicy: {
-        default: {
-          maxTimeToFirstByteMs: 10000,
-          maxLoadTimeMs: 12000,
-          timeoutRetry: {
-            maxNumRetry: 4,
-            retryDelayMs: 0,
-            maxRetryDelayMs: 0,
-          },
-          errorRetry: {
-            maxNumRetry: 6,
-            retryDelayMs: 1000,
-            maxRetryDelayMs: 8000,
-          },
-        },
-      },
-      steeringManifestLoadPolicy: {
-        default: {
-          maxTimeToFirstByteMs: 10000,
-          maxLoadTimeMs: 20000,
-          timeoutRetry: {
-            maxNumRetry: 2,
-            retryDelayMs: 0,
-            maxRetryDelayMs: 0,
-          },
-          errorRetry: {
-            maxNumRetry: 1,
-            retryDelayMs: 1000,
-            maxRetryDelayMs: 8000,
-          },
-        },
-      },
-      startLevel: -1,
-      testBandwidth: false,
-      abrEwmaDefaultEstimateMax: 10000000,
-      abrEwmaDefaultEstimate: 10000000,
+      enableWorker: true,
+      initialLiveManifestSize: 2,
+      liveSyncDurationCount: 5,
+      fragLoadingMaxRetry: 10,
+      manifestLoadingMaxRetry: 2,
+      levelLoadingMaxRetry: 4,
+      backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
+      liveDurationInfinity: true,
     });
 
     if (this.muxData)
