@@ -84,13 +84,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
-      const shouldRewindToEnd = !this.played && this.live;
       await this.videos[0].play();
-      if (shouldRewindToEnd) {
-        window.requestAnimationFrame(() => {
-          this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-        });
-      }
     } catch (e) {
       if (e.toString().includes("source")) {
         this.command(Types.Command.initCustomHLS);
@@ -179,13 +173,13 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.live, { canPlay: true, initialized: true })
   enableLiveMode() {
-    dispatch(this, Types.Action.live, {
-      live: true,
-    });
-    window.requestAnimationFrame(() => {
-      this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-      if (this.videos[0].paused && !this.castActivated) this.play();
-    });
+    dispatch(this, Types.Action.live, { live: true });
+    if (this.played) {
+      window.requestAnimationFrame(() => {
+        this.videos[0].currentTime = END_OF_STREAM_SECONDS;
+        this.play();
+      });
+    }
   }
 
   @listen(Types.Command.enableTextTrack)
