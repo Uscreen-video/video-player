@@ -19,8 +19,6 @@ import "../buttons/Play";
 import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
 
-const END_OF_STREAM_SECONDS = 99999;
-
 const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 
 // In Safari on live streams video.duration = Infinity
@@ -176,7 +174,9 @@ export class VideoContainer extends LitElement {
     dispatch(this, Types.Action.live, { live: true });
     if (this.played) {
       window.requestAnimationFrame(() => {
-        this.videos[0].currentTime = END_OF_STREAM_SECONDS;
+        const seekable = this.videos[0].seekable;
+        const end = seekable?.length ? seekable.end(0) - 10 : 999999;
+        this.videos[0].currentTime = end;
         this.play();
       });
     }
