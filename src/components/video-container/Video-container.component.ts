@@ -175,7 +175,7 @@ export class VideoContainer extends LitElement {
     if (this.played) {
       window.requestAnimationFrame(() => {
         const seekable = this.videos[0].seekable;
-        const end = seekable?.length ? seekable.end(0) - 10 : 999999;
+        const end = seekable?.length ? seekable.end(0) - 1 : 999999;
         this.videos[0].currentTime = end;
         this.play();
       });
