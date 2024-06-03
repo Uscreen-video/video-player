@@ -13,7 +13,7 @@ export const initialState: State = {
   isPlaying: false,
   isInteracted: false,
   idle: false,
-  canPlay: true,
+  canPlay: false,
   cues: [],
   castActivated: false,
   played: false,
