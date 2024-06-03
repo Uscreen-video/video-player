@@ -342,6 +342,7 @@ export class VideoContainer extends LitElement {
         });
         break;
       case "loadeddata":
+        console.log('LOADED DATA!')
         dispatch(this, Types.Action.updateDuration, {
           initialized: true,
           duration: getVideoDuration(video),
@@ -372,6 +373,7 @@ export class VideoContainer extends LitElement {
         dispatch(this, Types.Action.togglePip, { pipActivated: false });
         break;
       case "loadedmetadata":
+        console.log('LOADED META DATA!')
         dispatch(this, Types.Action.canPlay);
         break;
       case "error":
