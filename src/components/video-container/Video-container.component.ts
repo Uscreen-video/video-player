@@ -104,6 +104,7 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.seek, { canPlay: true })
   seek({ time }: { time: number }) {
+    console.log('GOING TO SEEK!!!')
     const [video] = this.videos;
     video.currentTime = time;
     if (video.paused && !this.castActivated) this.play();
