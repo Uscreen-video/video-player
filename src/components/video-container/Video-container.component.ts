@@ -19,8 +19,6 @@ import "../buttons/Play";
 import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
 
-const END_OF_STREAM_SECONDS = 99999;
-
 const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 
 // In Safari on live streams video.duration = Infinity
@@ -84,13 +82,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.play, { canPlay: true, castActivated: false })
   async play() {
     try {
-      const shouldRewindToEnd = !this.played && this.live;
       await this.videos[0].play();
-      if (shouldRewindToEnd) {
-        window.requestAnimationFrame(() => {
-          this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-        });
-      }
     } catch (e) {
       if (e.toString().includes("source")) {
         this.command(Types.Command.initCustomHLS);
@@ -179,13 +171,15 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.live, { canPlay: true, initialized: true })
   enableLiveMode() {
-    dispatch(this, Types.Action.live, {
-      live: true,
-    });
-    window.requestAnimationFrame(() => {
-      this.videos[0].currentTime = END_OF_STREAM_SECONDS;
-      if (this.videos[0].paused && !this.castActivated) this.play();
-    });
+    dispatch(this, Types.Action.live, { live: true });
+    if (this.played) {
+      window.requestAnimationFrame(() => {
+        const seekable = this.videos[0].seekable;
+        const end = seekable?.length ? seekable.end(0) - 1 : 999999;
+        this.videos[0].currentTime = end;
+        this.play();
+      });
+    }
   }
 
   @listen(Types.Command.enableTextTrack)

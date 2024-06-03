@@ -2,7 +2,7 @@ import { unsafeCSS, LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { classMap } from "lit/directives/class-map.js";
 import styles from "./Video-live-sign.styles.css?inline";
-import { createCommand, connect } from "../../state";
+import { createCommand, connect, dispatch, Types } from "../../state";
 
 @customElement("video-live-sign")
 export class VideoLiveSign extends LitElement {
@@ -18,12 +18,12 @@ export class VideoLiveSign extends LitElement {
 
   private onClick = () => {
     if (!this.live) {
-      this.command("live");
+      this.command(Types.Command.live);
     }
   };
 
   firstUpdated(): void {
-    this.command("live");
+    dispatch(this, Types.Action.live, { live: true });
     this.addEventListener("click", this.onClick);
   }
 
