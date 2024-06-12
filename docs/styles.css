@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+header.header {
+  @apply backdrop-blur-md bg-white/80 dark:bg-black/80 border-none shadow;
+}
+
+body {
+  --sl-color-text-accent: #006AFF;
+  --sl-color-hairline-shade: transparent;
+  --sl-text-h1: inherit;
+  --sl-text-h2: inherit;
+  --sl-text-h3: inherit;
+  --sl-text-h4: inherit;
+  --sl-color-gray-6: transparent;
+  --sl-color-hairline: inherit;
+  --ec-brdRad: 4px;
+  --sl-color-gray-5: transparent;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-title;
+}
+
+h1 {
+  @apply text-4xl;
+}
+h2 {
+  @apply text-3xl;
+}
+h3 {
+  @apply text-2xl;
+}
+h4 {
+  @apply text-xl;
+}
