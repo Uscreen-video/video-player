@@ -1,4 +1,4 @@
-import { unsafeCSS, LitElement, html } from "lit";
+import { unsafeCSS, LitElement, html, nothing } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import styles from "./Video-timeline.styles.css?inline";
 import { connect, createCommand } from "../../state";
@@ -129,6 +129,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
 
   render() {
     const disabled = this.disabled || !this.canPlay;
+
+    if (!this.duration || this.duration === Infinity) return nothing
+
     return html`
       <video-slider
         with-tooltip
