@@ -130,7 +130,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   render() {
     const disabled = this.disabled || !this.canPlay;
 
-    if (!this.duration) return nothing
+    if (!this.duration || this.duration === Infinity) return nothing
 
     return html`
       <video-slider

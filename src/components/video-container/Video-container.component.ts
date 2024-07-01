@@ -351,7 +351,7 @@ export class VideoContainer extends LitElement {
       case "loadeddata":
         dispatch(this, Types.Action.updateDuration, {
           initialized: true,
-          duration: getVideoDuration(video),
+          duration: getVideoDuration(video)
         });
         break;
       case "ratechange":
