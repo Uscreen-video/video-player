@@ -22,8 +22,15 @@ import { sourcesController, SourcesController } from "./sources";
 const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 
 // In Safari on live streams video.duration = Infinity
-const getVideoDuration = (video: HTMLVideoElement) =>
-  video.duration === Infinity ? video.seekable.end(0) : video.duration;
+const getVideoDuration = (video: HTMLVideoElement) => {
+  if (video.duration && video.duration !== Infinity) {
+    return video.duration
+  }
+  if (video.seekable.length > 0) {
+    return video.seekable.end(0)
+  }
+  return 0
+}
 
 /**
  * @slot - Video-container main content
