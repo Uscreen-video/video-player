@@ -24,6 +24,7 @@ export class VideoTimer extends LitElement {
   currentTime: number;
 
   get time() {
+    if (this.duration === Infinity) return 0
     if (this.format === "left") return this.duration - this.currentTime;
     if (this.format === "past") return this.currentTime;
     return this.duration;
