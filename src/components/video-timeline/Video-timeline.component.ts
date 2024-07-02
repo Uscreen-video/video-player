@@ -71,6 +71,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   @state()
   currentTime = 0;
 
+  @connect('played')
+  played: boolean
+
   @state()
   currentValue = 0;
 
@@ -128,9 +131,9 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
   };
 
   render() {
-    const disabled = this.disabled || !this.canPlay;
+    const disabled = this.disabled || !this.canPlay || this.duration === Infinity;
 
-    if (!this.duration || this.duration === Infinity) return nothing
+    if (this.duration === Infinity && this.played) return nothing
 
     return html`
       <video-slider
@@ -145,7 +148,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
           : timeAsString(this.currentValue)}"
         ?disabled=${disabled}
         ?full=${this.live}
-        ?loading=${!this.canPlay}
+        ?loading=${!this.canPlay || this.duration === Infinity}
         @changed=${this.handleChanged}
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
