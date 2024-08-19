@@ -25,13 +25,13 @@ const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
   if (video.duration && video.duration !== Infinity) {
-    return video.duration
+    return video.duration;
   }
   if (video.seekable.length > 0) {
-    return video.seekable.end(0)
+    return video.seekable.end(0);
   }
-  return Infinity
-}
+  return Infinity;
+};
 
 /**
  * @slot - Video-container main content
@@ -74,7 +74,7 @@ export class VideoContainer extends LitElement {
   live: boolean;
 
   @connect("drmOptions")
-  drmOptions?: DRMOptions
+  drmOptions?: DRMOptions;
 
   /**
    * A unique identifier used for storing and retrieving user preferences related to video playback.
@@ -267,18 +267,21 @@ export class VideoContainer extends LitElement {
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
       emeEnabled: !!this.drmOptions,
-      drmSystems: this.drmOptions ? {
-        'com.apple.fps': {
-          licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
-          serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
-        },
-        'com.widevine.alpha': {
-          licenseUrl: this.drmOptions[KeySystems.widevine]
-        },
-        'com.microsoft.playready': {
-          licenseUrl: this.drmOptions[KeySystems.playready]
-        }
-      } : {}
+      drmSystems: this.drmOptions
+        ? ({
+            "com.apple.fps": {
+              licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
+              serverCertificateUrl:
+                this.drmOptions[KeySystems.fps].certificateUrl,
+            },
+            "com.widevine.alpha": {
+              licenseUrl: this.drmOptions[KeySystems.widevine],
+            },
+            "com.microsoft.playready": {
+              licenseUrl: this.drmOptions[KeySystems.playready],
+            },
+          } as any)
+        : {},
     });
 
     if (this.muxData)
@@ -372,7 +375,7 @@ export class VideoContainer extends LitElement {
       case "loadeddata":
         dispatch(this, Types.Action.updateDuration, {
           initialized: true,
-          duration: getVideoDuration(video)
+          duration: getVideoDuration(video),
         });
         break;
       case "ratechange":
