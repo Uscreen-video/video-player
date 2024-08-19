@@ -12,8 +12,9 @@ import styles from "./Video-container.styles.css?inline";
 import type Hls from "hls.js";
 import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
+import { initFairPlayDRM } from "../../helpers/drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
-import { MuxParams } from "../../types";
+import { MuxParams, DRMOptions, KeySystems } from "../../types";
 import { when } from "lit/directives/when.js";
 import "../buttons/Play";
 import { subtitlesController, SubtitlesController } from "./subtitles";
@@ -71,6 +72,9 @@ export class VideoContainer extends LitElement {
 
   @connect("live")
   live: boolean;
+
+  @connect("drmOptions")
+  drmOptions?: DRMOptions
 
   /**
    * A unique identifier used for storing and retrieving user preferences related to video playback.
@@ -237,6 +241,10 @@ export class VideoContainer extends LitElement {
         ...this.muxData,
         player_init_time: this.initTime,
       });
+
+    if (this.drmOptions && this.drmOptions[KeySystems.fps]) {
+      initFairPlayDRM(this.videos[0], this.drmOptions[KeySystems.fps]);
+    }
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -258,6 +266,19 @@ export class VideoContainer extends LitElement {
       levelLoadingMaxRetry: 4,
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
+      emeEnabled: !!this.drmOptions,
+      drmSystems: this.drmOptions ? {
+        'com.apple.fps': {
+          licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
+          serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
+        },
+        'com.widevine.alpha': {
+          licenseUrl: this.drmOptions[KeySystems.widevine]
+        },
+        'com.microsoft.playready': {
+          licenseUrl: this.drmOptions[KeySystems.playready]
+        }
+      } : {}
     });
 
     if (this.muxData)
