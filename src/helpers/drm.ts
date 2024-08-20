@@ -1,4 +1,4 @@
-import { MuxParams, DRMSystemConfiguration } from "../types";
+import { DRMSystemConfiguration } from "../types";
 
 export const initFairPlayDRM = async (element: HTMLElement, fairPlayOptions: DRMSystemConfiguration) => {
   const certificateUrl = fairPlayOptions.certificateUrl;
@@ -14,11 +14,11 @@ const loadFairPlayCertificate = async (certificateUrl: string) => {
   return response.arrayBuffer();
 }
 
-const fairplayEncryptedCallback = (fairPlayCertificate, licenseServerUrl) => {
-  return async (event) => {
+const fairplayEncryptedCallback = (fairPlayCertificate: ArrayBuffer, licenseServerUrl: string) => {
+  return async (event: MediaEncryptedEvent) => {
     console.log("fairplayEncrypted callback", event);
 
-    const video = event.target;
+    const video = event.target as HTMLVideoElement;
     const initDataType = event.initDataType;
 
     if (!video.mediaKeys) {
@@ -38,7 +38,7 @@ const fairplayEncryptedCallback = (fairPlayCertificate, licenseServerUrl) => {
 
     let session = video.mediaKeys.createSession();
     session.generateRequest(initDataType, initData);
-    let message = await new Promise(resolve => {
+    let message = await new Promise<MediaKeySessionEventMap["message"]>(resolve => {
       session.addEventListener('message', resolve, { once: true });
     });
 
@@ -48,8 +48,8 @@ const fairplayEncryptedCallback = (fairPlayCertificate, licenseServerUrl) => {
   }
 }
 
-const getLicenseResponse = async (event, licenseServerUrl) => {
-  let spc_string = btoa(String.fromCharCode(...new Uint8Array(event.message)));
+const getLicenseResponse = async (event: MediaKeySessionEventMap["message"], licenseServerUrl: string) => {
+  // let spc_string = btoa(String.fromCharCode(...new Uint8Array(event.message)));
   let licenseResponse = await fetch(licenseServerUrl, {
     method: 'POST',
     headers: new Headers({'Content-type': 'application/json', 'X-AxDRM-Message': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2ZXJzaW9uIjoxLCJjb21fa2V5X2lkIjoiNjllNTQwODgtZTllMC00NTMwLThjMWEtMWViNmRjZDBkMTRlIiwibWVzc2FnZSI6eyJ2ZXJzaW9uIjoyLCJ0eXBlIjoiZW50aXRsZW1lbnRfbWVzc2FnZSIsImxpY2Vuc2UiOnsiYWxsb3dfcGVyc2lzdGVuY2UiOnRydWV9LCJjb250ZW50X2tleXNfc291cmNlIjp7ImlubGluZSI6W3siaWQiOiIyMTFhYzFkYy1jOGEyLTQ1NzUtYmFmNy1mYTRiYTU2YzM4YWMiLCJ1c2FnZV9wb2xpY3kiOiJUaGVPbmVQb2xpY3kifV19LCJjb250ZW50X2tleV91c2FnZV9wb2xpY2llcyI6W3sibmFtZSI6IlRoZU9uZVBvbGljeSIsInBsYXlyZWFkeSI6eyJwbGF5X2VuYWJsZXJzIjpbIjc4NjYyN0Q4LUMyQTYtNDRCRS04Rjg4LTA4QUUyNTVCMDFBNyJdfX1dfX0.D9FM9sbTFxBmcCOC8yMHrEtTwm0zy6ejZUCrlJbHz_U'}),

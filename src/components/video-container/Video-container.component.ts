@@ -273,10 +273,10 @@ export class VideoContainer extends LitElement {
           serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
         },
         'com.widevine.alpha': {
-          licenseUrl: this.drmOptions[KeySystems.widevine]
+          licenseUrl: this.drmOptions[KeySystems.widevine].licenseUrl
         },
         'com.microsoft.playready': {
-          licenseUrl: this.drmOptions[KeySystems.playready]
+          licenseUrl: this.drmOptions[KeySystems.playready].licenseUrl
         }
       } : {}
     });
