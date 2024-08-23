@@ -267,21 +267,18 @@ export class VideoContainer extends LitElement {
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
       emeEnabled: !!this.drmOptions,
-      drmSystems: this.drmOptions
-        ? ({
-            "com.apple.fps": {
-              licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
-              serverCertificateUrl:
-                this.drmOptions[KeySystems.fps].certificateUrl,
-            },
-            "com.widevine.alpha": {
-              licenseUrl: this.drmOptions[KeySystems.widevine],
-            },
-            "com.microsoft.playready": {
-              licenseUrl: this.drmOptions[KeySystems.playready],
-            },
-          } as any)
-        : {},
+      drmSystems: this.drmOptions ? {
+        'com.apple.fps': {
+          licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
+          serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
+        },
+        'com.widevine.alpha': {
+          licenseUrl: this.drmOptions[KeySystems.widevine].licenseUrl
+        },
+        'com.microsoft.playready': {
+          licenseUrl: this.drmOptions[KeySystems.playready].licenseUrl
+        }
+      } : {}
     });
 
     if (this.muxData)
