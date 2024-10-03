@@ -1,12 +1,12 @@
 import { DRMSystemConfiguration } from "../types";
 
-export const initFairPlayDRM = async (element: HTMLElement, fairPlayOptions: DRMSystemConfiguration) => {
+export const initFairPlayDRM = async (videoElement: HTMLVideoElement, fairPlayOptions: DRMSystemConfiguration) => {
   const certificateUrl = fairPlayOptions.certificateUrl;
   const licenseServerUrl = fairPlayOptions.licenseUrl;
 
   const fairPlayCertificate = await loadFairPlayCertificate(certificateUrl);
 
-  element.addEventListener('encrypted', fairplayEncryptedCallback(fairPlayCertificate, licenseServerUrl));
+  videoElement.addEventListener('encrypted', fairplayEncryptedCallback(fairPlayCertificate, licenseServerUrl));
 };
 
 const loadFairPlayCertificate = async (certificateUrl: string) => {
@@ -25,7 +25,6 @@ const fairplayEncryptedCallback = (fairPlayCertificate: ArrayBuffer, licenseServ
         videoCapabilities: [{ contentType: 'application/vnd.apple.mpegurl' }],
       }]);
 
-      console.log(access);
       let keys = await access.createMediaKeys();
 
       await keys.setServerCertificate(fairPlayCertificate);

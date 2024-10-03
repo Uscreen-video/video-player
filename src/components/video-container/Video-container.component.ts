@@ -269,14 +269,14 @@ export class VideoContainer extends LitElement {
       emeEnabled: !!this.drmOptions,
       drmSystems: this.drmOptions ? {
         'com.apple.fps': {
-          licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
-          serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
+          licenseUrl: this.drmOptions[KeySystems.fps]?.licenseUrl,
+          serverCertificateUrl: this.drmOptions[KeySystems.fps]?.certificateUrl,
         },
         'com.widevine.alpha': {
-          licenseUrl: this.drmOptions[KeySystems.widevine].licenseUrl
+          licenseUrl: this.drmOptions[KeySystems.widevine]?.licenseUrl
         },
         'com.microsoft.playready': {
-          licenseUrl: this.drmOptions[KeySystems.playready].licenseUrl
+          licenseUrl: this.drmOptions[KeySystems.playready]?.licenseUrl
         }
       } : {}
     });
