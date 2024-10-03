@@ -235,16 +235,19 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.init, { isSourceSupported: true })
   initNative() {
-    this.sources.enableSource();
-    if (this.muxData)
+    if (this.muxData) {
       connectMuxData(this.videos[0], {
         ...this.muxData,
         player_init_time: this.initTime,
       });
+    }
 
-    if (this.drmOptions && this.drmOptions[KeySystems.fps]) {
+    if (this.drmOptions?.[KeySystems.fps]) {
       initFairPlayDRM(this.videos[0], this.drmOptions[KeySystems.fps]);
     }
+
+    // Init source after the video events are set
+    this.sources.enableSource();
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -267,18 +270,21 @@ export class VideoContainer extends LitElement {
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
       emeEnabled: !!this.drmOptions,
-      drmSystems: this.drmOptions ? {
-        'com.apple.fps': {
-          licenseUrl: this.drmOptions[KeySystems.fps].licenseUrl,
-          serverCertificateUrl: this.drmOptions[KeySystems.fps].certificateUrl,
-        },
-        'com.widevine.alpha': {
-          licenseUrl: this.drmOptions[KeySystems.widevine].licenseUrl
-        },
-        'com.microsoft.playready': {
-          licenseUrl: this.drmOptions[KeySystems.playready].licenseUrl
-        }
-      } : {}
+      drmSystems: this.drmOptions
+        ? {
+            "com.apple.fps": {
+              licenseUrl: this.drmOptions[KeySystems.fps]?.licenseUrl,
+              serverCertificateUrl:
+                this.drmOptions[KeySystems.fps]?.certificateUrl,
+            },
+            "com.widevine.alpha": {
+              licenseUrl: this.drmOptions[KeySystems.widevine]?.licenseUrl,
+            },
+            "com.microsoft.playready": {
+              licenseUrl: this.drmOptions[KeySystems.playready]?.licenseUrl,
+            },
+          }
+        : {},
     });
 
     if (this.muxData)
@@ -350,6 +356,7 @@ export class VideoContainer extends LitElement {
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type;
     const video = this.videos[0];
+
     switch (type) {
       case "play":
         dispatch(this, Types.Action.play);
@@ -401,6 +408,13 @@ export class VideoContainer extends LitElement {
         break;
       case "loadedmetadata":
         dispatch(this, Types.Action.canPlay);
+        const duration = getVideoDuration(video);
+        if (duration && duration !== Infinity) {
+          dispatch(this, Types.Action.updateDuration, {
+            initialized: true,
+            duration,
+          });
+        }
         break;
       case "error":
         if (!this.isSourceSupported) return;
