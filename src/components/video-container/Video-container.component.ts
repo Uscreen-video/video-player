@@ -12,8 +12,9 @@ import styles from "./Video-container.styles.css?inline";
 import type Hls from "hls.js";
 import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
+import { initFairPlayDRM } from "../../helpers/drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
-import { MuxParams } from "../../types";
+import { MuxParams, DRMOptions, KeySystems } from "../../types";
 import { when } from "lit/directives/when.js";
 import "../buttons/Play";
 import { subtitlesController, SubtitlesController } from "./subtitles";
@@ -24,13 +25,13 @@ const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
   if (video.duration && video.duration !== Infinity) {
-    return video.duration
+    return video.duration;
   }
   if (video.seekable.length > 0) {
-    return video.seekable.end(0)
+    return video.seekable.end(0);
   }
-  return Infinity
-}
+  return Infinity;
+};
 
 /**
  * @slot - Video-container main content
@@ -71,6 +72,9 @@ export class VideoContainer extends LitElement {
 
   @connect("live")
   live: boolean;
+
+  @connect("drmOptions")
+  drmOptions?: DRMOptions;
 
   /**
    * A unique identifier used for storing and retrieving user preferences related to video playback.
@@ -231,12 +235,19 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.init, { isSourceSupported: true })
   initNative() {
-    this.sources.enableSource();
-    if (this.muxData)
+    if (this.muxData) {
       connectMuxData(this.videos[0], {
         ...this.muxData,
         player_init_time: this.initTime,
       });
+    }
+
+    if (this.drmOptions?.[KeySystems.fps]) {
+      initFairPlayDRM(this.videos[0], this.drmOptions[KeySystems.fps]);
+    }
+
+    // Init source after the video events are set
+    this.sources.enableSource();
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -258,6 +269,22 @@ export class VideoContainer extends LitElement {
       levelLoadingMaxRetry: 4,
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
+      emeEnabled: !!this.drmOptions,
+      drmSystems: this.drmOptions
+        ? {
+            "com.apple.fps": {
+              licenseUrl: this.drmOptions[KeySystems.fps]?.licenseUrl,
+              serverCertificateUrl:
+                this.drmOptions[KeySystems.fps]?.certificateUrl,
+            },
+            "com.widevine.alpha": {
+              licenseUrl: this.drmOptions[KeySystems.widevine]?.licenseUrl,
+            },
+            "com.microsoft.playready": {
+              licenseUrl: this.drmOptions[KeySystems.playready]?.licenseUrl,
+            },
+          }
+        : {},
     });
 
     if (this.muxData)
@@ -329,6 +356,7 @@ export class VideoContainer extends LitElement {
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type;
     const video = this.videos[0];
+
     switch (type) {
       case "play":
         dispatch(this, Types.Action.play);
@@ -351,7 +379,7 @@ export class VideoContainer extends LitElement {
       case "loadeddata":
         dispatch(this, Types.Action.updateDuration, {
           initialized: true,
-          duration: getVideoDuration(video)
+          duration: getVideoDuration(video),
         });
         break;
       case "ratechange":
@@ -380,6 +408,13 @@ export class VideoContainer extends LitElement {
         break;
       case "loadedmetadata":
         dispatch(this, Types.Action.canPlay);
+        const duration = getVideoDuration(video);
+        if (duration && duration !== Infinity) {
+          dispatch(this, Types.Action.updateDuration, {
+            initialized: true,
+            duration,
+          });
+        }
         break;
       case "error":
         if (!this.isSourceSupported) return;

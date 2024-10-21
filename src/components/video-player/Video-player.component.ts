@@ -11,7 +11,7 @@ import { FullscreenController } from "./controllers/Fullscreen";
 import { IdleController } from "./controllers/Idle";
 import { KeyboardController } from "./controllers/Keyboard";
 import { emit } from "../../helpers/event";
-import { Action, MuxParams } from "../../types";
+import { Action, MuxParams, DRMOptions } from "../../types";
 import { watch } from "../../decorators/watch";
 import styles from "./Video-player.styles.css?inline";
 
@@ -79,6 +79,12 @@ export class VideoPlayer extends LitElement {
   @property({ type: Number })
   offset: number;
 
+  /**
+   * DRM options
+   */
+  @property({ type: Object, attribute: "drm-options" })
+  drmOptions?: DRMOptions
+
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
     if (this.state.value.isFullscreen) {
@@ -129,6 +135,10 @@ export class VideoPlayer extends LitElement {
 
     if (this.muxData?.env_key) {
       this.state.setState(Action.setMuxParams, { muxData: this.muxData });
+    }
+
+    if (this.drmOptions) {
+      this.state.setState(Action.setDRMOptions, { drmOptions: this.drmOptions });
     }
   }
 

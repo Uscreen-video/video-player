@@ -84,6 +84,7 @@ export enum Action {
   setMuxParams = "setMuxParams",
   setVideoOffset = "setVideoOffset",
   live = "live",
+  setDRMOptions = "setDRMOptions",
 }
 
 export enum Event {
@@ -138,6 +139,7 @@ export type State = Partial<
     muxData: MuxParams;
     live: boolean;
     initialized: boolean;
+    drmOptions?: DRMOptions;
   } & typeof device
 >;
 
@@ -165,3 +167,21 @@ export type MuxOptions = {
   Hls?: (typeof import("hls.js"))["default"];
   hlsjs?: Hls;
 };
+
+
+export const enum KeySystems {
+  clearkey = 'org.w3.clearkey',
+  fps = 'com.apple.fps',
+  playready = 'com.microsoft.playready',
+  widevine = 'com.widevine.alpha',
+};
+
+
+export type DRMSystemConfiguration = {
+  licenseUrl: string;
+  certificateUrl?: string;
+};
+
+export type DRMOptions = Partial<
+  Record<KeySystems, DRMSystemConfiguration>
+>;
