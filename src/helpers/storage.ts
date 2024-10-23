@@ -6,7 +6,7 @@ export type StorageValue = Partial<
     | "isMuted"
     | "volume"
     | "activeQualityLevel"
-    | "activeTextTrack"
+    | "activeTextTrackId"
     | "playbackRate"
   >
 >;
