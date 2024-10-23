@@ -116,7 +116,7 @@ export type State = Partial<
     isAutoplay: boolean;
     isSourceSupported: boolean;
     isFullscreen: boolean;
-    activeTextTrack: string;
+    activeTextTrackId: string;
     activeQualityLevel: number;
     playbackRate: number;
     customHLS: boolean;
@@ -132,6 +132,7 @@ export type State = Partial<
       label: string;
       src: string;
       lang: string;
+      id: string;
     }[];
     qualityLevels: {
       name: string;

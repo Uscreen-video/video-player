@@ -18,8 +18,8 @@ export class VideoCues extends LitElement {
   /**
    * The currently active text track (e.g., subtitles or captions).
    */
-  @connect("activeTextTrack")
-  activeTextTrack: string;
+  @connect("activeTextTrackId")
+  activeTextTrackId: string;
 
   /**
    * An array of cues or subtitles to be displayed during video playback.
@@ -41,7 +41,7 @@ export class VideoCues extends LitElement {
   isFullscreen: false;
 
   render() {
-    if ((this.isIos && this.isFullscreen) || !this.activeTextTrack) return null;
+    if ((this.isIos && this.isFullscreen) || !this.activeTextTrackId) return null;
 
     return this.cues.map(
       (cue) => html`

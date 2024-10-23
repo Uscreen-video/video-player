@@ -12,7 +12,8 @@
   --menu-item-color-active: $menu-item-color-active;
   --menu-item-background-hover: var(--primary, $menu-item-background-hover);
   --menu-item-color-hover: $menu-item-color-hover;
-  --menu-max-height: auto;
+  --menu-max-height: var(--video-menu-max-height, auto);
+  --menu-max-height-subtract: 110px;
 
   --size: var(--button-size);
 }
@@ -72,10 +73,10 @@ button {
   white-space: nowrap;
   background: var(--tooltip-background);
   height: 0;
-  overflow: hidden;
   user-select: none;
-  max-height: var(--menu-max-height);
-  overflow: auto;
+  max-height: calc(var(--menu-max-height) - var(--menu-max-height-subtract));
+  overflow-x: hidden;
+  overflow-y: auto;
   & .inner {
     padding: 6px 12px;
   }
@@ -85,8 +86,9 @@ button {
 }
 
 @media (max-width: 640px) {
-  :host(:not([is-fullscreen])) .menu {
-    --menu-max-height: 150px;
+  .tooltip,
+  .menu {
+    --menu-max-height-subtract: 90px;
   }
 }
 

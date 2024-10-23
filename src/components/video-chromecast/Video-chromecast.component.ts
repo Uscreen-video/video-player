@@ -31,8 +31,8 @@ export class VideoChromecast extends LitElement {
   @connect("textTracks")
   cues: State["textTracks"];
 
-  @connect("activeTextTrack")
-  activeTextTrack: string;
+  @connect("activeTextTrackId")
+  activeTextTrackId: string;
 
   @state()
   targetDevise: string;
@@ -100,7 +100,7 @@ export class VideoChromecast extends LitElement {
 
     if (!media) return;
 
-    const index = this.cues.findIndex((s) => this.activeTextTrack === s.lang);
+    const index = this.cues.findIndex((s) => this.activeTextTrackId === s.id);
     const request = new window.chrome.cast.media.EditTracksInfoRequest([index]);
 
     media.editTracksInfo(request, void 0, void 0);
@@ -148,9 +148,9 @@ export class VideoChromecast extends LitElement {
 
     const request = new window.chrome.cast.media.LoadRequest(media);
 
-    if (this.activeTextTrack) {
+    if (this.activeTextTrackId) {
       const subtitlesLanguageIdx = this.cues.findIndex(
-        ({ lang }) => this.activeTextTrack === lang,
+        ({ id }) => this.activeTextTrackId === id,
       );
 
       request.activeTrackIds =
