@@ -194,11 +194,11 @@ export class VideoContainer extends LitElement {
   }
 
   @listen(Types.Command.enableTextTrack)
-  enableTextTrack({ lang }: { lang: string }) {
+  enableTextTrack({ trackId }: { trackId: string }) {
     dispatch(this, Types.Action.selectTextTrack, {
-      activeTextTrack: lang,
+      activeTextTrackId: trackId,
     });
-    this.subtitles.enableTextTrack(lang);
+    this.subtitles.enableTextTrack(trackId);
   }
 
   @listen(Types.Command.setPlaybackRate, { canPlay: true })
@@ -340,7 +340,7 @@ export class VideoContainer extends LitElement {
           this,
           this.videos[0],
           this.hls,
-          this._storageProvider.get().activeTextTrack,
+          this._storageProvider.get().activeTextTrackId,
         );
       },
     );
@@ -463,8 +463,8 @@ export class VideoContainer extends LitElement {
         value = +params.playbackRate;
         break;
       case Types.Command.enableTextTrack:
-        key = "activeTextTrack";
-        value = params.lang;
+        key = "activeTextTrackId";
+        value = params.trackId;
         break;
     }
     const currentVal = this._storageProvider.get();
@@ -494,7 +494,7 @@ export class VideoContainer extends LitElement {
         this,
         this.videos[0],
         this.hls,
-        savedSettings.activeTextTrack,
+        savedSettings.activeTextTrackId,
       );
     }
 

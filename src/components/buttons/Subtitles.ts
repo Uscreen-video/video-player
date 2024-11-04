@@ -18,8 +18,8 @@ const icons = {
 
 @customElement("video-subtitles-button")
 export class SubtitlesButton extends VideoButton {
-  @connect("activeTextTrack")
-  activeTrack: string;
+  @connect("activeTextTrackId")
+  activeTrackId: string;
 
   @connect("textTracks")
   textTracks: State["textTracks"];
@@ -38,8 +38,8 @@ export class SubtitlesButton extends VideoButton {
     if (!this.textTracks?.length) return null;
 
     return html`
-      <slot name="icon:${this.activeTrack ? "enabled" : "disabled"}">
-        ${this.activeTrack ? icons.solid : icons.outline}
+      <slot name="icon:${this.activeTrackId ? "enabled" : "disabled"}">
+        ${this.activeTrackId ? icons.solid : icons.outline}
       </slot>
     `;
   }
@@ -76,21 +76,21 @@ export class SubtitlesButton extends VideoButton {
   };
 
   handleItemClick = (e: any) => {
-    const lang = e.detail.value;
+    const trackId = e.detail.value;
     this.command(Types.Command.enableTextTrack, {
-      lang: lang === "off" ? "" : lang,
+      trackId: trackId === "off" ? "" : trackId,
     });
     this.removeMenu();
   };
 
   get getMenuItems(): any {
-    const active = this.activeTrack || "";
-    return [{ label: "Off", lang: "" }, ...(this.textTracks || [])].map(
+    const active = this.activeTrackId || "off";
+    return [{ label: "Off", lang: "", id: "off" }, ...(this.textTracks || [])].map(
       (track) => ({
         ...track,
-        value: track.lang || "off",
-        isActive: active === track.lang,
-        iconAfter: active === track.lang ? icons.check : null,
+        value: track.id,
+        isActive: active === track.id,
+        iconAfter: active === track.id ? icons.check : null,
       }),
     );
   }

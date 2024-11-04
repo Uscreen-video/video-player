@@ -12,7 +12,7 @@ export const initFairPlayDRM = async (videoElement: HTMLVideoElement, fairPlayOp
 const loadFairPlayCertificate = async (certificateUrl: string) => {
   let response = await fetch(certificateUrl);
   return response.arrayBuffer();
-}
+};
 
 const fairplayEncryptedCallback = (fairPlayCertificate: ArrayBuffer, licenseServerUrl: string) => {
   return async (event: MediaEncryptedEvent) => {
@@ -20,10 +20,17 @@ const fairplayEncryptedCallback = (fairPlayCertificate: ArrayBuffer, licenseServ
     const initDataType = event.initDataType;
 
     if (!video.mediaKeys) {
-      let access = await navigator.requestMediaKeySystemAccess("com.apple.fps", [{
-        initDataTypes: [initDataType],
-        videoCapabilities: [{ contentType: 'application/vnd.apple.mpegurl' }],
-      }]);
+      let access = await navigator.requestMediaKeySystemAccess(
+        "com.apple.fps",
+        [
+          {
+            initDataTypes: [initDataType],
+            videoCapabilities: [
+              { contentType: "application/vnd.apple.mpegurl" },
+            ],
+          },
+        ],
+      );
 
       let keys = await access.createMediaKeys();
 
@@ -35,15 +42,15 @@ const fairplayEncryptedCallback = (fairPlayCertificate: ArrayBuffer, licenseServ
 
     let session = video.mediaKeys.createSession();
     session.generateRequest(initDataType, initData);
-    let message = await new Promise<MediaKeySessionEventMap["message"]>(resolve => {
-      session.addEventListener('message', resolve, { once: true });
+    let message = await new Promise<MediaKeySessionEventMap["message"]>((resolve) => {
+      session.addEventListener("message", resolve, { once: true });
     });
 
     let response = await getLicenseResponse(message, licenseServerUrl);
     await session.update(response);
     return session;
-  }
-}
+  };
+};
 
 const getLicenseResponse = async (event: MediaKeySessionEventMap["message"], licenseServerUrl: string) => {
   let licenseResponse = await fetch(licenseServerUrl, {
@@ -52,5 +59,4 @@ const getLicenseResponse = async (event: MediaKeySessionEventMap["message"], lic
     body: event.message,
   });
   return licenseResponse.arrayBuffer();
-}
-
+};

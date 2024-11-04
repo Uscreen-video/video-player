@@ -1,5 +1,5 @@
 import { connect } from "../../state";
-import { unsafeCSS, LitElement, html } from "lit";
+import { unsafeCSS, LitElement, html, PropertyValues } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { DependentPropsMixin } from "../../mixins/DependentProps";
 import styles from "./Video-controls.styles.css?inline";
@@ -38,6 +38,28 @@ export class VideoControls extends DependentPropsMixin(LitElement) {
    */
   @property({ type: Boolean, reflect: true })
   custom = false;
+
+  private resizeObserver: ResizeObserver;
+
+  connectedCallback(): void {
+    super.connectedCallback();
+    this.resizeObserver = new ResizeObserver((entries) => {
+      const [entry] = entries
+      if (entry?.contentBoxSize) {
+        const { blockSize } =  entry.contentBoxSize[0]
+        this.style.cssText = `${this.style.cssText}; --video-menu-max-height: ${Math.round(blockSize)}px;`
+      }
+    });
+  }
+
+  protected firstUpdated(_changedProperties: PropertyValues): void {
+    this.resizeObserver.observe(this.parentElement)
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback()
+    this.resizeObserver?.disconnect()
+  }
 
   render() {
     return html`<slot></slot>`;
