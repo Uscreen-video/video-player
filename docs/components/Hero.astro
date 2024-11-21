@@ -1,0 +1,218 @@
+---
+import { Image } from 'astro:assets';
+const { data } = Astro.props.entry;
+---
+<script>
+  import anime from 'https://cdn.jsdelivr.net/npm/animejs@3.2.2/+esm'
+  import 'https://cdn.jsdelivr.net/npm/@uscreentv/video-player/+esm'
+
+  const softShadow = 'rgba(0, 0, 0, 0.45) 0px 25px 20px -20px'
+  const hardShadow = 'rgba(0, 0, 0, 0.4) 0px 2px 4px, rgba(0, 0, 0, 0.3) 0px 7px 13px -3px, rgba(0, 0, 0, 0.2) 0px -3px 0px inset'
+
+  anime
+    .timeline({ easing: 'easeOutExpo', duration: 750 })
+    .add({
+      targets: '.player',
+      perspective: 2000,
+      opacity: 1,
+    })
+    .add({
+      targets: '.player',
+      translateZ: -100,
+    }, 400)
+    .add({
+      targets: '.player',
+      rotateX: 40,
+      translateX: -10,
+      translateY: -50,
+    })
+    .add({
+      targets: 'video',
+      translateX: 10,
+      translateY: -15,
+      boxShadow: softShadow,
+      opacity: 1
+      // rotateZ: -10,
+    })
+    .add({
+      targets: 'video-controls',
+      translateX: 25,
+      translateY: -35,
+      boxShadow: softShadow,
+      opacity: 1,
+    })
+    .add({
+      targets: 'video-timeline',
+      translateY: -30,
+    })
+    .add({
+      targets: 'video-controls > *:not(video-timeline)',
+      translateX: (_, i) => 5 + i*2,
+      translateY: -20,
+      boxShadow: hardShadow,
+      left: 5,
+      background: '#000',
+      borderRadius: "4px",
+      delay: (_, i) => i * 100,
+    }, '-=750')
+    .add({
+      targets: '.uscreen-logo',
+      opacity: 1,
+    })
+    .add({
+      targets: '.element-description',
+      opacity: 1,
+    }, '-=750')
+
+</script>
+
+<div class="hero container">
+  <div class="player rounded-lg border-white border-4 shadow-lg opacity-0 scale-90">
+    <video-player 
+      storage-key="uscreen:player" 
+      idle-timeout="3000">
+      <video
+        preload="metadata"
+        slot="video"
+        autoplay
+        playsinline
+        muted
+        title="My test video"
+        class="bg-transparent rounded-lg shadow opacity-0"
+      >
+        <source 
+          src="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+          type="application/x-mpegURL"
+        />
+      </video>
+      <video-controls class="pb-0 rounded-b-lg opacity-0">
+        <video-timeline>
+          <video-timer></video-timer>
+        </video-timeline>
+        <video-play-button>
+        </video-play-button>
+        <video-forward-button>
+        </video-forward-button>
+        <video-backward-button>
+        </video-backward-button>
+        <video-volume-button>
+        </video-volume-button>
+        <video-volume-control></video-volume-control>
+        <hr class="ms-auto"/>
+        <video-subtitles-button>
+        </video-subtitles-button>
+        <video-settings-button>
+        </video-settings-button>
+        <video-airplay-button></video-airplay-button>
+        <video-pip-button>
+        </video-pip-button>
+        <video-chromecast-button>
+        </video-chromecast-button>
+        <video-fullscreen-button>
+        </video-fullscreen-button>
+      </video-controls>
+      <video-cues></video-cues>
+      <div class="uscreen-logo opacity-0 absolute inset-0 text-center text-white flex flex-col items-center justify-center">
+        <a
+          area-label="Uscreen website"
+          href="https://www.uscreen.tv/"
+          target="_blank"
+          class="block leading-none shadow rounded-full overflow-hidden transition-shadow hover:shadow-lg"
+        >
+          <svg class="w-10 h-10 lg:h-20 lg:w-20 shadow rounded-full" viewBox="0 0 337 337" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_1_252)">
+            <path d="M228.02 336.32H109.58C49.4201 336.32 0.640137 287.54 0.640137 227.38V108.94C0.640137 48.78 49.4201 0 109.58 0H228.01C288.18 0 336.95 48.78 336.95 108.94V227.37C336.96 287.54 288.18 336.32 228.02 336.32Z" fill="white"/>
+            <path d="M212.04 172.36C210.67 173.22 209.21 173.92 207.71 174.46V183C207.71 204.45 190.26 221.91 168.82 221.91H168.58C147.25 221.79 129.9 204.12 129.9 182.52V116.44C129.9 107.38 122.53 100.01 113.47 100.01C104.41 100.01 97.0402 107.38 97.0402 116.44V182.43C97.0402 201.54 104.51 219.63 118.08 233.37C131.7 247.16 149.7 254.76 168.76 254.77H168.79C208.36 254.77 240.55 222.58 240.55 183.01V154.52L212.04 172.36Z" fill="#0F172A"/>
+            <path d="M261.575 121.333L219.648 95.3194C215.292 92.6133 209.64 95.7243 209.64 100.811V152.829C209.64 157.925 215.292 161.026 219.648 158.32L261.575 132.316C265.662 129.778 265.662 123.872 261.575 121.333Z" fill="#006AFF"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_1_252">
+            <rect width="336.32" height="336.32" fill="white" transform="translate(0.640137)"/>
+            </clipPath>
+            </defs>
+          </svg>
+        </a>
+      </div>
+    </video-player>
+  </div>
+  <div class="description flex -top-[60px] relative">
+    <a class="element-description text-accent">
+      <div class="element-descriotion-pointer h-[45px]"></div>
+      <code class="text-nowrap">&lt;video-container&gt;</code>
+    </a>
+    <a class="element-description text-emerald-400 ms-10">
+      <div class="element-descriotion-pointer h-[65px]"></div>
+      <code class="text-nowrap">&lt;video&gt;</code>
+    </a>
+    <a class="element-description text-indigo-400 ms-10">
+      <div class="element-descriotion-pointer h-[90px]"></div>
+      <code class="text-nowrap">&lt;video-controls&gt;</code>
+    </a>
+    <a class="element-description text-fuchsia-400 ms-10">
+      <div class="element-descriotion-pointer h-[265px]"></div>
+      <code class="text-nowrap">&lt;custom-html&gt;</code>
+    </a>
+    <a class="element-description text-pink-400 ms-auto">
+      <div class="element-descriotion-pointer h-[90px] left-auto right-[20px]"></div>
+      <code class="text-nowrap">&lt;video-button&gt;</code>
+    </a>
+  </div>
+</div>
+<div class="conteiner text-center space-x-4 -top-10 relative">
+  <a
+    href="/intro"
+    class="cta-primary">
+    Get Started
+  </a>
+  <a
+  href="/guides/get-started"
+  class="cta-secondary">
+  API Reference
+</a>
+</div>
+
+<style>
+  .element-description {
+    position: relative;
+    opacity: 0;
+  }
+  .element-descriotion-pointer {
+    position: absolute;
+    width: 2px;
+    bottom: 100%;
+    border-radius: 2px;
+    left: 10px;
+    background-color: currentColor;
+  }
+  .element-descriotion-pointer:before{
+    content: ' ';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    bottom: calc(100% - 2px);
+    left: calc(50% - 4px);
+    border: 2px solid currentColor;
+  }
+  .cta-primary, .cta-secondary{
+    background: linear-gradient(180deg, #238aff, #07f);
+    text-decoration: none;
+    border-radius: 9999px;
+    color: #fff;
+    padding: .75rem 1.5rem;
+    margin-top: .5rem;
+    text-shadow: 0 1px 1px #00387838;
+    box-shadow: 0 1px 2px #00295738;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cta-secondary{
+    background: transparent;
+    color: var(--tw-ring-color);
+    border: 1px solid var(--tw-ring-color);
+  }
+  .cta-primary:hover, .cta-secondary:hover{
+    box-shadow: 0 5px 30px -10px #0078ffab;
+    filter: brightness(1.05);
+  }
+</style>
