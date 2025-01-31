@@ -16,7 +16,7 @@ const icons = {
   chevron: unsafeSVG(_chevronIcon),
 };
 
-type Menu = "shortcuts" | "rate" | "quality";
+type Menu = "shortcuts" | "rate" | "quality" | "audio";
 
 @customElement("video-settings-button")
 export class SubtitlesButton extends VideoButton {
@@ -24,7 +24,7 @@ export class SubtitlesButton extends VideoButton {
     type: Array,
     converter: (v) => v.split(",").map((v) => v.trim()),
   })
-  settings: Menu[] = ["shortcuts", "rate", "quality"];
+  settings: Menu[] = ["shortcuts", "rate", "quality", "audio"];
 
   @property({ type: Object })
   translation: Record<string, any> = {};
@@ -37,6 +37,12 @@ export class SubtitlesButton extends VideoButton {
 
   @connect("qualityLevels")
   qualityLevels: Types.State["qualityLevels"];
+
+  @connect("audioTracks")
+  audioTracks: Types.State["audioTracks"];
+
+  @connect("activeAudioTrackId")
+  activeAudioTrackId: Types.State["activeAudioTrackId"];
 
   @state()
   activeMenu: Menu;
@@ -127,6 +133,8 @@ export class SubtitlesButton extends VideoButton {
         return this.selectRate(value);
       case "quality":
         return this.setQuality(value);
+      case "audio":
+        return this.selectAudio(value);
       default:
         return this.selectMenu(value);
     }
@@ -150,6 +158,8 @@ export class SubtitlesButton extends VideoButton {
         return this.shortcutsMenuItems;
       case "quality":
         return this.qualityMenuItems;
+      case "audio":
+        return this.audioMenuItems;
       default:
         return this.mainMenuItems;
     }
@@ -165,12 +175,18 @@ export class SubtitlesButton extends VideoButton {
     this.removeMenu();
   };
 
+  selectAudio = (id: string) => {
+    this.command(Types.Command.enableAudioTrack, { trackId: id });
+    this.removeMenu();
+  }
+
   selectMenu(menu?: Menu) {
     this.activeMenu = this.isSingleMenuItem ? this.settings[0] : menu;
 
     // We need to trigger resize event to update the menu position
     Promise.resolve().then(() => emit(this, "resize"));
   }
+
 
   get isSingleMenuItem() {
     return this.settings.length === 1;
@@ -208,12 +224,22 @@ export class SubtitlesButton extends VideoButton {
         iconAfter: `${this.playbackRate}x`,
       });
 
+    if (this.settings.includes("audio") && this.audioTracks?.length && this.activeAudioTrackId) {
+      menu.push({
+        label: "Audio",
+        value: "audio",
+        iconAfter: this.audioTracks.find(t => t.id === this.activeAudioTrackId)?.label,
+      });
+    }
+
     if (this.settings.includes("quality") && this.qualityLevels?.length)
       menu.push({
         label: "Quality",
         value: "quality",
         iconAfter: this.qualityLevel,
       });
+
+
     return menu;
   }
 
@@ -250,6 +276,24 @@ export class SubtitlesButton extends VideoButton {
         isActive: this.qualityLevel === Number(level.name),
       })),
     ];
+    if (this.isSingleMenuItem) return items;
+    return [
+      {
+        label: "back",
+        iconBefore: icons.chevron,
+        value: "back",
+      },
+      ...items,
+    ];
+  }
+
+  get audioMenuItems(): any {
+    const items = this.audioTracks.map((track) => ({
+      label: track.label,
+      value: track.id,
+      iconAfter: this.activeAudioTrackId === track.id ? icons.check : undefined,
+      isActive: this.activeAudioTrackId === track.id,
+    }));
     if (this.isSingleMenuItem) return items;
     return [
       {
