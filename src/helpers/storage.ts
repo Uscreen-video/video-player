@@ -8,6 +8,7 @@ export type StorageValue = Partial<
     | "activeQualityLevel"
     | "activeTextTrackId"
     | "playbackRate"
+    | "activeAudioTrackId"
   >
 >;
 

@@ -36,6 +36,8 @@ export enum Command {
   backward = "backward",
   /** Enable a text track */
   enableTextTrack = "enableTextTrack",
+  /** Enable an audio track */
+  enableAudioTrack = "enableAudioTrack",
   /** Sets video quality */
   setQualityLevel = "setQualityLevel",
   /** Initialize the custom HLS player */
@@ -73,6 +75,7 @@ export enum Action {
   interacted = "interacted",
   idle = "idle",
   selectTextTrack = "selectTextTrack",
+  selectAudioTrack = "selectAudioTrack",
   cues = "cues",
   setPlaybackRate = "setPlaybackRate",
   setQualityLevel = "setQualityLevel",
@@ -117,6 +120,7 @@ export type State = Partial<
     isSourceSupported: boolean;
     isFullscreen: boolean;
     activeTextTrackId: string;
+    activeAudioTrackId: string;
     activeQualityLevel: number;
     playbackRate: number;
     customHLS: boolean;
@@ -133,6 +137,11 @@ export type State = Partial<
       src: string;
       lang: string;
       id: string;
+    }[];
+    audioTracks: {
+      label: string,
+      lang: string,
+      id: string
     }[];
     qualityLevels: {
       name: string;
