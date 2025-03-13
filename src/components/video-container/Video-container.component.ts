@@ -19,6 +19,8 @@ import { when } from "lit/directives/when.js";
 import "../buttons/Play";
 import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
+import { audiosController } from "./audios";
+import type { AudiosController } from "./audios/types";
 
 const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
 
@@ -42,6 +44,7 @@ export class VideoContainer extends LitElement {
   public command = createCommand(this);
   private subtitles: SubtitlesController;
   private sources: SourcesController;
+  private audios: AudiosController;
 
   hls: Hls;
   initTime: number;
@@ -201,6 +204,11 @@ export class VideoContainer extends LitElement {
     this.subtitles.enableTextTrack(trackId);
   }
 
+  @listen(Types.Command.enableAudioTrack)
+  enableAudioTrack({ trackId }: { trackId: string }) {
+    this.audios.enableAudioTrack(trackId);
+  }
+
   @listen(Types.Command.setPlaybackRate, { canPlay: true })
   setPlaybackRate({ playbackRate }: { playbackRate: number }) {
     this.videos[0].playbackRate = this.videos[0].defaultPlaybackRate =
@@ -342,6 +350,15 @@ export class VideoContainer extends LitElement {
           this.hls,
           this._storageProvider.get().activeTextTrackId,
         );
+
+        window.requestAnimationFrame(() => {
+          this.audios = audiosController(
+            this,
+            this.videos[0],
+            this.hls,
+            this._storageProvider.get().activeAudioTrackId,
+          );
+        })
       },
     );
 
@@ -437,6 +454,7 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.toggleMuted)
   @listen(Types.Command.setPlaybackRate)
   @listen(Types.Command.enableTextTrack)
+  @listen(Types.Command.enableAudioTrack)
   _syncStateWithStorage(params: CommandParams, _: any, command: Types.Command) {
     if (!this.storageKey) return;
 
@@ -464,6 +482,10 @@ export class VideoContainer extends LitElement {
         break;
       case Types.Command.enableTextTrack:
         key = "activeTextTrackId";
+        value = params.trackId;
+        break;
+      case Types.Command.enableAudioTrack:
+        key = "activeAudioTrackId";
         value = params.trackId;
         break;
     }
@@ -495,6 +517,12 @@ export class VideoContainer extends LitElement {
         this.videos[0],
         this.hls,
         savedSettings.activeTextTrackId,
+      );
+      this.audios = audiosController(
+        this,
+        this.videos[0],
+        this.hls,
+        savedSettings.activeAudioTrackId
       );
     }
 
