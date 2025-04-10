@@ -8,12 +8,17 @@ import _castIcon from "../../icons/chrome-cast-outline.svg?raw";
 // import { CastStatus } from '../../types';
 const castIcon = unsafeSVG(_castIcon);
 
+const buildTrackId = (track: chrome.cast.media.Track) => {
+  return `${track.name}-${track.language}`
+}
+
 @customElement("video-chromecast")
 export class VideoChromecast extends LitElement {
   static styles = unsafeCSS(styles);
   public command = createCommand(this);
   private player: cast.framework.RemotePlayer;
   private controller: cast.framework.RemotePlayerController;
+  private media: chrome.cast.media.Media;
 
   @connect("src")
   src: string;
@@ -34,8 +39,14 @@ export class VideoChromecast extends LitElement {
   @connect("activeTextTrackId")
   activeTextTrackId: string;
 
+  @connect("activeAudioTrackId")
+  activeAudioTrackId: string;
+
   @state()
-  targetDevise: string;
+  targetDevice: string;
+
+  @state()
+  castStatus: 'DEFAULT' | 'ERROR' = 'DEFAULT';
 
   @listen(Command.togglePlay, { castActivated: true })
   @listen(Command.play, { castActivated: true })
@@ -94,17 +105,28 @@ export class VideoChromecast extends LitElement {
 
   @listen(Command.enableTextTrack, { castActivated: true })
   handleCuesChange() {
-    const session =
-      window.cast.framework.CastContext.getInstance().getCurrentSession();
-    const media = session?.getMediaSession && session.getMediaSession();
-
-    if (!media) return;
-
-    const index = this.cues.findIndex((s) => this.activeTextTrackId === s.id);
-    const request = new window.chrome.cast.media.EditTracksInfoRequest([index]);
-
-    media.editTracksInfo(request, void 0, void 0);
+    this.requestTracksChange();
   }
+
+  @listen(Command.enableAudioTrack, { castActivated: true })
+  handleAudioTrackChange() {
+    this.requestTracksChange();
+  }
+
+  private requestTracksChange() {
+    if (!this.media) return;
+
+    const activeTextTrack = this.media.media.tracks.find((track) => track.type === window.chrome.cast.media.TrackType.TEXT && buildTrackId(track) === this.activeTextTrackId);
+
+    const activeAudioTrack = this.media.media.tracks.find((track) => track.type === window.chrome.cast.media.TrackType.AUDIO && buildTrackId(track) === this.activeAudioTrackId);
+
+    const activeTrackIDs = [activeTextTrack?.trackId, activeAudioTrack?.trackId].filter(i => !!i);
+
+    const request = new window.chrome.cast.media.EditTracksInfoRequest(activeTrackIDs);
+    this.media.editTracksInfo(request, void 0, void 0);
+  }
+
+  private shouldInitTracks = false
 
   @listen(Command.requestCast)
   async loadMedia() {
@@ -123,21 +145,6 @@ export class VideoChromecast extends LitElement {
       window.chrome.cast.media.TextTrackFontGenericFamily.SANS_SERIF;
     media.textTrackStyle.fontScale = 1.0;
     media.textTrackStyle.foregroundColor = "#FFFFFF";
-    media.tracks = this.cues.map((track, i) => {
-      const t = new window.chrome.cast.media.Track(
-        Number(i),
-        window.chrome.cast.media.TrackType.TEXT,
-      );
-
-      t.trackContentId = track.src;
-      t.trackContentType = "text/vtt";
-      t.subtype = window.chrome.cast.media.TextTrackType.CAPTIONS;
-      t.name = track.label;
-      t.trackId = Number(i);
-      t.language = track.lang;
-
-      return t;
-    });
 
     media.metadata.title = this.title;
     media.metadata.images = [
@@ -148,15 +155,6 @@ export class VideoChromecast extends LitElement {
 
     const request = new window.chrome.cast.media.LoadRequest(media);
 
-    if (this.activeTextTrackId) {
-      const subtitlesLanguageIdx = this.cues.findIndex(
-        ({ id }) => this.activeTextTrackId === id,
-      );
-
-      request.activeTrackIds =
-        subtitlesLanguageIdx !== -1 ? [subtitlesLanguageIdx] : [];
-    }
-
     try {
       await window.cast.framework.CastContext.getInstance().requestSession();
 
@@ -165,7 +163,10 @@ export class VideoChromecast extends LitElement {
 
       await session.loadMedia(request);
 
-      this.targetDevise = this.player?.statusText || "";
+      this.updateDeviceName();
+
+      this.shouldInitTracks = true;
+      this.castStatus = 'DEFAULT';
     } catch (err) {
       console.error(err);
     }
@@ -205,6 +206,12 @@ export class VideoChromecast extends LitElement {
     );
 
     dispatch(this, Action.setCastStatus, { castAvailable: true });
+
+    setTimeout(() => {
+      if (this.active && !this.media) {
+        this.castStatus = 'ERROR';
+      }
+    }, 500)
   }
 
   loadChromeCastFramework() {
@@ -233,19 +240,56 @@ export class VideoChromecast extends LitElement {
     }
   };
 
+  private updateDeviceName() {
+    const session = window.cast.framework.CastContext.getInstance().getCurrentSession();
+
+    const device = session?.getCastDevice();
+
+    if (device) {
+      this.targetDevice = device.friendlyName;
+    }
+  }
+
   handleCastEvent = ({
     field,
     value,
   }: cast.framework.RemotePlayerChangedEvent) => {
+    console.log(field, value);
     switch (field) {
+      case "mediaInfo":
+        const session = window.cast.framework.CastContext.getInstance().getCurrentSession();
+        const _media = session?.getMediaSession && session.getMediaSession();
+        if (_media) {
+          this.media = _media;
+        }
+        if (this.shouldInitTracks && value?.tracks?.length > 1) {
+          this.requestTracksChange();
+          this.shouldInitTracks = false;
+        }
+        break;
       case "displayName":
-        this.targetDevise = value;
+        this.updateDeviceName();
         break;
       case "isConnected":
+        if (value) {
+          this.command(Command.pause);
+        }
         dispatch(this, Action.setCastStatus, { castActivated: value });
         break;
       case "playerState":
         dispatch(this, value === "PLAYING" ? Action.play : Action.pause);
+        if (value === 'IDLE') {
+          setTimeout(() => {
+            if (this.media?.idleReason === 'ERROR') {
+              console.log(this.media)
+              this.castStatus = 'ERROR';
+            }
+            if (this.media?.idleReason === 'FINISHED') {
+              const session = window.cast.framework.CastContext.getInstance().getCurrentSession();
+              session.endSession(true);
+            }
+          }, 500)
+        }
         break;
       case "currentTime":
         dispatch(this, Action.updateTime, { currentTime: value });
@@ -254,6 +298,10 @@ export class VideoChromecast extends LitElement {
   };
 
   render() {
-    return html` ${castIcon} <slot>Casting to</slot> "${this.targetDevise}" `;
+    if (this.castStatus === 'ERROR') {
+      return html` ${castIcon} <slot name="error">Error while loading media resource. Please restart cast.</slot>`;
+    }
+
+    return html` ${castIcon} <slot>Casting to</slot> "${this.targetDevice}"`
   }
 }
