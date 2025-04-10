@@ -105,12 +105,16 @@ export class VideoChromecast extends LitElement {
 
   @listen(Command.enableTextTrack, { castActivated: true })
   handleCuesChange() {
-    this.requestTracksChange();
+    window.requestAnimationFrame(() => {
+      this.requestTracksChange();
+    })
   }
 
   @listen(Command.enableAudioTrack, { castActivated: true })
   handleAudioTrackChange() {
-    this.requestTracksChange();
+    window.requestAnimationFrame(() => {
+      this.requestTracksChange();
+    })
   }
 
   private requestTracksChange() {
@@ -254,7 +258,6 @@ export class VideoChromecast extends LitElement {
     field,
     value,
   }: cast.framework.RemotePlayerChangedEvent) => {
-    console.log(field, value);
     switch (field) {
       case "mediaInfo":
         const session = window.cast.framework.CastContext.getInstance().getCurrentSession();
@@ -263,8 +266,10 @@ export class VideoChromecast extends LitElement {
           this.media = _media;
         }
         if (this.shouldInitTracks && value?.tracks?.length > 1) {
-          this.requestTracksChange();
           this.shouldInitTracks = false;
+          window.requestAnimationFrame(() => {
+            this.requestTracksChange();
+          })
         }
         break;
       case "displayName":
@@ -281,7 +286,6 @@ export class VideoChromecast extends LitElement {
         if (value === 'IDLE') {
           setTimeout(() => {
             if (this.media?.idleReason === 'ERROR') {
-              console.log(this.media)
               this.castStatus = 'ERROR';
             }
             if (this.media?.idleReason === 'FINISHED') {
