@@ -104,13 +104,15 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
     this.currentValue = this.currentTime;
   }
 
-  handleInput(e: InputEvent & { currentTarget: VideoSlider }) {
-    this.currentValue = e.currentTarget.currentValue;
+  handleInput(e: { detail: { value: number } }) {
+    this.currentValue = e.detail.value;
     this.isChanging = this.isPendingUpdate = true;
   }
 
   handleChanged(e: { detail: { value: number } }) {
-    const time = e.detail.value;
+    const time = this.hoverPosition > 0
+      ? this.hoverPosition
+      : e.detail.value;
     this.command(Command.seek, { time });
     this.isChanging = false;
   }
@@ -152,7 +154,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
         @changed=${this.handleChanged}
         @hovering=${this.handleHover}
         @hoverend=${this.handleHoverEnd}
-        @input=${this.handleInput}
+        @inputing=${this.handleInput}
       >
         ${when(!this.disabled, this.renderBars)}
         <slot name="tooltip" slot="tooltip"></slot>
