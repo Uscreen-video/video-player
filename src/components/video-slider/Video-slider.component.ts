@@ -134,6 +134,7 @@ export class VideoSlider extends LitElement {
 
   handleInput(e: InputEvent & { target: HTMLInputElement }) {
     this.currentValue = this.max * (Number.parseFloat(e.target.value) / 100);
+    emit(this, "inputing", { value: this.currentValue })
   }
 
   handleChange() {
@@ -162,6 +163,8 @@ export class VideoSlider extends LitElement {
       emit(this, "hoverend");
       this.isHovered = false;
     }, 5000);
+
+    emit(this, "hovering", { position: percents });
   }
 
   handlePointerLeave() {
