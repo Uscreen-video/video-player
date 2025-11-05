@@ -2,7 +2,7 @@ import { unsafeCSS, LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import styles from "./Video-chromecast.styles.css?inline";
 import { connect, createCommand, dispatch, listen } from "../../state";
-import { Action, Command, State } from "../../types";
+import { Action, Command, State, DRMOptions, KeySystems, MuxParams } from "../../types";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import _castIcon from "../../icons/chrome-cast-outline.svg?raw";
 // import { CastStatus } from '../../types';
@@ -33,6 +33,12 @@ export class VideoChromecast extends LitElement {
 
   @connect("activeTextTrackId")
   activeTextTrackId: string;
+
+  @connect("drmOptions")
+  drmOptions?: DRMOptions;
+
+  @connect("muxData")
+  muxData: MuxParams;
 
   @state()
   targetDevise: string;
@@ -145,6 +151,11 @@ export class VideoChromecast extends LitElement {
         url: this.poster,
       },
     ];
+    media.customData = this.drmOptions ? {
+      "drm": {
+        "licenseUrl": this.drmOptions[KeySystems.widevine]?.licenseUrl
+      }
+    } : {};
 
     const request = new window.chrome.cast.media.LoadRequest(media);
 
@@ -155,6 +166,9 @@ export class VideoChromecast extends LitElement {
 
       request.activeTrackIds =
         subtitlesLanguageIdx !== -1 ? [subtitlesLanguageIdx] : [];
+    }
+    request.customData = {
+      "mux": { "envKey": this.muxData?.env_key }
     }
 
     try {
