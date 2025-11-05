@@ -2,7 +2,7 @@ import { unsafeCSS, LitElement, html } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import styles from "./Video-chromecast.styles.css?inline";
 import { connect, createCommand, dispatch, listen } from "../../state";
-import { Action, Command, State } from "../../types";
+import { Action, Command, State, DRMOptions, KeySystems, MuxParams } from "../../types";
 import { unsafeSVG } from "lit/directives/unsafe-svg.js";
 import _castIcon from "../../icons/chrome-cast-outline.svg?raw";
 // import { CastStatus } from '../../types';
@@ -34,8 +34,17 @@ export class VideoChromecast extends LitElement {
   @connect("activeTextTrackId")
   activeTextTrackId: string;
 
+  @connect("drmOptions")
+  drmOptions?: DRMOptions;
+
+  @connect("muxData")
+  muxData: MuxParams;
+
   @state()
   targetDevise: string;
+
+  @property({ type: String, attribute: "receiver-application-id" })
+  receiverApplicationId?: string;
 
   @listen(Command.togglePlay, { castActivated: true })
   @listen(Command.play, { castActivated: true })
@@ -145,6 +154,13 @@ export class VideoChromecast extends LitElement {
         url: this.poster,
       },
     ];
+    console.log("Setting DRM options: ", this.drmOptions);
+    media.customData = this.drmOptions ? {
+      "drm": {
+        "licenseUrl": this.drmOptions[KeySystems.widevine]?.licenseUrl
+      }
+    } : {};
+    console.log("Media custom data: ", media.customData);
 
     const request = new window.chrome.cast.media.LoadRequest(media);
 
@@ -156,6 +172,12 @@ export class VideoChromecast extends LitElement {
       request.activeTrackIds =
         subtitlesLanguageIdx !== -1 ? [subtitlesLanguageIdx] : [];
     }
+
+    console.log("Setting Mux data: ", this.muxData);
+    request.customData = {
+      ...(this.muxData?.env_key && { "mux": { "envKey": this.muxData.env_key } })
+    };
+    console.log("Request custom data: ", request.customData);
 
     try {
       await window.cast.framework.CastContext.getInstance().requestSession();
@@ -188,9 +210,9 @@ export class VideoChromecast extends LitElement {
   }
 
   initChromeCast() {
+    console.log("Using receiver application ID: ", this.receiverApplicationId || window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
     window.cast.framework.CastContext.getInstance().setOptions({
-      receiverApplicationId:
-        window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      receiverApplicationId: this.receiverApplicationId || window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
       autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
       resumeSavedSession: false,
     });
