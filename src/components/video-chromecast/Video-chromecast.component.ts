@@ -54,6 +54,9 @@ export class VideoChromecast extends LitElement {
   @state()
   castStatus: 'DEFAULT' | 'ERROR' = 'DEFAULT';
 
+  @property({ type: String, attribute: "receiver-application-id" })
+  receiverApplicationId?: string;
+
   @listen(Command.togglePlay, { castActivated: true })
   @listen(Command.play, { castActivated: true })
   @listen(Command.pause, { castActivated: true })
@@ -217,8 +220,7 @@ export class VideoChromecast extends LitElement {
 
   initChromeCast() {
     window.cast.framework.CastContext.getInstance().setOptions({
-      receiverApplicationId:
-        window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+      receiverApplicationId: this.receiverApplicationId || chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
       autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
       resumeSavedSession: false,
     });
