@@ -154,13 +154,11 @@ export class VideoChromecast extends LitElement {
         url: this.poster,
       },
     ];
-    console.log("Setting DRM options: ", this.drmOptions);
     media.customData = this.drmOptions ? {
       "drm": {
         "licenseUrl": this.drmOptions[KeySystems.widevine]?.licenseUrl
       }
     } : {};
-    console.log("Media custom data: ", media.customData);
 
     const request = new window.chrome.cast.media.LoadRequest(media);
 
@@ -173,11 +171,9 @@ export class VideoChromecast extends LitElement {
         subtitlesLanguageIdx !== -1 ? [subtitlesLanguageIdx] : [];
     }
 
-    console.log("Setting Mux data: ", this.muxData);
     request.customData = {
       ...(this.muxData?.env_key && { "mux": { "envKey": this.muxData.env_key } })
     };
-    console.log("Request custom data: ", request.customData);
 
     try {
       await window.cast.framework.CastContext.getInstance().requestSession();
@@ -210,7 +206,6 @@ export class VideoChromecast extends LitElement {
   }
 
   initChromeCast() {
-    console.log("Using receiver application ID: ", this.receiverApplicationId || window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID);
     window.cast.framework.CastContext.getInstance().setOptions({
       receiverApplicationId: this.receiverApplicationId || window.chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
       autoJoinPolicy: window.chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
