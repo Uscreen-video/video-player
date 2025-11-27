@@ -40,7 +40,7 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
       lang: t.language || t.label,
       label: t.label,
       id: buildTrackId(t),
-    })).sort((a, b) => a.lang.localeCompare(b.lang, undefined, { sensitivity: 'base' }))
+    })).sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))
   });
 
   const showTracks = (trackId: string) => {
