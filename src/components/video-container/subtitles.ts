@@ -34,14 +34,28 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
     return textTracks
   };
 
-  const tracksToStoreState = () => ({
-    textTracks: getTracks().map((t) => ({
-      src: langToSrcMapping[t.language] || "",
-      lang: t.language || t.label,
-      label: t.label,
-      id: buildTrackId(t),
-    })).sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }))
-  });
+  const tracksToStoreState = () => {
+    const pageLanguage = document.documentElement.lang;
+    const pageLanguageCode = pageLanguage.split('-')?.[0];
+
+    return {
+      textTracks: getTracks().map((t) => ({
+        src: langToSrcMapping[t.language] || "",
+        lang: t.language || t.label,
+        label: t.label,
+        id: buildTrackId(t),
+      })).sort((a, b) => {
+        if (pageLanguageCode) {
+          const aMatches = a.lang === pageLanguageCode;
+          const bMatches = b.lang === pageLanguageCode;
+          if (aMatches && !bMatches) return -1;
+          if (!aMatches && bMatches) return 1;
+        }
+
+        return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' })
+      })
+    }
+  };
 
   const showTracks = (trackId: string) => {
     if (hls) {
