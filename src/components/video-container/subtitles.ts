@@ -35,8 +35,8 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
   };
 
   const tracksToStoreState = () => {
-    const pageLanguage = document.documentElement.lang;
-    const pageLanguageCode = pageLanguage.split('-')?.[0];
+    const userLanguage = navigator.language;
+    const userLanguageCode = userLanguage.split('-')[0];
 
     return {
       textTracks: getTracks().map((t) => ({
@@ -45,9 +45,9 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
         label: t.label,
         id: buildTrackId(t),
       })).sort((a, b) => {
-        if (pageLanguageCode) {
-          const aMatches = a.lang === pageLanguageCode;
-          const bMatches = b.lang === pageLanguageCode;
+        if (userLanguageCode) {
+          const aMatches = a.lang === userLanguageCode;
+          const bMatches = b.lang === userLanguageCode;
           if (aMatches && !bMatches) return -1;
           if (!aMatches && bMatches) return 1;
         }
