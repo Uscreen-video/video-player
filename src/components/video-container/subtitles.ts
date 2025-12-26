@@ -35,7 +35,7 @@ const videoTextTtracksManager = (video: HTMLVideoElement, hls: Hls) => {
   };
 
   const tracksToStoreState = () => {
-    const userLanguage = navigator.language;
+    const userLanguage = navigator.language || document.documentElement.lang || 'en';
     const userLanguageCode = userLanguage.split('-')[0];
 
     return {
