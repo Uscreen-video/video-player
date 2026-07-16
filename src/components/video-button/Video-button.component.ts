@@ -170,7 +170,13 @@ export class VideoButton extends LitElement {
       ${when(
         !isMobile(),
         () => html`
-          <div id="tooltip" role="tooltip" class="tooltip" part="tooltip">
+          <div
+            id="tooltip"
+            role="tooltip"
+            tabindex="0"
+            class="tooltip"
+            part="tooltip"
+          >
             <div class="inner">${tooltip}</div>
           </div>
         `,

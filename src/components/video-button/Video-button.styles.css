@@ -95,3 +95,9 @@ button {
 .menu .inner {
   padding: 0;
 }
+
+.tooltip:focus-visible,
+.menu:focus-visible {
+  outline: 2px solid var(--primary, var(--tooltip-text, #fff));
+  outline-offset: 2px;
+}

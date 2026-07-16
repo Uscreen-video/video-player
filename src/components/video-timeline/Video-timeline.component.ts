@@ -140,6 +140,7 @@ export class VideoTimeline extends DependentPropsMixin(LitElement) {
     return html`
       <video-slider
         with-tooltip
+        label="Seek"
         .value=${this.currentValue}
         .max=${this.duration}
         .valueText="${timeAsString(this.currentValue)} of ${timeAsString(

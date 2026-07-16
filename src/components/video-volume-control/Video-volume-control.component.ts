@@ -29,6 +29,7 @@ export class VideoVolumeControl extends LitElement {
     if (this.isIos) return null;
     return html`
       <video-slider
+        label="Volume"
         .value=${this.isMuted ? 0 : this.volume}
         @changed=${this.handleVolumeChange}
       ></video-slider>
