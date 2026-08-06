@@ -10,6 +10,7 @@ import {
 } from "@popperjs/core";
 import { closestElement } from "../../helpers/closest";
 import { when } from "lit/directives/when.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import { isDeepAssigned } from "../../helpers/slot";
 
 type CombinedEventType = PointerEvent &
@@ -59,6 +60,13 @@ export class VideoSlider extends LitElement {
    */
   @property({ attribute: "value-text" })
   valueText = "";
+
+  /**
+   * Accessible name for the slider, exposed as `aria-label` on the range input.
+   * Screen readers announce this so the control has a name (WCAG 1.3.1, 4.1.2).
+   */
+  @property({ attribute: "label" })
+  label = "";
 
   /**
    * Text to display in the tooltip.
@@ -247,6 +255,7 @@ export class VideoSlider extends LitElement {
           max="100"
           step="0.001"
           role="slider"
+          aria-label=${ifDefined(this.label || undefined)}
           ?disabled=${this.disabled}
           .value=${this.positionInPercents}
           .aria-valuenow=${this.currentValue}
