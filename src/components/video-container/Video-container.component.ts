@@ -14,6 +14,7 @@ import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
 import { initFairPlayDRM } from "../../helpers/drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
+import { qualityBadge } from "../../helpers/quality";
 import { MuxParams, DRMOptions, KeySystems } from "../../types";
 import { when } from "lit/directives/when.js";
 import "../buttons/Play";
@@ -317,8 +318,11 @@ export class VideoContainer extends LitElement {
     this.hls.on(
       HLS.Events.LEVEL_UPDATED,
       (_: unknown, { level }: { level: number }) => {
+        // Only reflects what is playing — the user's selection lives in
+        // `activeQualityLevel` and must not be overwritten by ABR switches,
+        // otherwise picking "Auto" appears to select a concrete level.
         dispatch(this, Types.Action.setQualityLevel, {
-          activeQualityLevel: this.hls.levels[level]?.height || -1,
+          currentQualityLevel: this.hls.levels[level]?.height || -1,
         });
       },
     );
@@ -327,9 +331,15 @@ export class VideoContainer extends LitElement {
       HLS.Events.MANIFEST_PARSED,
       (_: unknown, { levels }: { levels: unknown[] }) => {
         dispatch(this, Types.Action.setLevels, {
-          qualityLevels: levels.map((level: { height: string }) => ({
-            name: level.height || "auto",
-          })),
+          qualityLevels: (levels as { width?: number; height?: number }[])
+            // A rendition without RESOLUTION cannot be labelled or selected by
+            // height, so it is left out of the menu rather than shown as "autop"
+            .filter((level) => level.height > 0)
+            .map((level) => ({
+              name: String(level.height),
+              height: level.height,
+              badge: qualityBadge(level.width, level.height),
+            })),
         });
         const { activeQualityLevel } = this._storageProvider.get();
         if (activeQualityLevel >= 0) {
@@ -358,7 +368,7 @@ export class VideoContainer extends LitElement {
             this.hls,
             this._storageProvider.get().activeAudioTrackId,
           );
-        })
+        });
       },
     );
 
@@ -522,7 +532,7 @@ export class VideoContainer extends LitElement {
         this,
         this.videos[0],
         this.hls,
-        savedSettings.activeAudioTrackId
+        savedSettings.activeAudioTrackId,
       );
     }
 

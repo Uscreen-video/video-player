@@ -97,6 +97,9 @@ export enum Event {
   registerCommand = "video-register-command",
 }
 
+/** Marketing label for the higher resolution tiers. Lower tiers get no badge. */
+export type QualityBadge = "HD" | "2K" | "4K";
+
 export type State = Partial<
   {
     value: number;
@@ -121,7 +124,10 @@ export type State = Partial<
     isFullscreen: boolean;
     activeTextTrackId: string;
     activeAudioTrackId: string;
+    /** The quality level selected by the user. `-1` means automatic (ABR) selection. */
     activeQualityLevel: number;
+    /** The height of the rendition currently being played, whatever selected it. */
+    currentQualityLevel: number;
     playbackRate: number;
     customHLS: boolean;
     airplayAvailable: boolean;
@@ -139,12 +145,15 @@ export type State = Partial<
       id: string;
     }[];
     audioTracks: {
-      label: string,
-      lang: string,
-      id: string
+      label: string;
+      lang: string;
+      id: string;
     }[];
     qualityLevels: {
+      /** The height as a string — kept as the menu item value for compatibility */
       name: string;
+      height: number;
+      badge?: QualityBadge;
     }[];
     muxData: MuxParams;
     live: boolean;
@@ -178,20 +187,16 @@ export type MuxOptions = {
   hlsjs?: Hls;
 };
 
-
 export const enum KeySystems {
-  clearkey = 'org.w3.clearkey',
-  fps = 'com.apple.fps',
-  playready = 'com.microsoft.playready',
-  widevine = 'com.widevine.alpha',
-};
-
+  clearkey = "org.w3.clearkey",
+  fps = "com.apple.fps",
+  playready = "com.microsoft.playready",
+  widevine = "com.widevine.alpha",
+}
 
 export type DRMSystemConfiguration = {
   licenseUrl: string;
   certificateUrl?: string;
 };
 
-export type DRMOptions = Partial<
-  Record<KeySystems, DRMSystemConfiguration>
->;
+export type DRMOptions = Partial<Record<KeySystems, DRMSystemConfiguration>>;

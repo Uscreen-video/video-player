@@ -1,4 +1,4 @@
-import { unsafeCSS, LitElement, html } from "lit";
+import { unsafeCSS, LitElement, html, type TemplateResult } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import { when } from "lit/directives/when.js";
 import styles from "./Video-menu.styles.css?inline";
@@ -7,8 +7,9 @@ import { eventCode, emit } from "../../helpers/event";
 type MenuItem = {
   // The value associated with the menu item
   value: string | number;
-  // The text label of the menu item
-  label: string;
+  // The text label of the menu item, or a template when it carries markup
+  // such as a quality badge
+  label: string | TemplateResult;
   // Indicates whether the menu item is currently active
   isActive?: boolean;
   // Icon to display before the label
