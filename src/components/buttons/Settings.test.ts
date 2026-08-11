@@ -86,15 +86,18 @@ describe("video-settings-button quality menu", () => {
     expect(auto.label).to.equal("Auto");
   });
 
-  it("reports the playing rendition next to Auto", async () => {
+  // Every row in the selection list is a choice, so a resolution appended to
+  // "Auto" would read as choosing that resolution. It belongs on the parent
+  // row, which reports rather than offers.
+  it("keeps Auto bare in the selection list while a rendition plays", async () => {
     const el = await settingsButton({
       qualityLevel: -1,
       currentQualityLevel: 1080,
     });
     const [auto] = await readItems(el.qualityMenuItems);
 
-    expect(auto.label).to.equal("Auto (1080p)");
-    expect(auto.badge).to.equal("HD");
+    expect(auto.label).to.equal("Auto");
+    expect(auto.badge).to.equal(null);
   });
 
   it("translates Auto when a translation is provided", async () => {
@@ -105,8 +108,11 @@ describe("video-settings-button quality menu", () => {
     });
     const [auto] = await readItems(el.qualityMenuItems);
 
-    expect(auto.label).to.equal("Авто (2160p)");
-    expect(auto.badge).to.equal("4K");
+    expect(auto.label).to.equal("Авто");
+    expect(await readLabel(el.qualitySummary)).to.deep.equal({
+      label: "Авто (2160p)",
+      badge: "4K",
+    });
   });
 
   // Regression: ABR switches used to overwrite the user's selection, moving the

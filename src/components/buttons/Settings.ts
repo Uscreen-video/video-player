@@ -206,15 +206,23 @@ export class SubtitlesButton extends VideoButton {
     );
   }
 
+  /** "Auto" on its own, as the selection list shows it. */
+  get autoLabel() {
+    return this.translation.auto || "Auto";
+  }
+
   /**
-   * "Auto" on its own until a rendition is playing, then "Auto (1080p HD)" so
-   * it is clear what automatic selection has settled on.
+   * "Auto" plus the rendition it settled on — "Auto (1080p HD)" — for the
+   * parent menu, which has to say what you are getting without being opened.
+   *
+   * The selection list keeps the bare "Auto": there every row is a choice, and
+   * a resolution appended to one reads as choosing that resolution.
    */
   get autoQualityLabel() {
-    const auto = this.translation.auto || "Auto";
     const level = this.currentLevel;
-    if (!level) return auto;
-    return html`${auto} (${withBadge(qualityLabel(level.height), level.badge)})`;
+    if (!level) return this.autoLabel;
+    const rendition = withBadge(qualityLabel(level.height), level.badge);
+    return html`${this.autoLabel} (${rendition})`;
   }
 
   /** The value shown next to "Quality" in the parent menu. */
@@ -306,7 +314,7 @@ export class SubtitlesButton extends VideoButton {
     const isAuto = this.qualityLevel === -1;
     const items = [
       {
-        label: this.autoQualityLabel,
+        label: this.autoLabel,
         iconAfter: isAuto ? icons.check : undefined,
         isActive: isAuto,
         value: -1,
