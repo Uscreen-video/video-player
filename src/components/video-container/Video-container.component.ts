@@ -227,7 +227,7 @@ export class VideoContainer extends LitElement {
       ({ height }) => height === level,
     );
     this.hls.nextLevel = qualityLevelIdx;
-    // We need to update state here as well, as HLS.Events.LEVEL_UPDATED sometimes not triggered
+    // We need to update state here as well, as HLS.Events.LEVEL_SWITCHED sometimes not triggered
     dispatch(this, Types.Action.setQualityLevel, {
       activeQualityLevel: qualityLevelIdx === -1 ? -1 : level,
     });
@@ -324,7 +324,9 @@ export class VideoContainer extends LitElement {
         // Only reflects what is playing — the user's selection lives in
         // `activeQualityLevel` and must not be overwritten by ABR switches,
         // otherwise picking "Auto" appears to select a concrete level.
-        dispatch(this, Types.Action.setQualityLevel, {
+        // Dispatched as a plain update rather than setQualityLevel, which is
+        // reserved for a deliberate change and is reported as one downstream.
+        dispatch(this, Types.Action.update, {
           currentQualityLevel: this.hls.levels[level]?.height || -1,
         });
       },
