@@ -315,8 +315,11 @@ export class VideoContainer extends LitElement {
       }
     });
 
+    // LEVEL_SWITCHED, not LEVEL_UPDATED: the latter fires when a rendition
+    // playlist is loaded or refreshed, and a VOD playlist loads once and never
+    // refreshes, so it goes stale as soon as a level is replayed from cache.
     this.hls.on(
-      HLS.Events.LEVEL_UPDATED,
+      HLS.Events.LEVEL_SWITCHED,
       (_: unknown, { level }: { level: number }) => {
         // Only reflects what is playing — the user's selection lives in
         // `activeQualityLevel` and must not be overwritten by ABR switches,
