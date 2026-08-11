@@ -269,6 +269,11 @@ export class VideoContainer extends LitElement {
     this.hls?.destroy();
 
     this.hls = new HLS({
+      // Without this, automatic selection climbs the whole ladder whenever
+      // bandwidth allows — a 4K rendition pulled into a 400px window. Capping
+      // keys off the element's size in device pixels, and constrains automatic
+      // selection only: a rendition picked by hand still overrides it.
+      capLevelToPlayerSize: true,
       maxMaxBufferLength: 30,
       enableWorker: true,
       initialLiveManifestSize: 2,
