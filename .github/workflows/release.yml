@@ -11,8 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
-      id-token: write
+      contents: write # push the release tag
+      issues: write # @semantic-release/github opens an issue when a release fails
+      pull-requests: write # ...and comments on released PRs
+      id-token: write # npm trusted publishing (OIDC)
 
     steps:
       - uses: actions/checkout@v7
@@ -40,6 +42,6 @@ jobs:
 
       - name: Semantic Release
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm dlx semantic-release
