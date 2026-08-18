@@ -1,0 +1,50 @@
+name: Test
+
+on:
+  pull_request:
+
+# A new push supersedes whatever is still running for the same pull request.
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          run_install: false
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: 'package.json'
+          cache: 'pnpm'
+
+      # `prepare` installs the browser the test runner drives, which is a ~180MB
+      # download on every run without this.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: playwright-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --prefer-offline --frozen-lockfile
+
+      # The test runner loads ./dist/index.js, so the suite only covers the
+      # working tree once it has been built.
+      - name: Build
+        run: pnpm run build
+
+      - name: Test
+        run: pnpm test
