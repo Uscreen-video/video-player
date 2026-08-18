@@ -7,8 +7,9 @@ import { DRMSystemConfiguration, KeySystems } from "../types";
  */
 const KEY_SYSTEMS: string[] = [KeySystems.fps, "com.apple.fps.1_0"];
 
-// Shares one request between concurrent `encrypted` events, and forgets it on
-// failure so that the next event can retry
+// Shares one request between concurrent `encrypted` events: the first call wins
+// and every later one gets its promise, whatever arguments they pass. A failure
+// is forgotten so that the next event can retry
 const once = <A extends unknown[], T>(request: (...args: A) => Promise<T>) => {
   let pending: Promise<T>;
   return (...args: A) => {
@@ -55,7 +56,7 @@ export const initFairPlayDRM = async (
 };
 
 const requestKeySystemAccess = async (initDataType: string) => {
-  let error: unknown;
+  const failures: string[] = [];
 
   for (const keySystem of KEY_SYSTEMS) {
     try {
@@ -66,11 +67,11 @@ const requestKeySystemAccess = async (initDataType: string) => {
         },
       ]);
     } catch (e) {
-      error = e;
+      failures.push(`${keySystem}: ${e}`);
     }
   }
 
-  throw error;
+  throw new Error(`No FairPlay key system available (${failures.join(", ")})`);
 };
 
 const createKeySession = async (

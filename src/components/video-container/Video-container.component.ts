@@ -272,9 +272,24 @@ export class VideoContainer extends LitElement {
 
   @listen(Types.Command.reload)
   reload() {
+    const [video] = this.videos;
+    const { currentTime } = video;
+
+    // Reloading replays the source from the start, live streams excluded since
+    // they are expected to resume at the edge
+    if (currentTime && !this.live) {
+      video.addEventListener(
+        "loadedmetadata",
+        () => {
+          video.currentTime = currentTime;
+        },
+        { once: true },
+      );
+    }
+
     if (this.isSourceSupported) {
       // `load()` replays the source, and with it the `encrypted` event
-      this.videos[0].load();
+      video.load();
     } else {
       this.command(Types.Command.initCustomHLS);
     }
@@ -458,7 +473,9 @@ export class VideoContainer extends LitElement {
       case "error":
         if (!this.isSourceSupported) return;
         this.command(Types.Command.error, {
-          code: video.error?.code,
+          // WebKit fires `error` with no `MediaError` attached, and a connection
+          // failure is the only kind the player can recover from
+          code: video.error?.code ?? MediaError.MEDIA_ERR_NETWORK,
           message: video.error?.message,
         });
         break;
