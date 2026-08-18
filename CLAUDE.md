@@ -10,14 +10,18 @@ the operational layer on top of it.
 pnpm dev            # vite dev server on index.html (a real player with a live stream)
 pnpm build          # clean + dist/ + lib/ + types/
 pnpm test           # web-test-runner, playwright chromium
-pnpm verify         # prettier:check + lint + build + test — run before proposing a PR
 pnpm manifest       # regenerate custom-elements.json
 pnpm generate       # hygen: scaffold src/components/<name>/
 ```
 
 `pnpm test` loads `./dist/index.js`, so **run `pnpm build` before `pnpm test`**
-or you will be testing the previous build. `pnpm verify` already does this in the
-right order.
+or you will be testing the previous build. `pnpm build && pnpm test` is the
+check to run before proposing a PR.
+
+**Do not use `pnpm verify`.** It is `prettier:check && lint && build && test`,
+but neither `prettier:check` nor `lint` exists in `package.json` (there is no
+eslint in the project at all), so it fails on the first step and never reaches
+the build or the tests. Formatting is still enforced on commit by lint-staged.
 
 Node `^22`, pnpm `^8`. Commits are linted by commitlint (conventional commits)
 and releases are automated by semantic-release from `main`, so the commit
@@ -84,15 +88,35 @@ All live in the code today; none are fixed.
 - **Outside Safari the player always uses hls.js**, whatever the source type —
   `INIT_NATIVE_HLS_RE` in `Video-container.component.ts` gates the native path
   on the user agent, not on `canPlayType()`.
-- **`canPlay` gates `play`, `seek` and `setPlaybackRate`.** On the hls.js path
-  it is dispatched from `LEVEL_LOADED`, not `MANIFEST_PARSED`. Moving it earlier
-  releases pending commands before there are segments to act on.
+- **`canPlay` gates `play`, `seek` and `setPlaybackRate`, but only on iOS.**
+  `initialState` sets `canPlay: !device.isIos`, so everywhere else it is already
+  `true` before a source is inspected and those three commands are never held —
+  the `Action.canPlay` dispatched from `LEVEL_LOADED` (hls.js) or
+  `loadedmetadata` (native) is re-asserting a value that was true all along.
+  Only iOS actually exercises the gate, and `<video-errors-manager>` reopens it
+  by clearing `canPlay` on a network error. Still do not move the dispatch
+  earlier: on the hls.js path it is `LEVEL_LOADED`, not `MANIFEST_PARSED`,
+  because earlier means releasing iOS's pending commands before there are
+  segments to act on.
 - **`Action.init` must be dispatched before `Command.init`** — the `init`
   handlers are gated on `isSourceSupported`, which only that action sets.
-- **Do not reorder the fields in `Video-player.component.ts`.** The `state`
-  field must be initialised after the `@listen` initializers; otherwise
-  `StateController` is listening when the registration events fire and every
-  player-level command registers twice.
+- **Every `@listen` registration is delivered twice, and only controller order
+  saves it.** `EventListener.hostConnected` does
+  `_host.state?.registerCommand?.(event) || _host.dispatchEvent(event)` —
+  `registerCommand` returns `undefined`, so the event is *always* dispatched as
+  well. It goes unnoticed because `@listen` registers through
+  `ReactiveElement.addInitializer`, which runs inside the `ReactiveElement`
+  constructor (before any subclass field initialiser), so the `EventListener`
+  controllers are always added before the `StateController` that
+  `state = createState(this)` creates. Their `hostConnected` therefore runs
+  first, while nothing is listening for `video-register-command` yet, and the
+  duplicate event is dropped. Anything that gets a `StateController` connected
+  ahead of the `@listen` controllers — a mixin, a base class, a hand-rolled
+  `addController` call — makes every player-level command register twice.
+  Reordering the fields in `Video-player.component.ts` is *not* one of those
+  things — initializers always run before field initialisers, whatever the
+  order on the page — so if commands do start registering twice, look at
+  controller registration order and at that `||`, not at the field list.
 - **A command listener that never fires is never unregistered.**
   `EventListener` stores its `unsubscribe` inside the handler invocation, so
   `hostDisconnected` has nothing to call unless the command ran at least once.

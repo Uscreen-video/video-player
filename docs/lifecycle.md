@@ -40,8 +40,15 @@ the engine can actually act on those requests, not when it merely knows the
 stream exists — for hls.js that means a variant playlist has been parsed and
 segment URLs exist, and for the native engine it means metadata has loaded.
 
-Setting it earlier would release every held command before there is anything to
-play or seek within. It is the single most delicate ordering in the player.
+The gate only ever closes on iOS: everywhere else `canPlay` starts out `true`,
+because only iOS refuses to act on a `<video>` element that has not loaded yet.
+So the three commands are held on iOS and pass straight through elsewhere, and
+setting the flag late costs nothing on the platforms that do not need it.
+
+Setting it *earlier* would release every held command before there is anything
+to play or seek within, which is what makes this the most delicate ordering in
+the player. The flag is not write-once, either — an error can reopen the gate
+and park those commands again (see [Errors](#errors)).
 
 ## Engines
 
