@@ -340,6 +340,11 @@ export class VideoContainer extends LitElement {
     this.hls.on(
       HLS.Events.MANIFEST_PARSED,
       (_: unknown, { levels }: { levels: unknown[] }) => {
+        // Attaching only once the renditions are known is what makes automatic
+        // selection respect the player size: hls.js measures the element when
+        // media is attached, and skips it when no rendition is loaded yet.
+        this.hls.attachMedia(this.videos[0]);
+
         dispatch(this, Types.Action.setLevels, {
           qualityLevels: (levels as { width?: number; height?: number }[])
             // A rendition without RESOLUTION cannot be labelled or selected by
@@ -384,7 +389,6 @@ export class VideoContainer extends LitElement {
 
     this.sources.enableSource();
     this.hls.loadSource(this.sources.getSrc());
-    this.hls.attachMedia(this.videos[0]);
 
     dispatch(this, Types.Action.update, { customHLS: true });
   }
