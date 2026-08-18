@@ -56,11 +56,11 @@
     "manifest": "custom-elements-manifest analyze",
     "manifest:watch": "pnpm manifest --watch",
     "postinstall": "pnpm run manifest",
-    "prepare": "pnpm dlx playwright install chromium",
+    "prepare": "pnpm exec playwright install chromium",
     "test": "web-test-runner"
   },
   "dependencies": {
-    "hls.js": "^1.5.7",
+    "hls.js": "1.7.0",
     "lit": "^3.1.2",
     "lit-html": "^3.1.2",
     "mux-embed": "^5.2.0",
@@ -88,6 +88,7 @@
     "husky": "^9.0.11",
     "hygen": "^6.2.11",
     "lint-staged": "^15.2.2",
+    "playwright": "1.42.1",
     "postcss": "^8.4.38",
     "postcss-nesting": "^12.1.0",
     "postcss-preset-env": "^9.5.2",
