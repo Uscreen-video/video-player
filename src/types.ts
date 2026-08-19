@@ -56,6 +56,8 @@ export enum Command {
   live = "live",
   /** Sets error */
   error = "error",
+  /** Reloads the media source after a playback error */
+  reload = "reload",
 }
 
 export enum Action {
@@ -193,6 +195,15 @@ export const enum KeySystems {
   playready = "com.microsoft.playready",
   widevine = "com.widevine.alpha",
 }
+
+export type PlayerError = {
+  /** Mirrors `MediaError.code` when the failure comes from the media element */
+  code?: number;
+  /** Technical reason of the failure, logged by the `player:commands` channel */
+  message?: string;
+  /** Set when the key system, and not the media element, has failed */
+  drm?: boolean;
+};
 
 export type DRMSystemConfiguration = {
   licenseUrl: string;
