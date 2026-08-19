@@ -100,6 +100,11 @@ describe("initFairPlayDRM", () => {
     await waitUntil(() => errors.length === 1);
     expect(keySystems).to.eql(["com.apple.fps", "com.apple.fps.1_0"]);
     expect(requests).to.eql([]);
+    // both refusals have to be reported, they tell different stories
+    expect(String(errors[0])).to.contain("com.apple.fps: Error: not available");
+    expect(String(errors[0])).to.contain(
+      "com.apple.fps.1_0: Error: not available",
+    );
   });
 
   it("reports a rejected certificate request", async () => {

@@ -20,8 +20,25 @@ export class VideoErrorsManager extends LitElement {
   @connect("src")
   src: string;
 
+  @connect("isPlaying")
+  isPlaying: boolean;
+
+  @connect("currentTime")
+  currentTime: number;
+
   @state()
   message: string | TemplateResult<any> = "";
+
+  printedAt = 0;
+
+  willUpdate() {
+    // A failure the viewer got past should not stay on screen: playing beyond
+    // the point it was reported at means playback recovered, while a stall
+    // keeps the message since `currentTime` stops moving
+    if (this.message && this.isPlaying && this.currentTime > this.printedAt) {
+      this.clear();
+    }
+  }
 
   @listen(Types.Command.error)
   handleErrors(error: Types.PlayerError) {
@@ -36,11 +53,13 @@ export class VideoErrorsManager extends LitElement {
 
     if (error.message) this.print(error.message);
     if (error.code === MediaError.MEDIA_ERR_NETWORK) {
+      const failedAt = this.currentTime;
       dispatch(this, Types.Action.update, { canPlay: false });
       this.requestSrc(5)
         .then(() => {
           dispatch(this, Types.Action.update, { canPlay: true });
-          this.command(Types.Command.reload);
+          // Playback that moved on by itself must not be interrupted
+          if (this.currentTime === failedAt) this.command(Types.Command.reload);
         })
         .catch(() =>
           this.print(
@@ -61,6 +80,7 @@ export class VideoErrorsManager extends LitElement {
 
   print = (message: string | TemplateResult<any>, persist = false) => {
     this.message = message;
+    this.printedAt = this.currentTime;
     if (!persist) this.timer = setTimeout(this.clear, this.timeout);
   };
 
