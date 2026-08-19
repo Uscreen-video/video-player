@@ -1,11 +1,12 @@
 import { unsafeCSS, LitElement, html, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
 import styles from "./Video-errors-manager.styles.css?inline";
-import { Types, connect, dispatch, listen } from "../../state";
+import { Types, connect, createCommand, dispatch, listen } from "../../state";
 
 @customElement("video-errors-manager")
 export class VideoErrorsManager extends LitElement {
   static styles = unsafeCSS(styles);
+  public command = createCommand(this);
 
   timer = 0;
 
@@ -23,20 +24,27 @@ export class VideoErrorsManager extends LitElement {
   message: string | TemplateResult<any> = "";
 
   @listen(Types.Command.error)
-  handleErrors(error: MediaError) {
+  handleErrors(error: Types.PlayerError) {
+    if (error.drm) {
+      return this.print(
+        html`This video is protected and its playback license could not be
+          loaded.<br />
+          Please reload this page to try again.`,
+        true,
+      );
+    }
+
     if (error.message) this.print(error.message);
     if (error.code === MediaError.MEDIA_ERR_NETWORK) {
       dispatch(this, Types.Action.update, { canPlay: false });
       this.requestSrc(5)
-        .then(() =>
-          dispatch(this, Types.Action.update, {
-            canPlay: true,
-            src: this.src + "#" + Math.random().toString(36).slice(2, 7),
-          }),
-        )
+        .then(() => {
+          dispatch(this, Types.Action.update, { canPlay: true });
+          this.command(Types.Command.reload);
+        })
         .catch(() =>
           this.print(
-            html`The stream could not be fetched after the maximum allowed
+            html`The video could not be fetched after the maximum allowed
               connection attempts.<br />
               Please reload this page to try again.`,
             true,
@@ -60,7 +68,7 @@ export class VideoErrorsManager extends LitElement {
     if (!attempts) throw new Error("Video is not available");
 
     this.print(
-      html`The stream is currently not active.<br />
+      html`The video could not be loaded.<br />
         Attempting to establish a connection...`,
     );
     await new Promise((resolve) => setTimeout(resolve, this.timeout));

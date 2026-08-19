@@ -242,7 +242,7 @@ export class VideoContainer extends LitElement {
   }
 
   @listen(Types.Command.init, { isSourceSupported: true })
-  initNative() {
+  async initNative() {
     if (this.muxData) {
       connectMuxData(this.videos[0], {
         ...this.muxData,
@@ -251,11 +251,33 @@ export class VideoContainer extends LitElement {
     }
 
     if (this.drmOptions?.[KeySystems.fps]) {
-      initFairPlayDRM(this.videos[0], this.drmOptions[KeySystems.fps]);
+      try {
+        await initFairPlayDRM(
+          this.videos[0],
+          this.drmOptions[KeySystems.fps],
+          this.handleDRMError,
+        );
+      } catch (e) {
+        this.handleDRMError(e);
+      }
     }
 
     // Init source after the video events are set
     this.sources.enableSource();
+  }
+
+  handleDRMError = (error: unknown) => {
+    this.command(Types.Command.error, { drm: true, message: String(error) });
+  };
+
+  @listen(Types.Command.reload)
+  reload() {
+    if (this.isSourceSupported) {
+      // `load()` replays the source, and with it the `encrypted` event
+      this.videos[0].load();
+    } else {
+      this.command(Types.Command.initCustomHLS);
+    }
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -435,9 +457,10 @@ export class VideoContainer extends LitElement {
         break;
       case "error":
         if (!this.isSourceSupported) return;
-        const error = video.error || { code: MediaError.MEDIA_ERR_NETWORK };
-
-        this.command(Types.Command.error, { ...error });
+        this.command(Types.Command.error, {
+          code: video.error?.code,
+          message: video.error?.message,
+        });
         break;
     }
   }
