@@ -18,8 +18,8 @@ dependencies:
     specifier: ^4.3.4
     version: 4.3.4
   hls.js:
-    specifier: ^1.5.7
-    version: 1.5.7
+    specifier: 1.7.0
+    version: 1.7.0
   lit:
     specifier: ^3.1.2
     version: 3.1.2
@@ -85,6 +85,9 @@ devDependencies:
   lint-staged:
     specifier: ^15.2.2
     version: 15.2.2
+  playwright:
+    specifier: 1.42.1
+    version: 1.42.1
   postcss:
     specifier: ^8.4.38
     version: 8.4.38
@@ -3854,9 +3857,8 @@ packages:
     resolution: {integrity: sha512-tzcUFauisWKNHaRkN4Wjl/ZA07gENAjFl3J/c480dprkGTg5EQstgaNFqBfUqCq54kZRIEcreTsAgF/m2quD7A==}
     dev: true
 
-  /hls.js@1.5.7:
-    resolution: {integrity: sha512-Hnyf7ojTBtXHeOW1/t6wCBJSiK1WpoKF9yg7juxldDx8u3iswrkPt2wbOA/1NiwU4j27DSIVoIEJRAhcdMef/A==}
-    requiresBuild: true
+  /hls.js@1.7.0:
+    resolution: {integrity: sha512-NnQpT6Z//+2IB2qovSUbKbrlXY1MOpi0JynZ9L2NNOuTJiNCyMSQj9k2laEj1v7CxU/Hb8oTWR98eT3mVpPQVQ==}
     dev: false
 
   /hook-std@3.0.0:

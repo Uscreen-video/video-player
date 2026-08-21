@@ -16,6 +16,8 @@ export const initialState: State = {
   canPlay: !device.isIos,
   cues: [],
   castActivated: false,
+  // Automatic selection is the default, so "Auto" reads as selected from the start
+  activeQualityLevel: -1,
   played: false,
   airplayAvailable: Boolean(
     (window as any).WebKitPlaybackTargetAvailabilityEvent,

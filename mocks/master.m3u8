@@ -1,0 +1,23 @@
+#EXTM3U
+#EXT-X-VERSION:5
+#EXT-X-INDEPENDENT-SEGMENTS
+
+# A 4K ladder, deliberately not ordered by resolution, the way a real
+# multi-variant playlist arrives. Every variant points at the same rendition
+# playlist; the query string keeps their URLs distinct.
+#
+# CODECS is left out on purpose. It keeps the ladder intact in browsers built
+# without H.264 — hls.js drops every variant it cannot pass to MediaSource —
+# and it means the test does not lean on codec signalling to get capping going.
+#EXT-X-STREAM-INF:BANDWIDTH=2963400,AVERAGE-BANDWIDTH=2963400,RESOLUTION=1280x720,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=720
+#EXT-X-STREAM-INF:BANDWIDTH=1355200,AVERAGE-BANDWIDTH=1355200,RESOLUTION=854x480,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=480
+#EXT-X-STREAM-INF:BANDWIDTH=673200,AVERAGE-BANDWIDTH=673200,RESOLUTION=480x270,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=270
+#EXT-X-STREAM-INF:BANDWIDTH=5892700,AVERAGE-BANDWIDTH=5892700,RESOLUTION=1920x1080,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=1080
+#EXT-X-STREAM-INF:BANDWIDTH=15152500,AVERAGE-BANDWIDTH=15152500,RESOLUTION=2560x1440,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=1440
+#EXT-X-STREAM-INF:BANDWIDTH=25253800,AVERAGE-BANDWIDTH=25253800,RESOLUTION=3840x2160,CLOSED-CAPTIONS=NONE
+rendition.m3u8?variant=2160

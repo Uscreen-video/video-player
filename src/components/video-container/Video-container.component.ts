@@ -14,6 +14,7 @@ import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
 import { initFairPlayDRM } from "../../helpers/drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
+import { qualityBadge } from "../../helpers/quality";
 import { MuxParams, DRMOptions, KeySystems } from "../../types";
 import { when } from "lit/directives/when.js";
 import "../buttons/Play";
@@ -226,7 +227,7 @@ export class VideoContainer extends LitElement {
       ({ height }) => height === level,
     );
     this.hls.nextLevel = qualityLevelIdx;
-    // We need to update state here as well, as HLS.Events.LEVEL_UPDATED sometimes not triggered
+    // We need to update state here as well, as HLS.Events.LEVEL_SWITCHED sometimes not triggered
     dispatch(this, Types.Action.setQualityLevel, {
       activeQualityLevel: qualityLevelIdx === -1 ? -1 : level,
     });
@@ -305,6 +306,11 @@ export class VideoContainer extends LitElement {
     this.hls?.destroy();
 
     this.hls = new HLS({
+      // Without this, automatic selection climbs the whole ladder whenever
+      // bandwidth allows — a 4K rendition pulled into a 400px window. Capping
+      // keys off the element's size in device pixels, and constrains automatic
+      // selection only: a rendition picked by hand still overrides it.
+      capLevelToPlayerSize: true,
       maxMaxBufferLength: 30,
       enableWorker: true,
       initialLiveManifestSize: 2,
@@ -351,11 +357,19 @@ export class VideoContainer extends LitElement {
       }
     });
 
+    // LEVEL_SWITCHED, not LEVEL_UPDATED: the latter fires when a rendition
+    // playlist is loaded or refreshed, and a VOD playlist loads once and never
+    // refreshes, so it goes stale as soon as a level is replayed from cache.
     this.hls.on(
-      HLS.Events.LEVEL_UPDATED,
+      HLS.Events.LEVEL_SWITCHED,
       (_: unknown, { level }: { level: number }) => {
-        dispatch(this, Types.Action.setQualityLevel, {
-          activeQualityLevel: this.hls.levels[level]?.height || -1,
+        // Only reflects what is playing — the user's selection lives in
+        // `activeQualityLevel` and must not be overwritten by ABR switches,
+        // otherwise picking "Auto" appears to select a concrete level.
+        // Dispatched as a plain update rather than setQualityLevel, which is
+        // reserved for a deliberate change and is reported as one downstream.
+        dispatch(this, Types.Action.update, {
+          currentQualityLevel: this.hls.levels[level]?.height || -1,
         });
       },
     );
@@ -363,10 +377,21 @@ export class VideoContainer extends LitElement {
     this.hls.on(
       HLS.Events.MANIFEST_PARSED,
       (_: unknown, { levels }: { levels: unknown[] }) => {
+        // Attaching only once the renditions are known is what makes automatic
+        // selection respect the player size: hls.js measures the element when
+        // media is attached, and skips it when no rendition is loaded yet.
+        this.hls.attachMedia(this.videos[0]);
+
         dispatch(this, Types.Action.setLevels, {
-          qualityLevels: levels.map((level: { height: string }) => ({
-            name: level.height || "auto",
-          })),
+          qualityLevels: (levels as { width?: number; height?: number }[])
+            // A rendition without RESOLUTION cannot be labelled or selected by
+            // height, so it is left out of the menu rather than shown as "autop"
+            .filter((level) => level.height > 0)
+            .map((level) => ({
+              name: String(level.height),
+              height: level.height,
+              badge: qualityBadge(level.width, level.height),
+            })),
         });
         const { activeQualityLevel } = this._storageProvider.get();
         if (activeQualityLevel >= 0) {
@@ -395,13 +420,12 @@ export class VideoContainer extends LitElement {
             this.hls,
             this._storageProvider.get().activeAudioTrackId,
           );
-        })
+        });
       },
     );
 
     this.sources.enableSource();
     this.hls.loadSource(this.sources.getSrc());
-    this.hls.attachMedia(this.videos[0]);
 
     dispatch(this, Types.Action.update, { customHLS: true });
   }
@@ -562,7 +586,7 @@ export class VideoContainer extends LitElement {
         this,
         this.videos[0],
         this.hls,
-        savedSettings.activeAudioTrackId
+        savedSettings.activeAudioTrackId,
       );
     }
 
