@@ -100,7 +100,6 @@ export class VideoButton extends LitElement {
   }
 
   protected firstUpdated(): void {
-    this.addEventListener("focus", this.handleFocus);
     this.addEventListener("blur", this.handleBlur);
     this.addEventListener("mouseenter", this.createTooltip);
     this.addEventListener("mouseleave", this.destroyTooltip);
@@ -109,23 +108,12 @@ export class VideoButton extends LitElement {
   disconnectedCallback(): void {
     this.destroyTooltip();
     this.destroyMenu();
-    this.removeEventListener("focus", this.handleFocus);
     this.removeEventListener("blur", this.handleBlur);
     this.removeEventListener("mouseenter", this.createTooltip);
     this.removeEventListener("mouseleave", this.destroyTooltip);
   }
 
   handleClick(): void {}
-
-  handleFocus = () => {
-    if (!this.menu) return;
-    // We have to have a small timeout to not mix this event with the click event
-    setTimeout(() => {
-      if (!this.menuPopper) {
-        this.createMenu();
-      }
-    }, 100);
-  };
 
   handleBlur = () => {
     this.destroyMenu();

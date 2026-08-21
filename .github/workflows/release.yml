@@ -10,16 +10,24 @@ jobs:
   release:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write # push the release tag
+      issues: write # @semantic-release/github opens an issue when a release fails
+      pull-requests: write # ...and comments on released PRs
+      id-token: write # npm trusted publishing (OIDC)
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v3
+        # Pinned to a commit: this job holds contents:write and an OIDC token
+        # that can publish to npm, and a major tag is mutable upstream.
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v7
         with:
           node-version-file: 'package.json'
           cache: 'pnpm'
@@ -36,6 +44,6 @@ jobs:
 
       - name: Semantic Release
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm dlx semantic-release

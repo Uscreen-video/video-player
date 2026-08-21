@@ -9,6 +9,7 @@ import _chevronIcon from "../../icons/chevron-left.svg?raw";
 import "../video-menu";
 import type { VideoMenu } from "../video-menu";
 import { emit } from "../../helpers/event";
+import { qualityLabel } from "../../helpers/quality";
 
 const icons = {
   settings: unsafeSVG(_settingsIcon),
@@ -17,6 +18,10 @@ const icons = {
 };
 
 type Menu = "shortcuts" | "rate" | "quality" | "audio";
+
+/** Appends the HD/2K/4K marketing badge as a superscript, when there is one. */
+const withBadge = (label: string, badge?: string) =>
+  badge ? html`${label}<sup class="badge">${badge}</sup>` : label;
 
 @customElement("video-settings-button")
 export class SubtitlesButton extends VideoButton {
@@ -34,6 +39,9 @@ export class SubtitlesButton extends VideoButton {
 
   @connect("activeQualityLevel")
   qualityLevel: number;
+
+  @connect("currentQualityLevel")
+  currentQualityLevel: number;
 
   @connect("qualityLevels")
   qualityLevels: Types.State["qualityLevels"];
@@ -178,7 +186,7 @@ export class SubtitlesButton extends VideoButton {
   selectAudio = (id: string) => {
     this.command(Types.Command.enableAudioTrack, { trackId: id });
     this.removeMenu();
-  }
+  };
 
   selectMenu(menu?: Menu) {
     this.activeMenu = this.isSingleMenuItem ? this.settings[0] : menu;
@@ -187,9 +195,43 @@ export class SubtitlesButton extends VideoButton {
     Promise.resolve().then(() => emit(this, "resize"));
   }
 
-
   get isSingleMenuItem() {
     return this.settings.length === 1;
+  }
+
+  /** The rendition currently playing, as listed in the menu. */
+  get currentLevel() {
+    return this.qualityLevels?.find(
+      (level) => level.height === this.currentQualityLevel,
+    );
+  }
+
+  /** "Auto" on its own, as the selection list shows it. */
+  get autoLabel() {
+    return this.translation.auto || "Auto";
+  }
+
+  /**
+   * "Auto" plus the rendition it settled on — "Auto (1080p HD)" — for the
+   * parent menu, which has to say what you are getting without being opened.
+   *
+   * The selection list keeps the bare "Auto": there every row is a choice, and
+   * a resolution appended to one reads as choosing that resolution.
+   */
+  get autoQualityLabel() {
+    const level = this.currentLevel;
+    if (!level) return this.autoLabel;
+    const rendition = withBadge(qualityLabel(level.height), level.badge);
+    return html`${this.autoLabel} (${rendition})`;
+  }
+
+  /** The value shown next to "Quality" in the parent menu. */
+  get qualitySummary() {
+    if (this.qualityLevel === -1) return this.autoQualityLabel;
+    const level = this.qualityLevels?.find(
+      (l) => l.height === this.qualityLevel,
+    );
+    return withBadge(qualityLabel(this.qualityLevel), level?.badge);
   }
 
   get rateMenuItems(): any {
@@ -224,11 +266,17 @@ export class SubtitlesButton extends VideoButton {
         iconAfter: `${this.playbackRate}x`,
       });
 
-    if (this.settings.includes("audio") && this.audioTracks?.length && this.activeAudioTrackId) {
+    if (
+      this.settings.includes("audio") &&
+      this.audioTracks?.length &&
+      this.activeAudioTrackId
+    ) {
       menu.push({
         label: "Audio",
         value: "audio",
-        iconAfter: this.audioTracks.find(t => t.id === this.activeAudioTrackId)?.label,
+        iconAfter: this.audioTracks.find(
+          (t) => t.id === this.activeAudioTrackId,
+        )?.label,
       });
     }
 
@@ -236,16 +284,18 @@ export class SubtitlesButton extends VideoButton {
       menu.push({
         label: "Quality",
         value: "quality",
-        iconAfter: this.qualityLevel,
+        iconAfter: this.qualitySummary,
       });
-
 
     return menu;
   }
 
   get selectedMenuLabel() {
     if (!this.activeMenu || !this.isSingleMenuItem) return "";
-    return this.mainMenuItems.find((m) => m.value === this.activeMenu).label;
+    // The entry is absent until its tracks/levels have loaded
+    return (
+      this.mainMenuItems.find((m) => m.value === this.activeMenu)?.label || ""
+    );
   }
 
   get shortcutsMenuItems(): any {
@@ -261,19 +311,19 @@ export class SubtitlesButton extends VideoButton {
   }
 
   get qualityMenuItems(): any {
+    const isAuto = this.qualityLevel === -1;
     const items = [
       {
-        label: "auto",
-        iconAfter: this.qualityLevel === -1 ? icons.check : undefined,
-        isActive: this.qualityLevel === -1,
+        label: this.autoLabel,
+        iconAfter: isAuto ? icons.check : undefined,
+        isActive: isAuto,
         value: -1,
       },
-      ...this.qualityLevels.map((level) => ({
-        label: `${level.name}p`,
+      ...(this.qualityLevels || []).map((level) => ({
+        label: withBadge(qualityLabel(level.height), level.badge),
         value: level.name,
-        iconAfter:
-          this.qualityLevel === Number(level.name) ? icons.check : undefined,
-        isActive: this.qualityLevel === Number(level.name),
+        iconAfter: this.qualityLevel === level.height ? icons.check : undefined,
+        isActive: this.qualityLevel === level.height,
       })),
     ];
     if (this.isSingleMenuItem) return items;
@@ -288,7 +338,7 @@ export class SubtitlesButton extends VideoButton {
   }
 
   get audioMenuItems(): any {
-    const items = this.audioTracks.map((track) => ({
+    const items = (this.audioTracks || []).map((track) => ({
       label: track.label,
       value: track.id,
       iconAfter: this.activeAudioTrackId === track.id ? icons.check : undefined,
