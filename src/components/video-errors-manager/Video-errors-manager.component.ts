@@ -1,5 +1,6 @@
 import { unsafeCSS, LitElement, html, TemplateResult } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import { when } from "lit/directives/when.js";
 import styles from "./Video-errors-manager.styles.css?inline";
 import { Types, connect, createCommand, dispatch, listen } from "../../state";
 
@@ -26,6 +27,12 @@ export class VideoErrorsManager extends LitElement {
   @connect("currentTime")
   currentTime: number;
 
+  @connect("drmHelpUrl")
+  drmHelpUrl: string;
+
+  @connect("isInAppBrowser")
+  isInAppBrowser: boolean;
+
   @state()
   message: string | TemplateResult<any> = "";
 
@@ -43,12 +50,7 @@ export class VideoErrorsManager extends LitElement {
   @listen(Types.Command.error)
   handleErrors(error: Types.PlayerError) {
     if (error.drm) {
-      return this.print(
-        html`This video is protected and its playback license could not be
-          loaded.<br />
-          Please reload this page to try again.`,
-        true,
-      );
+      return this.print(this.drmMessage(error), true);
     }
 
     if (error.message) this.print(error.message);
@@ -69,6 +71,40 @@ export class VideoErrorsManager extends LitElement {
             true,
           ),
         );
+    }
+  }
+
+  // Never keyed on the browser version: the same version carries a working CDM
+  // on one install and a broken one on another, only the failure itself tells
+  drmMessage({ reason, status }: Types.PlayerError): TemplateResult<any> {
+    switch (reason) {
+      case "no-access":
+        return html`This browser can't play protected video. Turn on protected
+        content (DRM) in your browser settings, or open this page in Chrome,
+        Firefox, Edge or
+        Safari.${when(
+          this.drmHelpUrl,
+          () =>
+            html`<br /><a href=${this.drmHelpUrl} target="_blank" rel="noopener"
+                >How to turn it on</a
+              >`,
+        )}${when(
+          this.isInAppBrowser,
+          () =>
+            html`<br />You're inside an app's built-in browser. Open this page
+              in your regular browser.`,
+        )}`;
+      case "license-refused":
+        return status >= 400 && status < 500
+          ? html`The playback licence was refused.<br />
+              Reload this page to request a new one.`
+          : html`This video is protected and your browser's DRM component is out
+              of date.<br />
+              Update your browser, then reload this page.`;
+      default:
+        return html`This video is protected and its playback license could not
+          be loaded.<br />
+          Please reload this page to try again.`;
     }
   }
 
