@@ -3,7 +3,7 @@ import { playwrightLauncher } from '@web/test-runner-playwright';
 
 export default {
   rootDir: '.',
-  files: 'src/components/**/*.test.ts',
+  files: 'src/**/*.test.ts',
   concurrentBrowsers: 3,
   nodeResolve: {
     exportConditions: ['production', 'default']

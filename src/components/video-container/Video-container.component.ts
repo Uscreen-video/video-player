@@ -243,7 +243,7 @@ export class VideoContainer extends LitElement {
   }
 
   @listen(Types.Command.init, { isSourceSupported: true })
-  initNative() {
+  async initNative() {
     if (this.muxData) {
       connectMuxData(this.videos[0], {
         ...this.muxData,
@@ -252,11 +252,48 @@ export class VideoContainer extends LitElement {
     }
 
     if (this.drmOptions?.[KeySystems.fps]) {
-      initFairPlayDRM(this.videos[0], this.drmOptions[KeySystems.fps]);
+      try {
+        await initFairPlayDRM(
+          this.videos[0],
+          this.drmOptions[KeySystems.fps],
+          this.handleDRMError,
+        );
+      } catch (e) {
+        this.handleDRMError(e);
+      }
     }
 
     // Init source after the video events are set
     this.sources.enableSource();
+  }
+
+  handleDRMError = (error: unknown) => {
+    this.command(Types.Command.error, { drm: true, message: String(error) });
+  };
+
+  @listen(Types.Command.reload)
+  reload() {
+    const [video] = this.videos;
+    const { currentTime } = video;
+
+    // Reloading replays the source from the start, live streams excluded since
+    // they are expected to resume at the edge
+    if (currentTime && !this.live) {
+      video.addEventListener(
+        "loadedmetadata",
+        () => {
+          video.currentTime = currentTime;
+        },
+        { once: true },
+      );
+    }
+
+    if (this.isSourceSupported) {
+      // `load()` replays the source, and with it the `encrypted` event
+      video.load();
+    } else {
+      this.command(Types.Command.initCustomHLS);
+    }
   }
 
   @listen(Types.Command.initCustomHLS)
@@ -459,9 +496,12 @@ export class VideoContainer extends LitElement {
         break;
       case "error":
         if (!this.isSourceSupported) return;
-        const error = video.error || { code: MediaError.MEDIA_ERR_NETWORK };
-
-        this.command(Types.Command.error, { ...error });
+        this.command(Types.Command.error, {
+          // WebKit fires `error` with no `MediaError` attached, and a connection
+          // failure is the only kind the player can recover from
+          code: video.error?.code ?? MediaError.MEDIA_ERR_NETWORK,
+          message: video.error?.message,
+        });
         break;
     }
   }
