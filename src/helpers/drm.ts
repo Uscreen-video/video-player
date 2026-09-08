@@ -95,6 +95,7 @@ export const initFairPlayDRM = async (
   videoElement: HTMLVideoElement,
   { certificateUrl, licenseUrl }: DRMSystemConfiguration,
   onError: (error: unknown) => void,
+  onWirelessKeyRequestRefused?: () => void,
 ) => {
   const loadCertificate = once(() =>
     fetchBuffer(certificateUrl, "certificate", "certificate-failed"),
@@ -110,18 +111,41 @@ export const initFairPlayDRM = async (
     await videoElement.setMediaKeys(keys);
   });
 
-  // Safari serves the source from the markup, so `encrypted` can fire before
-  // this module is evaluated. The listener has to be attached before any await,
-  // otherwise the event is missed and no key session is ever created
-  videoElement.addEventListener("encrypted", async (event) => {
+  const handleEncrypted = async (event: MediaEncryptedEvent) => {
     try {
       await attachMediaKeys(event.initDataType);
       await createKeySession(event, licenseUrl);
     } catch (error) {
+      if (isWirelessKeyRequestRefusal(error, videoElement)) {
+        onWirelessKeyRequestRefused?.();
+        return;
+      }
       onError(error);
     }
-  });
+  };
+
+  // Safari serves the source from the markup, so `encrypted` can fire before
+  // this module is evaluated. The listener has to be attached before any await,
+  // otherwise the event is missed and no key session is ever created
+  videoElement.addEventListener("encrypted", handleEncrypted);
+
+  return () => {
+    videoElement.removeEventListener("encrypted", handleEncrypted);
+  };
 };
+
+/**
+ * Sender OS 26.1 and 26.2 reject `generateRequest` with `NotSupportedError`
+ * once playback moves to an AirPlay target, and no EME retry recovers it
+ * @see https://github.com/muxinc/elements/issues/1261
+ */
+const isWirelessKeyRequestRefusal = (
+  error: unknown,
+  videoElement: HTMLVideoElement,
+) =>
+  error instanceof DOMException &&
+  error.name === "NotSupportedError" &&
+  Boolean(videoElement.webkitCurrentPlaybackTargetIsWireless);
 
 const requestKeySystemAccess = async (initDataType: string) => {
   const failures: string[] = [];
