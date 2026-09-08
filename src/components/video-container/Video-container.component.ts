@@ -13,6 +13,7 @@ import type Hls from "hls.js";
 import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
 import { initFairPlayDRM } from "../../helpers/drm";
+import { initWebkitFairPlayDRM } from "../../helpers/webkit-drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
 import { qualityBadge } from "../../helpers/quality";
 import { MuxParams, DRMOptions, KeySystems } from "../../types";
@@ -251,21 +252,59 @@ export class VideoContainer extends LitElement {
       });
     }
 
-    if (this.drmOptions?.[KeySystems.fps]) {
-      try {
-        await initFairPlayDRM(
-          this.videos[0],
-          this.drmOptions[KeySystems.fps],
-          this.handleDRMError,
-        );
-      } catch (e) {
-        this.handleDRMError(e);
-      }
-    }
+    await this.initDRM();
 
     // Init source after the video events are set
     this.sources.enableSource();
   }
+
+  private useWebkitFairplay = false;
+  private teardownFairPlayDRM?: () => void;
+
+  private async initDRM() {
+    const fairplay = this.drmOptions?.[KeySystems.fps];
+    if (!fairplay) return;
+
+    try {
+      this.teardownFairPlayDRM = this.useWebkitFairplay
+        ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
+        : await initFairPlayDRM(
+            this.videos[0],
+            fairplay,
+            this.handleDRMError,
+            this.fallbackToWebkitFairplay,
+          );
+    } catch (e) {
+      this.handleDRMError(e);
+    }
+  }
+
+  private fallbackToWebkitFairplay = async () => {
+    const [video] = this.videos;
+    const wasPlaying = !video.paused;
+
+    this.teardownFairPlayDRM?.();
+    this.teardownFairPlayDRM = undefined;
+
+    try {
+      await video.setMediaKeys(null);
+    } catch {
+      // Safari refuses to detach on some builds, the reload below is what
+      // actually hands the element to the WebKit path
+    }
+
+    this.useWebkitFairplay = true;
+    await this.initDRM();
+    this.reload();
+
+    if (wasPlaying) {
+      video.addEventListener(
+        "loadedmetadata",
+        () => this.command(Types.Command.play),
+        { once: true },
+      );
+    }
+  };
 
   handleDRMError = (error: unknown) => {
     this.command(Types.Command.error, { drm: true, message: String(error) });
@@ -476,6 +515,9 @@ export class VideoContainer extends LitElement {
         });
         break;
       case "webkitcurrentplaybacktargetiswirelesschanged":
+        if (!video.webkitCurrentPlaybackTargetIsWireless) {
+          this.useWebkitFairplay = false;
+        }
         dispatch(this, Types.Action.toggleAirplay);
         break;
       case "enterpictureinpicture":
