@@ -48,4 +48,22 @@ describe("video-player playback errors", () => {
 
     expect(el.state.value.drmHelpUrl).to.equal("https://help.test/drm");
   });
+
+  it("follows `drm-help-url` changes and clears state when it is removed", async () => {
+    const el: VideoPlayer = await fixture(
+      html`<video-player drm-help-url="https://help.test/drm">
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>`,
+    );
+
+    el.setAttribute("drm-help-url", "https://help.test/drm-2");
+    await el.updateComplete;
+    expect(el.state.value.drmHelpUrl).to.equal("https://help.test/drm-2");
+
+    el.removeAttribute("drm-help-url");
+    await el.updateComplete;
+    expect(el.state.value.drmHelpUrl).to.equal(undefined);
+  });
 });
