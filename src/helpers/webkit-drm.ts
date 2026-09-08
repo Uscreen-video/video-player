@@ -23,7 +23,7 @@ export const initWebkitFairPlayDRM = (
   }
 
   const certificate = fetchBuffer(certificateUrl, "certificate");
-  let closeSession: (() => void) | undefined;
+  const openSessions = new Set<() => void>();
 
   const handleNeedKey = (event: WebKitNeedKeyEvent) => {
     const open = async () => {
@@ -58,12 +58,16 @@ export const initWebkitFairPlayDRM = (
       session.addEventListener("webkitkeymessage", handleKeyMessage);
       session.addEventListener("webkitkeyerror", handleKeyError);
 
-      closeSession = () => {
+      const closeSession = () => {
         session.removeEventListener("webkitkeymessage", handleKeyMessage);
         session.removeEventListener("webkitkeyerror", handleKeyError);
-        closeSession = undefined;
+        openSessions.delete(closeSession);
         session.close();
       };
+
+      // A stream that rotates keys needs a key session per `webkitneedkey`, and
+      // every one of them has to be closed on teardown
+      openSessions.add(closeSession);
     };
 
     open().catch(onError);
@@ -73,7 +77,8 @@ export const initWebkitFairPlayDRM = (
 
   return () => {
     videoElement.removeEventListener("webkitneedkey", handleNeedKey);
-    closeSession?.();
+    // Each call removes itself from the set, so iterate over a snapshot
+    for (const closeSession of [...openSessions]) closeSession();
     videoElement.webkitSetMediaKeys(null);
   };
 };
@@ -83,9 +88,10 @@ export const initWebkitFairPlayDRM = (
  * expects out: the untouched init data, then the content id and the certificate
  * each behind their own little-endian length
  */
-const buildInitData = (initData: ArrayBuffer, certificate: ArrayBuffer) => {
-  const contentId = toUtf16LE(readContentId(initData));
-  const parts = [new Uint8Array(initData)];
+const buildInitData = (initData: BufferSource, certificate: ArrayBuffer) => {
+  const bytes = toBytes(initData);
+  const contentId = toUtf16LE(readContentId(bytes));
+  const parts = [bytes];
   const sized = [contentId, new Uint8Array(certificate)];
 
   const size =
@@ -111,9 +117,27 @@ const buildInitData = (initData: ArrayBuffer, certificate: ArrayBuffer) => {
   return result;
 };
 
-// The leading length prefix decodes to one utf-16 character, dropped with the scheme
-const readContentId = (initData: ArrayBuffer) =>
-  new TextDecoder("utf-16le").decode(initData).replace("skd://", "").slice(1);
+// Safari hands `initData` over as a Uint8Array, whatever the EME-shaped typings
+// on the prefixed API say
+const toBytes = (source: BufferSource) =>
+  source instanceof ArrayBuffer
+    ? new Uint8Array(source)
+    : new Uint8Array(source.buffer, source.byteOffset, source.byteLength);
+
+// The four byte length prefix covers the url only, so decode that span rather
+// than the whole buffer — as two utf-16 code units the prefix is not text
+const readContentId = (initData: Uint8Array) => {
+  const view = new DataView(
+    initData.buffer,
+    initData.byteOffset,
+    initData.byteLength,
+  );
+  const length = Math.min(view.getUint32(0, true), initData.byteLength - 4);
+  const url = new TextDecoder("utf-16le").decode(
+    initData.subarray(4, 4 + length),
+  );
+  return url.replace(/^skd:\/\//, "");
+};
 
 const toUtf16LE = (value: string) => {
   const result = new Uint8Array(value.length * 2);

@@ -265,6 +265,10 @@ export class VideoContainer extends LitElement {
     const fairplay = this.drmOptions?.[KeySystems.fps];
     if (!fairplay) return;
 
+    // `Command.init` is re-dispatched on every `slotchange`, so a source swap
+    // would otherwise stack a second key handler on the same video element
+    this.teardownDRM();
+
     try {
       this.teardownFairPlayDRM = this.useWebkitFairplay
         ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
@@ -279,12 +283,16 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  private teardownDRM() {
+    this.teardownFairPlayDRM?.();
+    this.teardownFairPlayDRM = undefined;
+  }
+
   private fallbackToWebkitFairplay = async () => {
     const [video] = this.videos;
     const wasPlaying = !video.paused;
 
-    this.teardownFairPlayDRM?.();
-    this.teardownFairPlayDRM = undefined;
+    this.teardownDRM();
 
     try {
       await video.setMediaKeys(null);

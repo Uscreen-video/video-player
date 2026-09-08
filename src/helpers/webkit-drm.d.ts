@@ -24,7 +24,8 @@ declare global {
   };
 
   interface WebKitNeedKeyEvent extends Event {
-    initData: ArrayBuffer | null;
+    // Safari serves a Uint8Array here, the EME `initData` shape is only nominal
+    initData: BufferSource | null;
   }
 
   interface WebKitKeyMessageEvent extends Event {
