@@ -160,4 +160,15 @@ describe("FairPlay initialisation", () => {
 
     expect(listeners.size).to.equal(1);
   });
+
+  // A pending `Command.init` is released in the same task as a fresh one, so
+  // the two initialisations can start before either has stored its teardown
+  it("keeps one key handler when initialisation overlaps", async () => {
+    const container = await mountContainer();
+    const listeners = trackEncryptedListeners(container.videos[0]);
+
+    await Promise.all([container.initNative(), container.initNative()]);
+
+    expect(listeners.size).to.equal(1);
+  });
 });

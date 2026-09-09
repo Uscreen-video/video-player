@@ -23,7 +23,7 @@ const once = <A extends unknown[], T>(request: (...args: A) => Promise<T>) => {
   };
 };
 
-export const initFairPlayDRM = async (
+export const initFairPlayDRM = (
   videoElement: HTMLVideoElement,
   { certificateUrl, licenseUrl }: DRMSystemConfiguration,
   onError: (error: unknown) => void,

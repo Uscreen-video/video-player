@@ -252,7 +252,7 @@ export class VideoContainer extends LitElement {
       });
     }
 
-    await this.initDRM();
+    this.initDRM();
 
     // Init source after the video events are set
     this.sources.enableSource();
@@ -261,7 +261,13 @@ export class VideoContainer extends LitElement {
   private useWebkitFairplay = false;
   private teardownFairPlayDRM?: () => void;
 
-  private async initDRM() {
+  /**
+   * Stays synchronous on purpose. A pending `Command.init` is released in the
+   * same task as a fresh one, so an await between the teardown and the
+   * assignment would let both initialisations attach a key handler and leave
+   * only the last teardown reachable
+   */
+  private initDRM() {
     const fairplay = this.drmOptions?.[KeySystems.fps];
     if (!fairplay) return;
 
@@ -272,7 +278,7 @@ export class VideoContainer extends LitElement {
     try {
       this.teardownFairPlayDRM = this.useWebkitFairplay
         ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
-        : await initFairPlayDRM(
+        : initFairPlayDRM(
             this.videos[0],
             fairplay,
             this.handleDRMError,
@@ -302,7 +308,7 @@ export class VideoContainer extends LitElement {
     }
 
     this.useWebkitFairplay = true;
-    await this.initDRM();
+    this.initDRM();
     this.reload();
 
     if (wasPlaying) {
