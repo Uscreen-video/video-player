@@ -92,6 +92,15 @@ export class VideoPlayer extends LitElement {
   @property({ type: String, attribute: "drm-help-url" })
   drmHelpUrl?: string;
 
+  // Runs on the first update too, so the initial attribute lands in state
+  // without a `connectedCallback` branch. An empty or removed attribute clears it
+  @watch("drmHelpUrl")
+  handleDrmHelpUrlChange() {
+    this.state.setState(Action.update, {
+      drmHelpUrl: this.drmHelpUrl || undefined,
+    });
+  }
+
   /**
    * Re-emits every playback failure as a `playback-error` DOM event, the
    * `PlayerError` as its detail, so the page can observe what the viewer saw.
@@ -157,10 +166,6 @@ export class VideoPlayer extends LitElement {
       this.state.setState(Action.setDRMOptions, {
         drmOptions: this.drmOptions,
       });
-    }
-
-    if (this.drmHelpUrl) {
-      this.state.setState(Action.update, { drmHelpUrl: this.drmHelpUrl });
     }
   }
 

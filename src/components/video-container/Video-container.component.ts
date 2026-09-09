@@ -316,6 +316,7 @@ export class VideoContainer extends LitElement {
     this.command(Types.Command.error, drmErrorToPlayerError(error));
   };
 
+  /** Reset with every HLS instance, so an error never reports an earlier session */
   licenseExchange: LicenseExchange = {};
 
   // hls.js calls the hook again if it throws, so nothing in here may. It never
@@ -329,6 +330,8 @@ export class VideoContainer extends LitElement {
     try {
       this.licenseExchange.keySystem = keyContext.keySystem;
       if (keyContext.keySystem === KeySystems.widevine) {
+        // Renewal challenges do not always carry the build, and the CDM
+        // cannot change within one session, so the first reading stands
         this.licenseExchange.cdmVersion =
           widevineCdmVersion(licenseChallenge) ??
           this.licenseExchange.cdmVersion;
@@ -374,6 +377,7 @@ export class VideoContainer extends LitElement {
     if (!HLS.isSupported()) return;
 
     this.hls?.destroy();
+    this.licenseExchange = {};
 
     this.hls = new HLS({
       // Without this, automatic selection climbs the whole ladder whenever
