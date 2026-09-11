@@ -15,3 +15,8 @@ div {
   z-index: 2;
   overflow: hidden;
 }
+
+a {
+  color: inherit;
+  text-decoration: underline;
+}

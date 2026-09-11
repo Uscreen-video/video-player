@@ -161,6 +161,8 @@ export type State = Partial<
     live: boolean;
     initialized: boolean;
     drmOptions?: DRMOptions;
+    /** Where a viewer whose browser has no key system can read how to enable one */
+    drmHelpUrl?: string;
   } & typeof device
 >;
 
@@ -196,6 +198,17 @@ export const enum KeySystems {
   widevine = "com.widevine.alpha",
 }
 
+/**
+ * `no-access`: the browser has no usable key system (DRM disabled, in-app browser).
+ * `license-refused`: the key system works, the license server refused the request.
+ * `certificate-failed`: the FairPlay certificate could not be fetched.
+ */
+export type DRMFailureReason =
+  | "no-access"
+  | "license-refused"
+  | "certificate-failed"
+  | "unknown";
+
 export type PlayerError = {
   /** Mirrors `MediaError.code` when the failure comes from the media element */
   code?: number;
@@ -203,6 +216,14 @@ export type PlayerError = {
   message?: string;
   /** Set when the key system, and not the media element, has failed */
   drm?: boolean;
+  reason?: DRMFailureReason;
+  /** HTTP status of the license or certificate request, when one was made */
+  status?: number;
+  /** The engine's own error identifier, an hls.js `ErrorDetails` value */
+  details?: string;
+  keySystem?: string;
+  /** Widevine CDM build, read out of the license challenge when present */
+  cdmVersion?: string;
 };
 
 export type DRMSystemConfiguration = {
