@@ -12,7 +12,8 @@ that handles positioning and hiding while idle.
 
 The player also has structural slots: `video` (required), `chromecast`, and
 `errors`, which is filled with `<video-errors-manager>` unless you supply your
-own.
+own. When a video is DRM-protected, set `drm-help-url` on `<video-player>` and
+the "no key system" error links the viewer to that page.
 
 ## 2. Slots
 

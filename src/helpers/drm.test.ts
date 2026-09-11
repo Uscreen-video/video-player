@@ -1,5 +1,10 @@
 import { expect, fixture, html, waitUntil } from "@open-wc/testing";
-import { initFairPlayDRM } from "./drm";
+import {
+  DRMError,
+  initFairPlayDRM,
+  keySystemErrorToPlayerError,
+  widevineCdmVersion,
+} from "./drm";
 
 const drmOptions = {
   licenseUrl: "https://license.test/license",
@@ -86,15 +91,20 @@ describe("initFairPlayDRM", () => {
   let requestAccess: typeof navigator.requestMediaKeySystemAccess;
   let request: typeof fetch;
   let status = 200;
+  let licenseStatus: number | undefined;
 
   beforeEach(() => {
     requests.length = 0;
     status = 200;
+    licenseStatus = undefined;
     requestAccess = navigator.requestMediaKeySystemAccess;
     request = window.fetch;
     window.fetch = async (url: any, init: RequestInit = {}) => {
       requests.push({ url: String(url), method: init.method || "GET" });
-      return new Response(new ArrayBuffer(8), { status });
+      const isLicense = String(url) === drmOptions.licenseUrl;
+      return new Response(new ArrayBuffer(8), {
+        status: isLicense && licenseStatus ? licenseStatus : status,
+      });
     };
   });
 
@@ -126,6 +136,9 @@ describe("initFairPlayDRM", () => {
     expect(String(errors[0])).to.contain(
       "com.apple.fps.1_0: Error: not available",
     );
+    expect(errors[0]).to.be.instanceOf(DRMError);
+    expect((errors[0] as DRMError).reason).to.equal("no-access");
+    expect((errors[0] as DRMError).status).to.equal(undefined);
   });
 
   it("reports a rejected certificate request", async () => {
@@ -141,6 +154,25 @@ describe("initFairPlayDRM", () => {
     expect(String(errors[0])).to.contain(
       "FairPlay certificate request failed with 403",
     );
+    expect((errors[0] as DRMError).reason).to.equal("certificate-failed");
+    expect((errors[0] as DRMError).status).to.equal(403);
+  });
+
+  it("reports a refused license with its status", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    licenseStatus = 500;
+    fakeKeySystem(video);
+
+    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    dispatchEncrypted(video);
+
+    await waitUntil(() => errors.length === 1);
+    expect(String(errors[0])).to.contain(
+      "FairPlay license request failed with 500",
+    );
+    expect((errors[0] as DRMError).reason).to.equal("license-refused");
+    expect((errors[0] as DRMError).status).to.equal(500);
   });
 
   it("routes a refused key request to the WebKit fallback while wireless", async () => {
@@ -215,5 +247,82 @@ describe("initFairPlayDRM", () => {
       { url: drmOptions.licenseUrl, method: "POST" },
       { url: drmOptions.licenseUrl, method: "POST" },
     ]);
+  });
+});
+
+describe("keySystemErrorToPlayerError", () => {
+  it("maps a missing key system to `no-access`", () => {
+    const error = keySystemErrorToPlayerError({
+      details: "keySystemNoAccess",
+    } as any);
+
+    expect(error).to.eql({
+      drm: true,
+      reason: "no-access",
+      details: "keySystemNoAccess",
+      status: undefined,
+      keySystem: undefined,
+      cdmVersion: undefined,
+    });
+  });
+
+  it("maps a refused license to `license-refused` with the response status", () => {
+    const error = keySystemErrorToPlayerError(
+      {
+        details: "keySystemLicenseRequestFailed",
+        response: { code: 500 },
+      } as any,
+      { keySystem: "com.widevine.alpha", cdmVersion: "4.10.2934.0" },
+    );
+
+    expect(error).to.eql({
+      drm: true,
+      reason: "license-refused",
+      details: "keySystemLicenseRequestFailed",
+      status: 500,
+      keySystem: "com.widevine.alpha",
+      cdmVersion: "4.10.2934.0",
+    });
+  });
+
+  it("falls back to the recorded exchange status when hls.js has none", () => {
+    const error = keySystemErrorToPlayerError(
+      { details: "keySystemLicenseRequestFailed" } as any,
+      { status: 403 },
+    );
+
+    expect(error.status).to.equal(403);
+  });
+
+  it("maps any other key-system failure to `unknown`, keeping the detail", () => {
+    const error = keySystemErrorToPlayerError({
+      details: "keySystemSessionUpdateFailed",
+    } as any);
+
+    expect(error.reason).to.equal("unknown");
+    expect(error.details).to.equal("keySystemSessionUpdateFailed");
+    expect(error.code).to.equal(undefined);
+  });
+});
+
+describe("widevineCdmVersion", () => {
+  const bytes = (text: string) => new TextEncoder().encode(text);
+
+  it("reads the CDM build out of the challenge", () => {
+    const challenge = new Uint8Array([
+      ...[8, 1, 18, 200, 3, 0, 255],
+      ...bytes("widevine_cdm\0architecture_name\0x86-64\0"),
+      ...bytes("4.10.2934.0"),
+      ...[0, 0, 0],
+    ]);
+
+    expect(widevineCdmVersion(challenge)).to.equal("4.10.2934.0");
+  });
+
+  it("returns nothing when the challenge carries no version", () => {
+    expect(widevineCdmVersion(new Uint8Array([1, 2, 3, 4]))).to.equal(
+      undefined,
+    );
+    expect(widevineCdmVersion(bytes("version 4.10 only"))).to.equal(undefined);
   });
 });

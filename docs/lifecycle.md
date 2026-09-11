@@ -94,6 +94,12 @@ a network error it clears `canPlay` — which parks every gated command — retr
 the source a few times with a visible message, and then either resumes playback
 or asks the viewer to reload.
 
+A key-system failure is classified before it is shown, on both engines: no
+usable key system, a refused license (with the HTTP status), a failed FairPlay
+certificate, or unknown. Each gets its own persistent message, never keyed on
+the browser version. Every error also leaves the player as a `playback-error`
+DOM event on `<video-player>`, so the page can record what the viewer saw.
+
 ## Persistence
 
 Set `storage-key` on `<video-player>` and volume, mute, playback rate, quality,

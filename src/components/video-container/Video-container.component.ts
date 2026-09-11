@@ -12,7 +12,13 @@ import styles from "./Video-container.styles.css?inline";
 import type Hls from "hls.js";
 import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
-import { initFairPlayDRM } from "../../helpers/drm";
+import {
+  drmErrorToPlayerError,
+  initFairPlayDRM,
+  keySystemErrorToPlayerError,
+  LicenseExchange,
+  widevineCdmVersion,
+} from "../../helpers/drm";
 import { initWebkitFairPlayDRM } from "../../helpers/webkit-drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
 import { qualityBadge } from "../../helpers/quality";
@@ -321,7 +327,35 @@ export class VideoContainer extends LitElement {
   };
 
   handleDRMError = (error: unknown) => {
-    this.command(Types.Command.error, { drm: true, message: String(error) });
+    this.command(Types.Command.error, drmErrorToPlayerError(error));
+  };
+
+  /** Reset with every HLS instance, so an error never reports an earlier session */
+  licenseExchange: LicenseExchange = {};
+
+  // hls.js calls the hook again if it throws, so nothing in here may. It never
+  // opens the request either: hls.js does that once the hook returns
+  recordLicenseExchange = (
+    xhr: XMLHttpRequest,
+    _url: string,
+    keyContext: { keySystem: string },
+    licenseChallenge: Uint8Array,
+  ) => {
+    try {
+      this.licenseExchange.keySystem = keyContext.keySystem;
+      if (keyContext.keySystem === KeySystems.widevine) {
+        // Renewal challenges do not always carry the build, and the CDM
+        // cannot change within one session, so the first reading stands
+        this.licenseExchange.cdmVersion =
+          widevineCdmVersion(licenseChallenge) ??
+          this.licenseExchange.cdmVersion;
+      }
+      xhr.addEventListener("loadend", () => {
+        this.licenseExchange.status = xhr.status;
+      });
+    } catch {
+      return;
+    }
   };
 
   @listen(Types.Command.reload)
@@ -357,6 +391,7 @@ export class VideoContainer extends LitElement {
     if (!HLS.isSupported()) return;
 
     this.hls?.destroy();
+    this.licenseExchange = {};
 
     this.hls = new HLS({
       // Without this, automatic selection climbs the whole ladder whenever
@@ -374,6 +409,7 @@ export class VideoContainer extends LitElement {
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
       emeEnabled: !!this.drmOptions,
+      licenseXhrSetup: this.recordLicenseExchange,
       drmSystems: this.drmOptions
         ? {
             "com.apple.fps": {
@@ -403,7 +439,14 @@ export class VideoContainer extends LitElement {
     });
 
     this.hls.on(HLS.Events.ERROR, (_, error) => {
-      if (error.fatal && error.type === HLS.ErrorTypes.NETWORK_ERROR) {
+      if (!error.fatal) return;
+
+      if (error.type === HLS.ErrorTypes.KEY_SYSTEM_ERROR) {
+        this.command(
+          Types.Command.error,
+          keySystemErrorToPlayerError(error, this.licenseExchange),
+        );
+      } else if (error.type === HLS.ErrorTypes.NETWORK_ERROR) {
         this.command(Types.Command.error, {
           code: MediaError.MEDIA_ERR_NETWORK,
         });

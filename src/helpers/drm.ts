@@ -1,4 +1,10 @@
-import { DRMSystemConfiguration, KeySystems } from "../types";
+import type { ErrorData } from "hls.js";
+import {
+  DRMFailureReason,
+  DRMSystemConfiguration,
+  KeySystems,
+  PlayerError,
+} from "../types";
 
 /**
  * Modern EME expects the unversioned key system, the FairPlay 1.0 identifier is
@@ -6,6 +12,68 @@ import { DRMSystemConfiguration, KeySystems } from "../types";
  * @see https://bugs.webkit.org/show_bug.cgi?id=197433
  */
 const KEY_SYSTEMS: string[] = [KeySystems.fps, "com.apple.fps.1_0"];
+
+export class DRMError extends Error {
+  constructor(
+    message: string,
+    public readonly reason: DRMFailureReason,
+    public readonly status?: number,
+  ) {
+    super(message);
+    this.name = "DRMError";
+  }
+}
+
+/** What the last license request looked like, for the error report */
+export type LicenseExchange = {
+  keySystem?: string;
+  status?: number;
+  cdmVersion?: string;
+};
+
+const KEY_SYSTEM_REASONS: Record<string, DRMFailureReason> = {
+  keySystemNoAccess: "no-access",
+  keySystemLicenseRequestFailed: "license-refused",
+};
+
+export const keySystemErrorToPlayerError = (
+  error: Pick<ErrorData, "details"> & { response?: { code?: number } },
+  exchange: LicenseExchange = {},
+): PlayerError => ({
+  drm: true,
+  reason: KEY_SYSTEM_REASONS[error.details] ?? "unknown",
+  details: error.details,
+  status: error.response?.code ?? exchange.status,
+  keySystem: exchange.keySystem,
+  cdmVersion: exchange.cdmVersion,
+});
+
+export const drmErrorToPlayerError = (error: unknown): PlayerError =>
+  error instanceof DRMError
+    ? {
+        drm: true,
+        reason: error.reason,
+        status: error.status,
+        message: error.message,
+        keySystem: KeySystems.fps,
+      }
+    : { drm: true, reason: "unknown", message: String(error) };
+
+const CDM_VERSION = /\d+\.\d+\.\d+\.\d+/;
+const CHALLENGE_SCAN_BYTES = 4096;
+
+/**
+ * The Widevine CDM writes its build number in plain ASCII inside the license
+ * challenge. A heuristic: it returns nothing rather than guessing
+ */
+export const widevineCdmVersion = (
+  challenge: Uint8Array,
+): string | undefined => {
+  const text = new TextDecoder("latin1").decode(
+    challenge.subarray(0, CHALLENGE_SCAN_BYTES),
+  );
+  return text.match(CDM_VERSION)?.[0];
+};
 
 // Shares one request between concurrent `encrypted` events: the first call wins
 // and every later one gets its promise, whatever arguments they pass. A failure
@@ -30,7 +98,7 @@ export const initFairPlayDRM = (
   onWirelessKeyRequestRefused?: () => void,
 ) => {
   const loadCertificate = once(() =>
-    fetchBuffer(certificateUrl, "certificate"),
+    fetchBuffer(certificateUrl, "certificate", "certificate-failed"),
   );
 
   const attachMediaKeys = once(async (initDataType: string) => {
@@ -95,7 +163,10 @@ const requestKeySystemAccess = async (initDataType: string) => {
     }
   }
 
-  throw new Error(`No FairPlay key system available (${failures.join(", ")})`);
+  throw new DRMError(
+    `No FairPlay key system available (${failures.join(", ")})`,
+    "no-access",
+  );
 };
 
 const createKeySession = async (
@@ -119,16 +190,25 @@ const requestLicense = async (
   event: MediaKeySessionEventMap["message"],
   licenseUrl: string,
 ) =>
-  fetchBuffer(licenseUrl, "license", {
+  fetchBuffer(licenseUrl, "license", "license-refused", {
     method: "POST",
     headers: new Headers({ "Content-type": "application/octet-stream" }),
     body: event.message,
   });
 
-const fetchBuffer = async (url: string, name: string, init?: RequestInit) => {
+const fetchBuffer = async (
+  url: string,
+  name: string,
+  reason: DRMFailureReason,
+  init?: RequestInit,
+) => {
   const response = await fetch(url, init);
   if (!response.ok) {
-    throw new Error(`FairPlay ${name} request failed with ${response.status}`);
+    throw new DRMError(
+      `FairPlay ${name} request failed with ${response.status}`,
+      reason,
+      response.status,
+    );
   }
   return response.arrayBuffer();
 };

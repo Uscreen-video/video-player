@@ -107,9 +107,9 @@ Stable, and safe to build against:
   outside.
 - **The `"video-state"` context** — the read channel. Inside the player use
   `@connect`; outside it read `playerElement.state.value`.
-- **Outward DOM events** — `enter-fullscreen` and `exit-fullscreen` from
-  `<video-player>`, plus the interaction events of `<video-slider>` and
-  `<video-menu>`.
+- **Outward DOM events** — `enter-fullscreen`, `exit-fullscreen` and
+  `playback-error` (its `detail` is the `PlayerError`) from `<video-player>`,
+  plus the interaction events of `<video-slider>` and `<video-menu>`.
 
 Internal and liable to change: the `Action` enum and its reducer, the command
 bookkeeping inside the player, the track controllers, and everything in

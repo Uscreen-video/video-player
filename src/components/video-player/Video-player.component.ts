@@ -83,7 +83,32 @@ export class VideoPlayer extends LitElement {
    * DRM options
    */
   @property({ type: Object, attribute: "drm-options" })
-  drmOptions?: DRMOptions
+  drmOptions?: DRMOptions;
+
+  /**
+   * Linked from the error shown when the browser has no usable key system,
+   * so the viewer can read how to enable protected playback.
+   */
+  @property({ type: String, attribute: "drm-help-url" })
+  drmHelpUrl?: string;
+
+  // Runs on the first update too, so the initial attribute lands in state
+  // without a `connectedCallback` branch. An empty or removed attribute clears it
+  @watch("drmHelpUrl")
+  handleDrmHelpUrlChange() {
+    this.state.setState(Action.update, {
+      drmHelpUrl: this.drmHelpUrl || undefined,
+    });
+  }
+
+  /**
+   * Re-emits every playback failure as a `playback-error` DOM event, the
+   * `PlayerError` as its detail, so the page can observe what the viewer saw.
+   */
+  @listen(Types.Command.error)
+  reportError(error: Types.PlayerError) {
+    emit(this, "playback-error", error);
+  }
 
   @listen(Types.Command.toggleFullscreen)
   toggleFullscreen = () => {
@@ -138,7 +163,9 @@ export class VideoPlayer extends LitElement {
     }
 
     if (this.drmOptions) {
-      this.state.setState(Action.setDRMOptions, { drmOptions: this.drmOptions });
+      this.state.setState(Action.setDRMOptions, {
+        drmOptions: this.drmOptions,
+      });
     }
   }
 
