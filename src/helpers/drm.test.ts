@@ -64,6 +64,28 @@ const fakeKeySystem = (video: HTMLVideoElement) => {
   return sessions;
 };
 
+const fakeRefusingKeySystem = (video: HTMLVideoElement) => {
+  const mediaKeys = {
+    setServerCertificate: async () => true,
+    createSession: () => ({
+      addEventListener: () => {},
+      generateRequest: async () => {
+        throw new DOMException("not supported", "NotSupportedError");
+      },
+      update: async () => {},
+    }),
+  };
+
+  let attached: unknown = null;
+  Object.defineProperty(video, "mediaKeys", { get: () => attached });
+  (video as any).setMediaKeys = async (keys: unknown) => {
+    attached = keys;
+  };
+  (navigator as any).requestMediaKeySystemAccess = async () => ({
+    createMediaKeys: async () => mediaKeys,
+  });
+};
+
 describe("initFairPlayDRM", () => {
   const requests: { url: string; method: string }[] = [];
   let requestAccess: typeof navigator.requestMediaKeySystemAccess;
@@ -103,7 +125,6 @@ describe("initFairPlayDRM", () => {
       throw new Error("not available");
     };
 
-    // Not awaited on purpose: the listener has to be attached synchronously
     initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
@@ -126,7 +147,7 @@ describe("initFairPlayDRM", () => {
     status = 403;
     fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
     await waitUntil(() => errors.length === 1);
@@ -154,12 +175,68 @@ describe("initFairPlayDRM", () => {
     expect((errors[0] as DRMError).status).to.equal(500);
   });
 
+  it("routes a refused key request to the WebKit fallback while wireless", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    let refused = 0;
+
+    fakeRefusingKeySystem(video);
+    (video as any).webkitCurrentPlaybackTargetIsWireless = true;
+
+    initFairPlayDRM(
+      video,
+      drmOptions,
+      (error) => errors.push(error),
+      () => refused++,
+    );
+    dispatchEncrypted(video);
+
+    await waitUntil(() => refused === 1);
+    expect(errors).to.eql([]);
+  });
+
+  it("reports a refused key request while playing locally", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    let refused = 0;
+
+    fakeRefusingKeySystem(video);
+
+    initFairPlayDRM(
+      video,
+      drmOptions,
+      (error) => errors.push(error),
+      () => refused++,
+    );
+    dispatchEncrypted(video);
+
+    await waitUntil(() => errors.length === 1);
+    expect(refused).to.equal(0);
+    expect(String(errors[0])).to.contain("NotSupportedError");
+  });
+
+  it("removes the `encrypted` listener on teardown", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    const sessions = fakeKeySystem(video);
+
+    const teardown = initFairPlayDRM(video, drmOptions, (error) =>
+      errors.push(error),
+    );
+    teardown();
+    dispatchEncrypted(video);
+
+    await waitUntil(() => true);
+    expect(sessions).to.eql([]);
+    expect(requests).to.eql([]);
+  });
+
   it("requests a license per `encrypted` event, reusing the certificate", async () => {
     const video = await fixture<HTMLVideoElement>(html`<video></video>`);
     const errors: unknown[] = [];
     const sessions = fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
     dispatchEncrypted(video);
 

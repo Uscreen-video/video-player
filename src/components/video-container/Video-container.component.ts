@@ -19,6 +19,7 @@ import {
   LicenseExchange,
   widevineCdmVersion,
 } from "../../helpers/drm";
+import { initWebkitFairPlayDRM } from "../../helpers/webkit-drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
 import { qualityBadge } from "../../helpers/quality";
 import { MuxParams, DRMOptions, KeySystems } from "../../types";
@@ -257,21 +258,73 @@ export class VideoContainer extends LitElement {
       });
     }
 
-    if (this.drmOptions?.[KeySystems.fps]) {
-      try {
-        await initFairPlayDRM(
-          this.videos[0],
-          this.drmOptions[KeySystems.fps],
-          this.handleDRMError,
-        );
-      } catch (e) {
-        this.handleDRMError(e);
-      }
-    }
+    this.initDRM();
 
     // Init source after the video events are set
     this.sources.enableSource();
   }
+
+  private useWebkitFairplay = false;
+  private teardownFairPlayDRM?: () => void;
+
+  /**
+   * Stays synchronous on purpose. A pending `Command.init` is released in the
+   * same task as a fresh one, so an await between the teardown and the
+   * assignment would let both initialisations attach a key handler and leave
+   * only the last teardown reachable
+   */
+  private initDRM() {
+    const fairplay = this.drmOptions?.[KeySystems.fps];
+    if (!fairplay) return;
+
+    // `Command.init` is re-dispatched on every `slotchange`, so a source swap
+    // would otherwise stack a second key handler on the same video element
+    this.teardownDRM();
+
+    try {
+      this.teardownFairPlayDRM = this.useWebkitFairplay
+        ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
+        : initFairPlayDRM(
+            this.videos[0],
+            fairplay,
+            this.handleDRMError,
+            this.fallbackToWebkitFairplay,
+          );
+    } catch (e) {
+      this.handleDRMError(e);
+    }
+  }
+
+  private teardownDRM() {
+    this.teardownFairPlayDRM?.();
+    this.teardownFairPlayDRM = undefined;
+  }
+
+  private fallbackToWebkitFairplay = async () => {
+    const [video] = this.videos;
+    const wasPlaying = !video.paused;
+
+    this.teardownDRM();
+
+    try {
+      await video.setMediaKeys(null);
+    } catch {
+      // Safari refuses to detach on some builds, the reload below is what
+      // actually hands the element to the WebKit path
+    }
+
+    this.useWebkitFairplay = true;
+    this.initDRM();
+    this.reload();
+
+    if (wasPlaying) {
+      video.addEventListener(
+        "loadedmetadata",
+        () => this.command(Types.Command.play),
+        { once: true },
+      );
+    }
+  };
 
   handleDRMError = (error: unknown) => {
     this.command(Types.Command.error, drmErrorToPlayerError(error));
@@ -519,6 +572,9 @@ export class VideoContainer extends LitElement {
         });
         break;
       case "webkitcurrentplaybacktargetiswirelesschanged":
+        if (!video.webkitCurrentPlaybackTargetIsWireless) {
+          this.useWebkitFairplay = false;
+        }
         dispatch(this, Types.Action.toggleAirplay);
         break;
       case "enterpictureinpicture":
