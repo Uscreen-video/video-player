@@ -1,6 +1,7 @@
 import { html, fixture, expect, elementUpdated } from "@open-wc/testing";
 import type { VideoContainer } from "./Video-container.component";
 import type { VideoPlayer } from "../video-player/Video-player.component";
+import { KeySystems } from "../../types";
 
 describe("video-container", () => {
   it("with default parameters", async () => {
@@ -99,5 +100,75 @@ describe("automatic quality selection", () => {
 
     expect(cap, "automatic selection was left uncapped").to.not.equal(-1);
     expect(heights[cap]).to.be.at.most(720);
+  });
+});
+
+describe("FairPlay initialisation", () => {
+  /**
+   * Every live `encrypted` listener on the element, by identity — the handler
+   * is attached by `initFairPlayDRM` and removed by the teardown it returns
+   */
+  const trackEncryptedListeners = (video: HTMLVideoElement) => {
+    const live = new Set<unknown>();
+    const add = video.addEventListener.bind(video);
+    const remove = video.removeEventListener.bind(video);
+
+    video.addEventListener = (type: string, listener: any, options?: any) => {
+      if (type === "encrypted") live.add(listener);
+      return add(type, listener, options);
+    };
+    video.removeEventListener = (
+      type: string,
+      listener: any,
+      options?: any,
+    ) => {
+      if (type === "encrypted") live.delete(listener);
+      return remove(type, listener, options);
+    };
+
+    return live;
+  };
+
+  const mountContainer = async () => {
+    const player: VideoPlayer = await fixture(html`
+      <video-player>
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `);
+    await elementUpdated(player);
+    const container: VideoContainer =
+      player.shadowRoot.querySelector("video-container");
+    container.drmOptions = {
+      [KeySystems.fps]: {
+        licenseUrl: "https://license.test/license",
+        certificateUrl: "https://license.test/certificate",
+      },
+    };
+    return container;
+  };
+
+  // `Command.init` is re-dispatched on every `slotchange`, so a storefront that
+  // swaps the source used to leave the previous key handler attached
+  it("keeps one key handler across repeated initialisation", async () => {
+    const container = await mountContainer();
+    const listeners = trackEncryptedListeners(container.videos[0]);
+
+    await container.initNative();
+    await container.initNative();
+
+    expect(listeners.size).to.equal(1);
+  });
+
+  // A pending `Command.init` is released in the same task as a fresh one, so
+  // the two initialisations can start before either has stored its teardown
+  it("keeps one key handler when initialisation overlaps", async () => {
+    const container = await mountContainer();
+    const listeners = trackEncryptedListeners(container.videos[0]);
+
+    await Promise.all([container.initNative(), container.initNative()]);
+
+    expect(listeners.size).to.equal(1);
   });
 });

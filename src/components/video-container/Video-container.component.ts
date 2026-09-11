@@ -12,7 +12,14 @@ import styles from "./Video-container.styles.css?inline";
 import type Hls from "hls.js";
 import { getBufferedEnd } from "../../helpers/buffer";
 import { connectMuxData } from "../../helpers/mux";
-import { initFairPlayDRM } from "../../helpers/drm";
+import {
+  drmErrorToPlayerError,
+  initFairPlayDRM,
+  keySystemErrorToPlayerError,
+  LicenseExchange,
+  widevineCdmVersion,
+} from "../../helpers/drm";
+import { initWebkitFairPlayDRM } from "../../helpers/webkit-drm";
 import { createProvider, StorageProvider } from "../../helpers/storage";
 import { qualityBadge } from "../../helpers/quality";
 import { MuxParams, DRMOptions, KeySystems } from "../../types";
@@ -251,24 +258,104 @@ export class VideoContainer extends LitElement {
       });
     }
 
-    if (this.drmOptions?.[KeySystems.fps]) {
-      try {
-        await initFairPlayDRM(
-          this.videos[0],
-          this.drmOptions[KeySystems.fps],
-          this.handleDRMError,
-        );
-      } catch (e) {
-        this.handleDRMError(e);
-      }
-    }
+    this.initDRM();
 
     // Init source after the video events are set
     this.sources.enableSource();
   }
 
+  private useWebkitFairplay = false;
+  private teardownFairPlayDRM?: () => void;
+
+  /**
+   * Stays synchronous on purpose. A pending `Command.init` is released in the
+   * same task as a fresh one, so an await between the teardown and the
+   * assignment would let both initialisations attach a key handler and leave
+   * only the last teardown reachable
+   */
+  private initDRM() {
+    const fairplay = this.drmOptions?.[KeySystems.fps];
+    if (!fairplay) return;
+
+    // `Command.init` is re-dispatched on every `slotchange`, so a source swap
+    // would otherwise stack a second key handler on the same video element
+    this.teardownDRM();
+
+    try {
+      this.teardownFairPlayDRM = this.useWebkitFairplay
+        ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
+        : initFairPlayDRM(
+            this.videos[0],
+            fairplay,
+            this.handleDRMError,
+            this.fallbackToWebkitFairplay,
+          );
+    } catch (e) {
+      this.handleDRMError(e);
+    }
+  }
+
+  private teardownDRM() {
+    this.teardownFairPlayDRM?.();
+    this.teardownFairPlayDRM = undefined;
+  }
+
+  private fallbackToWebkitFairplay = async () => {
+    const [video] = this.videos;
+    const wasPlaying = !video.paused;
+
+    this.teardownDRM();
+
+    try {
+      await video.setMediaKeys(null);
+    } catch {
+      // Safari refuses to detach on some builds, the reload below is what
+      // actually hands the element to the WebKit path
+    }
+
+    this.useWebkitFairplay = true;
+    this.initDRM();
+    this.reload();
+
+    if (wasPlaying) {
+      video.addEventListener(
+        "loadedmetadata",
+        () => this.command(Types.Command.play),
+        { once: true },
+      );
+    }
+  };
+
   handleDRMError = (error: unknown) => {
-    this.command(Types.Command.error, { drm: true, message: String(error) });
+    this.command(Types.Command.error, drmErrorToPlayerError(error));
+  };
+
+  /** Reset with every HLS instance, so an error never reports an earlier session */
+  licenseExchange: LicenseExchange = {};
+
+  // hls.js calls the hook again if it throws, so nothing in here may. It never
+  // opens the request either: hls.js does that once the hook returns
+  recordLicenseExchange = (
+    xhr: XMLHttpRequest,
+    _url: string,
+    keyContext: { keySystem: string },
+    licenseChallenge: Uint8Array,
+  ) => {
+    try {
+      this.licenseExchange.keySystem = keyContext.keySystem;
+      if (keyContext.keySystem === KeySystems.widevine) {
+        // Renewal challenges do not always carry the build, and the CDM
+        // cannot change within one session, so the first reading stands
+        this.licenseExchange.cdmVersion =
+          widevineCdmVersion(licenseChallenge) ??
+          this.licenseExchange.cdmVersion;
+      }
+      xhr.addEventListener("loadend", () => {
+        this.licenseExchange.status = xhr.status;
+      });
+    } catch {
+      return;
+    }
   };
 
   @listen(Types.Command.reload)
@@ -304,6 +391,7 @@ export class VideoContainer extends LitElement {
     if (!HLS.isSupported()) return;
 
     this.hls?.destroy();
+    this.licenseExchange = {};
 
     this.hls = new HLS({
       // Without this, automatic selection climbs the whole ladder whenever
@@ -321,6 +409,7 @@ export class VideoContainer extends LitElement {
       backBufferLength: navigator.userAgent.match(/Android/i) ? 0 : 30,
       liveDurationInfinity: true,
       emeEnabled: !!this.drmOptions,
+      licenseXhrSetup: this.recordLicenseExchange,
       drmSystems: this.drmOptions
         ? {
             "com.apple.fps": {
@@ -350,7 +439,14 @@ export class VideoContainer extends LitElement {
     });
 
     this.hls.on(HLS.Events.ERROR, (_, error) => {
-      if (error.fatal && error.type === HLS.ErrorTypes.NETWORK_ERROR) {
+      if (!error.fatal) return;
+
+      if (error.type === HLS.ErrorTypes.KEY_SYSTEM_ERROR) {
+        this.command(
+          Types.Command.error,
+          keySystemErrorToPlayerError(error, this.licenseExchange),
+        );
+      } else if (error.type === HLS.ErrorTypes.NETWORK_ERROR) {
         this.command(Types.Command.error, {
           code: MediaError.MEDIA_ERR_NETWORK,
         });
@@ -476,6 +572,9 @@ export class VideoContainer extends LitElement {
         });
         break;
       case "webkitcurrentplaybacktargetiswirelesschanged":
+        if (!video.webkitCurrentPlaybackTargetIsWireless) {
+          this.useWebkitFairplay = false;
+        }
         dispatch(this, Types.Action.toggleAirplay);
         break;
       case "enterpictureinpicture":
