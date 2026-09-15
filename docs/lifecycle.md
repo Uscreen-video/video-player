@@ -95,10 +95,12 @@ the source a few times with a visible message, and then either resumes playback
 or asks the viewer to reload.
 
 A key-system failure is classified before it is shown, on both engines: no
-usable key system, a refused license (with the HTTP status), a failed FairPlay
-certificate, or unknown. Each gets its own persistent message, never keyed on
-the browser version. Every error also leaves the player as a `playback-error`
-DOM event on `<video-player>`, so the page can record what the viewer saw.
+usable key system, a refused license (with the HTTP status), a license request
+that never reached a server, a failed FairPlay certificate, or unknown. Each
+gets its own persistent message, never keyed on the browser version. A key
+system that fails leaves nothing to play, so the player is paused with the
+message. Every error also leaves the player as a `playback-error` DOM event on
+`<video-player>`, so the page can record what the viewer saw.
 
 ## Persistence
 
