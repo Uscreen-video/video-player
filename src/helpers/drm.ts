@@ -39,14 +39,24 @@ const KEY_SYSTEM_REASONS: Record<string, DRMFailureReason> = {
 export const keySystemErrorToPlayerError = (
   error: Pick<ErrorData, "details"> & { response?: { code?: number } },
   exchange: LicenseExchange = {},
-): PlayerError => ({
-  drm: true,
-  reason: KEY_SYSTEM_REASONS[error.details] ?? "unknown",
-  details: error.details,
-  status: error.response?.code ?? exchange.status,
-  keySystem: exchange.keySystem,
-  cdmVersion: exchange.cdmVersion,
-});
+): PlayerError => {
+  const status = error.response?.code ?? exchange.status;
+  const reason = KEY_SYSTEM_REASONS[error.details] ?? "unknown";
+
+  return {
+    drm: true,
+    // `XMLHttpRequest` reports status 0 when no response arrived at all, so a
+    // blocked or unreachable endpoint refused nothing
+    reason:
+      reason === "license-refused" && status === 0
+        ? "license-unreachable"
+        : reason,
+    details: error.details,
+    status,
+    keySystem: exchange.keySystem,
+    cdmVersion: exchange.cdmVersion,
+  };
+};
 
 export const drmErrorToPlayerError = (error: unknown): PlayerError =>
   error instanceof DRMError
@@ -202,7 +212,18 @@ const fetchBuffer = async (
   reason: DRMFailureReason,
   init?: RequestInit,
 ) => {
-  const response = await fetch(url, init);
+  let response: Response;
+  try {
+    response = await fetch(url, init);
+  } catch (e) {
+    // `fetch` rejects, rather than resolving, when the request never leaves the
+    // browser, so there is no status to report
+    throw new DRMError(
+      `FairPlay ${name} request could not be sent (${e})`,
+      reason === "license-refused" ? "license-unreachable" : reason,
+    );
+  }
+
   if (!response.ok) {
     throw new DRMError(
       `FairPlay ${name} request failed with ${response.status}`,
