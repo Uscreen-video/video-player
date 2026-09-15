@@ -175,6 +175,45 @@ describe("initFairPlayDRM", () => {
     expect((errors[0] as DRMError).status).to.equal(500);
   });
 
+  it("reports a license request that never left the browser", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    const stub = window.fetch;
+    window.fetch = async (url: any, init: RequestInit = {}) =>
+      String(url) === drmOptions.licenseUrl
+        ? Promise.reject(new TypeError("Failed to fetch"))
+        : stub(url, init);
+    fakeKeySystem(video);
+
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    dispatchEncrypted(video);
+
+    await waitUntil(() => errors.length === 1);
+    expect(String(errors[0])).to.contain(
+      "FairPlay license request could not be sent",
+    );
+    expect((errors[0] as DRMError).reason).to.equal("license-unreachable");
+    expect((errors[0] as DRMError).status).to.equal(undefined);
+  });
+
+  it("keeps `certificate-failed` when the certificate request cannot be sent", async () => {
+    const video = await fixture<HTMLVideoElement>(html`<video></video>`);
+    const errors: unknown[] = [];
+    const stub = window.fetch;
+    window.fetch = async (url: any, init: RequestInit = {}) =>
+      String(url) === drmOptions.certificateUrl
+        ? Promise.reject(new TypeError("Failed to fetch"))
+        : stub(url, init);
+    fakeKeySystem(video);
+
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    dispatchEncrypted(video);
+
+    await waitUntil(() => errors.length === 1);
+    expect((errors[0] as DRMError).reason).to.equal("certificate-failed");
+    expect((errors[0] as DRMError).status).to.equal(undefined);
+  });
+
   it("routes a refused key request to the WebKit fallback while wireless", async () => {
     const video = await fixture<HTMLVideoElement>(html`<video></video>`);
     const errors: unknown[] = [];
@@ -292,6 +331,35 @@ describe("keySystemErrorToPlayerError", () => {
     );
 
     expect(error.status).to.equal(403);
+    expect(error.reason).to.equal("license-refused");
+  });
+
+  it("maps a license request that got no response to `license-unreachable`", () => {
+    const error = keySystemErrorToPlayerError(
+      { details: "keySystemLicenseRequestFailed" } as any,
+      { status: 0 },
+    );
+
+    expect(error.reason).to.equal("license-unreachable");
+    expect(error.status).to.equal(0);
+  });
+
+  it("maps a zero status reported by hls.js to `license-unreachable`", () => {
+    const error = keySystemErrorToPlayerError({
+      details: "keySystemLicenseRequestFailed",
+      response: { code: 0 },
+    } as any);
+
+    expect(error.reason).to.equal("license-unreachable");
+  });
+
+  it("keeps `license-refused` when no status was observed at all", () => {
+    const error = keySystemErrorToPlayerError({
+      details: "keySystemLicenseRequestFailed",
+    } as any);
+
+    expect(error.reason).to.equal("license-refused");
+    expect(error.status).to.equal(undefined);
   });
 
   it("maps any other key-system failure to `unknown`, keeping the detail", () => {
