@@ -1,4 +1,10 @@
-import { html, fixture, expect, elementUpdated } from "@open-wc/testing";
+import {
+  html,
+  fixture,
+  expect,
+  elementUpdated,
+  waitUntil,
+} from "@open-wc/testing";
 import type { VideoErrorsManager } from "./Video-errors-manager.component";
 import type { VideoPlayer } from "../video-player/Video-player.component";
 import { Action, Command, PlayerError } from "../../types";
@@ -124,6 +130,21 @@ describe("video-errors-manager", () => {
       expect(text).to.contain("DRM component is out of date");
     });
 
+    it("asks for a reload when the license server could not be reached", async () => {
+      const { player, manager } = await mount();
+
+      const text = await report(player, manager, {
+        drm: true,
+        reason: "license-unreachable",
+      });
+
+      expect(text).to.contain(
+        "This video's playback license could not be loaded",
+      );
+      expect(text).to.contain("Please reload this page");
+      expect(text).not.to.contain("out of date");
+    });
+
     it("asks for a reload when the license server refuses with a 4xx", async () => {
       const { player, manager } = await mount();
 
@@ -150,6 +171,17 @@ describe("video-errors-manager", () => {
       expect(text).to.contain(
         "This video is protected and its playback license could not be loaded",
       );
+    });
+
+    it("pauses the player, so the controls stop showing playback", async () => {
+      const { player, manager } = await mount();
+      const video = player.querySelector("video");
+      let paused = 0;
+      video.pause = () => paused++;
+
+      await report(player, manager, { drm: true, reason: "no-access" });
+
+      await waitUntil(() => paused === 1);
     });
 
     it("persists the message instead of clearing it after the timeout", async () => {

@@ -201,11 +201,13 @@ export const enum KeySystems {
 /**
  * `no-access`: the browser has no usable key system (DRM disabled, in-app browser).
  * `license-refused`: the key system works, the license server refused the request.
+ * `license-unreachable`: the license request never reached a server, so no status came back.
  * `certificate-failed`: the FairPlay certificate could not be fetched.
  */
 export type DRMFailureReason =
   | "no-access"
   | "license-refused"
+  | "license-unreachable"
   | "certificate-failed"
   | "unknown";
 
