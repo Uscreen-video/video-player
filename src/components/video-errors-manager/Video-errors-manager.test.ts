@@ -184,6 +184,22 @@ describe("video-errors-manager", () => {
       await waitUntil(() => paused === 1);
     });
 
+    it("stays quiet while casting, where the receiver holds its own licence", async () => {
+      const { player, manager } = await mount();
+      player.state.setState(Action.update, { castActivated: true });
+      const video = player.querySelector("video");
+      let paused = 0;
+      video.pause = () => paused++;
+
+      const text = await report(player, manager, {
+        drm: true,
+        reason: "no-access",
+      });
+
+      expect(text).to.equal("");
+      expect(paused).to.equal(0);
+    });
+
     it("persists the message instead of clearing it after the timeout", async () => {
       const { player, manager } = await mount();
       manager.timeout = 10;
