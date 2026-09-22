@@ -33,6 +33,9 @@ export class VideoErrorsManager extends LitElement {
   @connect("isInAppBrowser")
   isInAppBrowser: boolean;
 
+  @connect("castActivated")
+  castActivated: boolean;
+
   @state()
   message: string | TemplateResult<any> = "";
 
@@ -50,6 +53,11 @@ export class VideoErrorsManager extends LitElement {
   @listen(Types.Command.error)
   handleErrors(error: Types.PlayerError) {
     if (error.drm) {
+      // The receiver holds its own licence, so a local key failure says nothing
+      // about the stream the viewer is watching on the cast target
+      if (this.castActivated) return;
+      // Nothing plays after this, so the controls must stop claiming that it does
+      this.command(Types.Command.pause);
       return this.print(this.drmMessage(error), true);
     }
 
@@ -94,6 +102,9 @@ export class VideoErrorsManager extends LitElement {
             html`<br />You're inside an app's built-in browser. Open this page
               in your regular browser.`,
         )}`;
+      case "license-unreachable":
+        return html`This video's playback license could not be loaded.<br />
+          Please reload this page.`;
       case "license-refused":
         return status >= 400 && status < 500
           ? html`The playback licence was refused.<br />

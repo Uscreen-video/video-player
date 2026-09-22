@@ -47,10 +47,21 @@ export class VideoChromecast extends LitElement {
   receiverApplicationId?: string;
 
   @listen(Command.togglePlay, { castActivated: true })
-  @listen(Command.play, { castActivated: true })
-  @listen(Command.pause, { castActivated: true })
-  play() {
+  togglePlay() {
     this.controller.playOrPause();
+  }
+
+  // `playOrPause` toggles, so plain play and pause have to check where the
+  // receiver already is — bound straight to it, `Command.pause` resumes a
+  // paused cast instead of leaving it alone
+  @listen(Command.play, { castActivated: true })
+  play() {
+    if (this.player.isPaused) this.controller.playOrPause();
+  }
+
+  @listen(Command.pause, { castActivated: true })
+  pause() {
+    if (!this.player.isPaused) this.controller.playOrPause();
   }
 
   @listen(Command.seek, { castActivated: true })
