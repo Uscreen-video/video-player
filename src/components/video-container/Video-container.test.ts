@@ -103,6 +103,48 @@ describe("automatic quality selection", () => {
   });
 });
 
+describe("blocked storage", () => {
+  const original = Object.getOwnPropertyDescriptor(window, "localStorage");
+  let container: VideoContainer;
+
+  beforeEach(() =>
+    Object.defineProperty(window, "localStorage", {
+      configurable: true,
+      get() {
+        throw new DOMException("blocked", "SecurityError");
+      },
+    }),
+  );
+
+  afterEach(() => {
+    container?.hls?.destroy();
+    Object.defineProperty(window, "localStorage", original);
+  });
+
+  it("starts the player without saved preferences", async () => {
+    const player: VideoPlayer = await fixture(html`
+      <video-player storage-key="test:blocked">
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `);
+    await elementUpdated(player);
+    container = player.shadowRoot.querySelector("video-container");
+
+    expect(
+      player.state.value.isSourceSupported,
+      "setup() stopped before Action.init",
+    ).to.not.equal(undefined);
+
+    await container.initHls();
+    await new Promise<void>((resolve, reject) => {
+      container.hls.on("hlsManifestParsed" as any, () => resolve());
+      setTimeout(() => reject(new Error("the manifest was never parsed")), 2000);
+    });
+  });
+});
+
 describe("FairPlay initialisation", () => {
   /**
    * Every live `encrypted` listener on the element, by identity — the handler

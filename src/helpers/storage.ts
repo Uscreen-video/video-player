@@ -22,12 +22,20 @@ export const createProvider = (key?: string): StorageProvider => {
   const Provider: StorageProvider = {
     get: () => {
       if (!key) return {};
-      const item = window.localStorage.getItem(key);
-      return item ? JSON.parse(item) : {};
+      try {
+        const value = JSON.parse(window.localStorage.getItem(key) ?? "{}");
+        return value && typeof value === "object" && !Array.isArray(value)
+          ? value
+          : {};
+      } catch {
+        return {};
+      }
     },
     set: (val) => {
       if (!key) return;
-      window.localStorage.setItem(key, JSON.stringify(val));
+      try {
+        window.localStorage.setItem(key, JSON.stringify(val));
+      } catch {}
     },
     clear: () => {
       if (!key) return;
