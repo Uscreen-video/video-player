@@ -29,8 +29,7 @@ import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
 import { audiosController } from "./audios";
 import type { AudiosController } from "./audios/types";
-
-const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
+import { INIT_NATIVE_HLS_RE } from "../../helpers/native-hls";
 
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
