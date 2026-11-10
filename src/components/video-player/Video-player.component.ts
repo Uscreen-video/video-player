@@ -156,8 +156,8 @@ export class VideoPlayer extends LitElement {
   };
 
   connectedCallback(): void {
-    super.connectedCallback();
     this.recreateVideosOnce();
+    super.connectedCallback();
     document.addEventListener("click", this.handleClick, { once: true });
     document.addEventListener("touch", this.handleClick, { once: true });
     document.addEventListener("keydown", this.handleClick, { once: true });

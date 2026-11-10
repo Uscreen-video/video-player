@@ -124,6 +124,13 @@ describe("video-player video re-creation after adoption", () => {
     );
   });
 
+  it("hands the fullscreen controller the new video", () => {
+    stubUserAgent(SAFARI_UA);
+    const { el } = appendFromTemplate();
+
+    expect(el.fullscreen.video).to.equal(el.querySelector("video"));
+  });
+
   it("keeps the video when the same player is appended again", () => {
     stubUserAgent(SAFARI_UA);
     const { el } = appendFromTemplate();
