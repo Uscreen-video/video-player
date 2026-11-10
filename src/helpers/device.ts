@@ -20,6 +20,8 @@ const isIos = (() => {
 const IN_APP_BROWSER_RE =
   /FBAN|FBAV|Instagram|Line\/|NAVER|MicroMessenger|DaumApps|; wv\)/;
 
+export const INIT_NATIVE_HLS_RE = /^((?!chrome|android).)*safari/i;
+
 const getDevice = () => {
   const ua = navigator?.userAgent;
   if (!ua) return {};

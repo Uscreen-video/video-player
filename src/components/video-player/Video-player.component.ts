@@ -11,6 +11,7 @@ import { FullscreenController } from "./controllers/Fullscreen";
 import { IdleController } from "./controllers/Idle";
 import { KeyboardController } from "./controllers/Keyboard";
 import { emit } from "../../helpers/event";
+import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
 import { Action, MuxParams, DRMOptions } from "../../types";
 import { watch } from "../../decorators/watch";
 import styles from "./Video-player.styles.css?inline";
@@ -19,6 +20,9 @@ import "../video-controls";
 import "../video-container";
 import "../video-chromecast";
 import "../video-errors-manager";
+
+// Elements upgraded by customElements.define were parsed into this document, and page code may already hold their <video>.
+let upgradingOnDefine = true;
 
 @customElement("video-player")
 export class VideoPlayer extends LitElement {
@@ -30,6 +34,8 @@ export class VideoPlayer extends LitElement {
   public command = createCommand(this);
   public state = createState(this);
   public fullscreen = new FullscreenController(this);
+
+  private videoRecreationDone = upgradingOnDefine;
 
   /**
    * The ID of the element to be used as the fullscreen container.
@@ -150,6 +156,7 @@ export class VideoPlayer extends LitElement {
   };
 
   connectedCallback(): void {
+    this.recreateVideosOnce();
     super.connectedCallback();
     document.addEventListener("click", this.handleClick, { once: true });
     document.addEventListener("touch", this.handleClick, { once: true });
@@ -167,6 +174,17 @@ export class VideoPlayer extends LitElement {
         drmOptions: this.drmOptions,
       });
     }
+  }
+
+  private recreateVideosOnce() {
+    if (this.videoRecreationDone) return;
+    this.videoRecreationDone = true;
+    if (!INIT_NATIVE_HLS_RE.test(navigator.userAgent)) return;
+
+    // Safari 27 never resumes decoding a <video> created by another document after the page is hidden (CAT-2407).
+    this.querySelectorAll(":scope > video").forEach((video) => {
+      video.replaceWith(document.importNode(video, true));
+    });
   }
 
   disconnectedCallback(): void {
@@ -190,3 +208,5 @@ export class VideoPlayer extends LitElement {
     `;
   }
 }
+
+upgradingOnDefine = false;
