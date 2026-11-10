@@ -11,6 +11,7 @@ import { FullscreenController } from "./controllers/Fullscreen";
 import { IdleController } from "./controllers/Idle";
 import { KeyboardController } from "./controllers/Keyboard";
 import { emit } from "../../helpers/event";
+import { INIT_NATIVE_HLS_RE } from "../../helpers/native-hls";
 import { Action, MuxParams, DRMOptions } from "../../types";
 import { watch } from "../../decorators/watch";
 import styles from "./Video-player.styles.css?inline";
@@ -19,6 +20,8 @@ import "../video-controls";
 import "../video-container";
 import "../video-chromecast";
 import "../video-errors-manager";
+
+let upgradingOnDefine = true;
 
 @customElement("video-player")
 export class VideoPlayer extends LitElement {
@@ -30,6 +33,8 @@ export class VideoPlayer extends LitElement {
   public command = createCommand(this);
   public state = createState(this);
   public fullscreen = new FullscreenController(this);
+
+  private videosRecreated = upgradingOnDefine;
 
   /**
    * The ID of the element to be used as the fullscreen container.
@@ -151,6 +156,7 @@ export class VideoPlayer extends LitElement {
 
   connectedCallback(): void {
     super.connectedCallback();
+    this.recreateVideosOnce();
     document.addEventListener("click", this.handleClick, { once: true });
     document.addEventListener("touch", this.handleClick, { once: true });
     document.addEventListener("keydown", this.handleClick, { once: true });
@@ -167,6 +173,16 @@ export class VideoPlayer extends LitElement {
         drmOptions: this.drmOptions,
       });
     }
+  }
+
+  private recreateVideosOnce() {
+    if (this.videosRecreated) return;
+    this.videosRecreated = true;
+    if (!INIT_NATIVE_HLS_RE.test(navigator.userAgent)) return;
+
+    this.querySelectorAll(":scope > video").forEach((video) => {
+      video.replaceWith(document.importNode(video, true));
+    });
   }
 
   disconnectedCallback(): void {
@@ -190,3 +206,5 @@ export class VideoPlayer extends LitElement {
     `;
   }
 }
+
+upgradingOnDefine = false;
