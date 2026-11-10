@@ -11,7 +11,7 @@ import { FullscreenController } from "./controllers/Fullscreen";
 import { IdleController } from "./controllers/Idle";
 import { KeyboardController } from "./controllers/Keyboard";
 import { emit } from "../../helpers/event";
-import { INIT_NATIVE_HLS_RE } from "../../helpers/native-hls";
+import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
 import { Action, MuxParams, DRMOptions } from "../../types";
 import { watch } from "../../decorators/watch";
 import styles from "./Video-player.styles.css?inline";
@@ -21,6 +21,7 @@ import "../video-container";
 import "../video-chromecast";
 import "../video-errors-manager";
 
+// Elements upgraded by customElements.define were parsed into this document, and page code may already hold their <video>.
 let upgradingOnDefine = true;
 
 @customElement("video-player")
@@ -34,7 +35,7 @@ export class VideoPlayer extends LitElement {
   public state = createState(this);
   public fullscreen = new FullscreenController(this);
 
-  private videosRecreated = upgradingOnDefine;
+  private videoRecreationDone = upgradingOnDefine;
 
   /**
    * The ID of the element to be used as the fullscreen container.
@@ -176,10 +177,11 @@ export class VideoPlayer extends LitElement {
   }
 
   private recreateVideosOnce() {
-    if (this.videosRecreated) return;
-    this.videosRecreated = true;
+    if (this.videoRecreationDone) return;
+    this.videoRecreationDone = true;
     if (!INIT_NATIVE_HLS_RE.test(navigator.userAgent)) return;
 
+    // Safari 27 never resumes decoding a <video> created by another document after the page is hidden (CAT-2407).
     this.querySelectorAll(":scope > video").forEach((video) => {
       video.replaceWith(document.importNode(video, true));
     });
