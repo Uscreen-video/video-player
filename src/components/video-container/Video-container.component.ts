@@ -29,7 +29,7 @@ import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
 import { audiosController } from "./audios";
 import type { AudiosController } from "./audios/types";
-import { INIT_NATIVE_HLS_RE } from "../../helpers/native-hls";
+import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
 
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
@@ -257,7 +257,7 @@ export class VideoContainer extends LitElement {
       });
     }
 
-    await this.initDRM();
+    this.initDRM();
 
     // Init source after the video events are set
     this.sources.enableSource();
@@ -266,14 +266,24 @@ export class VideoContainer extends LitElement {
   private useWebkitFairplay = false;
   private teardownFairPlayDRM?: () => void;
 
-  private async initDRM() {
+  /**
+   * Stays synchronous on purpose. A pending `Command.init` is released in the
+   * same task as a fresh one, so an await between the teardown and the
+   * assignment would let both initialisations attach a key handler and leave
+   * only the last teardown reachable
+   */
+  private initDRM() {
     const fairplay = this.drmOptions?.[KeySystems.fps];
     if (!fairplay) return;
+
+    // `Command.init` is re-dispatched on every `slotchange`, so a source swap
+    // would otherwise stack a second key handler on the same video element
+    this.teardownDRM();
 
     try {
       this.teardownFairPlayDRM = this.useWebkitFairplay
         ? initWebkitFairPlayDRM(this.videos[0], fairplay, this.handleDRMError)
-        : await initFairPlayDRM(
+        : initFairPlayDRM(
             this.videos[0],
             fairplay,
             this.handleDRMError,
@@ -284,12 +294,16 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  private teardownDRM() {
+    this.teardownFairPlayDRM?.();
+    this.teardownFairPlayDRM = undefined;
+  }
+
   private fallbackToWebkitFairplay = async () => {
     const [video] = this.videos;
     const wasPlaying = !video.paused;
 
-    this.teardownFairPlayDRM?.();
-    this.teardownFairPlayDRM = undefined;
+    this.teardownDRM();
 
     try {
       await video.setMediaKeys(null);
@@ -299,7 +313,7 @@ export class VideoContainer extends LitElement {
     }
 
     this.useWebkitFairplay = true;
-    await this.initDRM();
+    this.initDRM();
     this.reload();
 
     if (wasPlaying) {
