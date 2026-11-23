@@ -68,6 +68,22 @@ box is the screen and the fill is always black:
 >
 ```
 
+The fullscreen rule matches only when `<video-player>` itself is fullscreen. A
+page that sets `fullscreen-element` fullscreens its own wrapper, so it styles
+the player there. Without this rule, a portrait player is taller than the
+screen and its controls fall below it:
+
+```css
+.wrapper:fullscreen video-player {
+  --video-player-background: black;
+  height: 100%;
+  overflow: hidden;
+}
+```
+
+Set the two tokens in a stylesheet rule, not in an inline `style`, or the inline
+value wins over this rule.
+
 `--primary` is the shared accent hook: the slider fill, timeline progress and
 menu hover all fall back through it, so setting it once is usually enough.
 
