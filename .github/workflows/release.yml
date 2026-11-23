@@ -20,7 +20,9 @@ jobs:
       - uses: actions/checkout@v7
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        # Pinned to a commit: this job holds contents:write and an OIDC token
+        # that can publish to npm, and a major tag is mutable upstream.
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           run_install: false
 

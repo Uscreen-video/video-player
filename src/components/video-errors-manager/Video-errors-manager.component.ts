@@ -33,6 +33,9 @@ export class VideoErrorsManager extends LitElement {
   @connect("isInAppBrowser")
   isInAppBrowser: boolean;
 
+  @connect("castActivated")
+  castActivated: boolean;
+
   @state()
   message: string | TemplateResult<any> = "";
 
@@ -50,6 +53,9 @@ export class VideoErrorsManager extends LitElement {
   @listen(Types.Command.error)
   handleErrors(error: Types.PlayerError) {
     if (error.drm) {
+      // The receiver holds its own licence, so a local key failure says nothing
+      // about the stream the viewer is watching on the cast target
+      if (this.castActivated) return;
       // Nothing plays after this, so the controls must stop claiming that it does
       this.command(Types.Command.pause);
       return this.print(this.drmMessage(error), true);

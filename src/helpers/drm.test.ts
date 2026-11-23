@@ -125,7 +125,6 @@ describe("initFairPlayDRM", () => {
       throw new Error("not available");
     };
 
-    // Not awaited on purpose: the listener has to be attached synchronously
     initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
@@ -148,7 +147,7 @@ describe("initFairPlayDRM", () => {
     status = 403;
     fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
     await waitUntil(() => errors.length === 1);
@@ -186,7 +185,7 @@ describe("initFairPlayDRM", () => {
         : stub(url, init);
     fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
     await waitUntil(() => errors.length === 1);
@@ -207,7 +206,7 @@ describe("initFairPlayDRM", () => {
         : stub(url, init);
     fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
 
     await waitUntil(() => errors.length === 1);
@@ -223,7 +222,7 @@ describe("initFairPlayDRM", () => {
     fakeRefusingKeySystem(video);
     (video as any).webkitCurrentPlaybackTargetIsWireless = true;
 
-    await initFairPlayDRM(
+    initFairPlayDRM(
       video,
       drmOptions,
       (error) => errors.push(error),
@@ -242,7 +241,7 @@ describe("initFairPlayDRM", () => {
 
     fakeRefusingKeySystem(video);
 
-    await initFairPlayDRM(
+    initFairPlayDRM(
       video,
       drmOptions,
       (error) => errors.push(error),
@@ -260,7 +259,7 @@ describe("initFairPlayDRM", () => {
     const errors: unknown[] = [];
     const sessions = fakeKeySystem(video);
 
-    const teardown = await initFairPlayDRM(video, drmOptions, (error) =>
+    const teardown = initFairPlayDRM(video, drmOptions, (error) =>
       errors.push(error),
     );
     teardown();
@@ -276,7 +275,7 @@ describe("initFairPlayDRM", () => {
     const errors: unknown[] = [];
     const sessions = fakeKeySystem(video);
 
-    await initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
+    initFairPlayDRM(video, drmOptions, (error) => errors.push(error));
     dispatchEncrypted(video);
     dispatchEncrypted(video);
 
