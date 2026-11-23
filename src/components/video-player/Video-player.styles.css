@@ -3,3 +3,10 @@
   position: relative;
   outline: none;
 }
+
+:host(:fullscreen) video-container {
+  --video-player-background: black;
+
+  height: 100%;
+  padding-bottom: 0;
+}

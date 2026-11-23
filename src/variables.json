@@ -3,6 +3,9 @@
   "color-accent": "#006AFF",
   "color-danger": "#ED0B0B",
 
+  "aspect-ratio": "16 / 9",
+  "background": "black",
+
   "tooltip-background": "#232323",
   "tooltip-text": "#ffffff",
   "tooltip-font-size": "0.75rem",
