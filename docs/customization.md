@@ -50,11 +50,23 @@ and `tooltip` on `<video-slider>`; `progress-container` on `<video-timeline>`;
 
 - **Theme tokens**, `--video-player-<name>`, listed in `src/variables.json` —
   fonts, tooltip colours, button colour and size, menu item colours, timer,
-  live sign, cue size. Setting one on any ancestor rethemes every component that
-  uses it.
-- **Local knobs** declared on each component's `:host` — aspect ratio on the
-  container, progress and buffer colours on the timeline, track and thumb
-  styling on the slider, and so on. Each component's `.styles.css` is the list.
+  live sign, cue size, the player's shape and the fill around the video. Setting
+  one on any ancestor rethemes every component that uses it.
+- **Local knobs** declared on each component's `:host` — progress and buffer
+  colours on the timeline, track and thumb styling on the slider, and so on.
+  Each component's `.styles.css` is the list.
+
+The player does not read the video's dimensions. Its box is 16:9 until the page
+sets `--video-player-aspect-ratio`, as width / height, the same way as the CSS
+`aspect-ratio` property. The video fits inside the box and is never cropped, and
+`--video-player-background` (default `black`) fills the rest. In fullscreen the
+box is the screen and the fill is always black:
+
+```html
+<video-player
+  style="--video-player-aspect-ratio: 9 / 16; --video-player-background: #f2f2f2"
+>
+```
 
 `--primary` is the shared accent hook: the slider fill, timeline progress and
 menu hover all fall back through it, so setting it once is usually enough.

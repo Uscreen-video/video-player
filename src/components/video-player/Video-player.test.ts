@@ -148,3 +148,38 @@ describe("video-player video re-creation after adoption", () => {
     expect(el.querySelector("video")).to.equal(originalVideo);
   });
 });
+
+describe("video-player shape", () => {
+  const playerBox = async (style: string) => {
+    const el: VideoPlayer = await fixture(html`
+      <video-player style=${style}>
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `);
+    const container = el.shadowRoot.querySelector("video-container");
+    const video = el.querySelector("video");
+    return {
+      width: container.getBoundingClientRect().width,
+      height: container.getBoundingClientRect().height,
+      background: getComputedStyle(video).backgroundColor,
+    };
+  };
+
+  it("keeps 16:9 and a black fill by default", async () => {
+    const box = await playerBox("width: 320px");
+
+    expect(box.height).to.be.closeTo(180, 0.5);
+    expect(box.background).to.equal("rgb(0, 0, 0)");
+  });
+
+  it("takes the aspect ratio and the fill from the page", async () => {
+    const box = await playerBox(
+      "width: 180px; --video-player-aspect-ratio: 9 / 16; --video-player-background: rgb(128, 128, 128)",
+    );
+
+    expect(box.height).to.be.closeTo(320, 0.5);
+    expect(box.background).to.equal("rgb(128, 128, 128)");
+  });
+});
