@@ -50,6 +50,7 @@ are siblings of the container, not children.
 | --- | --- |
 | `<video-player>` | Owns state, the command bus, and the fullscreen / idle / keyboard controllers. The only element that must exist. |
 | `<video-container>` | Owns the media element. Nearly every playback command handler lives here, and native `<video>` events become actions here. |
+| `<video-media>` | Describes the video in page markup and holds the real `<video>` in its shadow root, only while it is in the document. Optional: a plain `<video slot="video">` still works. See [Lifecycle](./lifecycle.md#the-media-element). |
 | `<video-controls>` | Layout and idle-hiding for the control bar. Optional. |
 | Buttons | All extend `<video-button>`. Each reads a state field and fires one command — no other logic. |
 | `<video-chromecast>` | Mirrors playback commands onto a cast session while casting. |

@@ -30,6 +30,7 @@ import { sourcesController, SourcesController } from "./sources";
 import { audiosController } from "./audios";
 import type { AudiosController } from "./audios/types";
 import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
+import { MediaChangeDetail, VideoMedia } from "../video-media";
 
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
@@ -56,8 +57,23 @@ export class VideoContainer extends LitElement {
   hls: Hls;
   initTime: number;
 
-  @queryAssignedElements({ selector: "video", flatten: true })
-  videos: HTMLVideoElement[];
+  @queryAssignedElements({ flatten: true })
+  slotted: HTMLElement[];
+
+  get media(): VideoMedia | undefined {
+    return this.slotted.find(
+      (element): element is VideoMedia => element instanceof VideoMedia,
+    );
+  }
+
+  get videos(): HTMLVideoElement[] {
+    return this.slotted.flatMap((element) => {
+      if (element instanceof HTMLVideoElement) return [element];
+      if (element instanceof VideoMedia && element.video)
+        return [element.video];
+      return [];
+    });
+  }
 
   @connect("poster")
   poster: string;
@@ -261,6 +277,7 @@ export class VideoContainer extends LitElement {
 
     // Init source after the video events are set
     this.sources.enableSource();
+    this.sources.attachNative();
   }
 
   private useWebkitFairplay = false;
@@ -375,8 +392,8 @@ export class VideoContainer extends LitElement {
     }
 
     if (this.isSourceSupported) {
-      // `load()` replays the source, and with it the `encrypted` event
-      video.load();
+      // A reload replays the source, and with it the `encrypted` event
+      this.sources.reloadNative();
     } else {
       this.command(Types.Command.initCustomHLS);
     }
@@ -529,6 +546,7 @@ export class VideoContainer extends LitElement {
   handleVideoEvent(e: Event & { target: HTMLVideoElement }) {
     const type = e.type;
     const video = this.videos[0];
+    if (!video) return;
 
     switch (type) {
       case "play":
@@ -655,7 +673,20 @@ export class VideoContainer extends LitElement {
     this._storageProvider.set({ ...currentVal, [key]: value });
   }
 
+  handleMediaChange(e: CustomEvent<MediaChangeDetail>) {
+    if (e.detail.video) return this.setup();
+
+    this.hls?.destroy();
+    this.hls = undefined;
+    this.teardownDRM();
+    (e.detail.previous as { mux?: { destroy?: () => void } }).mux?.destroy?.();
+    dispatch(this, Types.Action.update, { customHLS: false });
+    dispatch(this, Types.Action.pause);
+  }
+
   setup() {
+    if (!this.videos[0]) return;
+
     // active quality level will be initialized in HLS callback
     const { activeQualityLevel, ...savedSettings } =
       this._storageProvider.get();
@@ -668,7 +699,7 @@ export class VideoContainer extends LitElement {
       this.videos[0].volume = savedSettings.volume;
     }
 
-    this.sources = sourcesController(this.videos[0]);
+    this.sources = sourcesController(this.videos[0], this.media);
 
     const isSourceSupported = !INIT_NATIVE_HLS_RE.test(navigator.userAgent)
       ? false
@@ -743,6 +774,7 @@ export class VideoContainer extends LitElement {
     return html`
       <slot
         @slotchange=${this.setup}
+        @video-media-change=${this.handleMediaChange}
         @play=${this.handleVideoEvent}
         @pause=${this.handleVideoEvent}
         @timeupdate=${this.handleVideoEvent}

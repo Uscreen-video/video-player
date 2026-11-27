@@ -33,6 +33,44 @@ If the chosen `<source>` carries only a `data-src`, startup describes the media
 in state and stops without loading anything. Firing the init command yourself is
 what starts the download — this is the lazy-loading path.
 
+## The media element
+
+The `video` slot takes one of two elements:
+
+- A plain `<video slot="video">`. The video is part of the page markup.
+- A `<video-media slot="video">` with the same attributes and the same
+  `<source>` and `<track>` children. The page markup then only describes the
+  video. `<video-media>` creates the real `<video>` in its shadow root when it
+  enters the document, and removes it when it leaves.
+
+Use `<video-media>` on a page that something copies with `cloneNode`. Turbo
+does that for its page cache and for frame navigation. A copy of a plain
+`<video>` is a second working video that never enters the document, and Safari
+loads it and plays it with sound. A copy of `<video-media>` has no shadow root
+and no video, so it has nothing to load.
+
+`<video-media>` creates the video in `connectedCallback` only. Do not move that
+to the constructor or to `attributeChangedCallback`: WebKit upgrades a detached
+copy and runs both.
+
+Three things differ from a plain `<video>`:
+
+- **The inner video has no `<source>` children.** The player reads the URL from
+  the `<source>` in the page markup each time it loads. On the native engine it
+  sets `src` on the inner video. A page renews a URL the same way as before: it
+  writes the `<source>` and fires the `reload` command.
+- **Each return to the document creates a new video.** `<video-media>` fires
+  `video-media-change` with the new video, or with `null` when the video is
+  removed. The player starts up again on the first and drops the engine, the
+  DRM handlers, and the Mux monitor on the second. A move inside the document
+  keeps the video.
+- **Page code talks to `<video-media>`.** The element dispatches the media
+  events of the inner video on itself and proxies playback state
+  (`currentTime`, `duration`, `paused`, `volume`, `muted`, and others) and
+  `play()`, `pause()`, and `load()`. The inner video is available as `.video`.
+  Attributes set on `<video-media>` reach the inner video, except `id`,
+  `class`, `style`, `slot`, `hidden`, and `data-*`.
+
 ## Readiness
 
 `canPlay` is the gate for `play`, `seek` and `setPlaybackRate`. It is set when

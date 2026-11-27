@@ -1,11 +1,19 @@
 import { State } from "../../types";
 
-export const sourcesController = (video: HTMLVideoElement) => {
-  const sources = Array.from(video.querySelectorAll("source"));
+export const sourcesController = (
+  video: HTMLVideoElement,
+  sourcesParent: Element = video,
+) => {
+  const sources = Array.from(sourcesParent.querySelectorAll("source"));
 
   const supportedSource = sources.find((s) => video.canPlayType(s.type));
 
   const activeSource = supportedSource || sources[0];
+
+  const videoHasNoSources = sourcesParent !== video;
+
+  const getSrc = () =>
+    activeSource.src || activeSource.getAttribute("data-src");
 
   return {
     allSources: (): State["sources"] =>
@@ -14,10 +22,16 @@ export const sourcesController = (video: HTMLVideoElement) => {
         src: s.src || s.getAttribute("data-src"),
       })),
     isSourceSupported: () => !!supportedSource,
-    getSrc: () => activeSource.src || activeSource.getAttribute("data-src"),
+    getSrc,
     enableSource: () => {
-      activeSource.src =
-        activeSource.src || activeSource.getAttribute("data-src");
+      activeSource.src = getSrc();
+    },
+    attachNative: () => {
+      if (videoHasNoSources) video.src = getSrc();
+    },
+    reloadNative: () => {
+      if (videoHasNoSources) video.src = getSrc();
+      else video.load();
     },
     isLazy: () => !activeSource.src,
   };
