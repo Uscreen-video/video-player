@@ -33,6 +33,37 @@ If the chosen `<source>` carries only a `data-src`, startup describes the media
 in state and stops without loading anything. Firing the init command yourself is
 what starts the download — this is the lazy-loading path.
 
+## Autoplay
+
+A page asks for autoplay the usual way, with the attribute on the `<video>`.
+Startup reads it into `isAutoplay`, **replaces it with `data-autoplay`**, and
+starts playback itself as soon as the engine has a source — right after the
+native source is enabled, or right after hls.js attaches the media.
+
+Playback is started with `play()` rather than on a `canplay` event: under
+`preload="none"` nothing loads until something asks to play, so waiting for the
+event would wait forever. `data-autoplay` is what the player reads afterwards —
+the browser ignores it — because startup runs again on every `slotchange`, and
+a copy of the page restored into the document has to be able to ask again.
+
+The attribute cannot stay. `cloneNode` copies attributes but not playback
+state, so a copy of the page that carries `autoplay` starts the stream by
+itself, from the beginning, and WebKit plays such a copy even though it is in
+no document — with sound nothing on the page can reach. Turbo takes a copy on
+every visit and on every frame render, and asks no one first. Without the
+attribute the copy stays paused at `readyState` 0.
+
+The player keeps the rest of the browser's behaviour: the first pause gives up
+on autoplay, as the browser's own autoplaying flag does — including a pause
+command sent before playback has begun, which the element itself would report
+no event for — and a refusal, an unmuted autoplay the viewer never allowed, is
+left where the attribute would have left it. The request is armed once per
+video, so a later `setup()` never restarts what the viewer has stopped.
+
+Keep `preload` off `auto` for the same reason: a copy with `preload="auto"`
+loads the whole stream and stays in `NETWORK_LOADING` for as long as the
+snapshot lives. `metadata` fetches once and goes idle.
+
 ## Readiness
 
 `canPlay` is the gate for `play`, `seek` and `setPlaybackRate`. It is set when
