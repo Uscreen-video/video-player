@@ -113,6 +113,30 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  /**
+   * What the browser's own autoplaying flag held: set when the markup asked
+   * for autoplay, cleared by the first pause, so a viewer who pauses before
+   * the first frame arrives is not overruled
+   */
+  private autoplayPending = false;
+
+  /** The `autoplay` attribute is removed in `setup()`, so this takes its place */
+  private startAutoplay(video: HTMLVideoElement) {
+    video.addEventListener(
+      "canplay",
+      () => {
+        if (!this.autoplayPending || this.videos[0] !== video) return;
+        this.autoplayPending = false;
+        // The method, not `Command.play`: the command waits on `canPlay`,
+        // which iOS only sets once the engine reports back, and the attribute
+        // never waited for that. A refusal — an unmuted autoplay without
+        // interaction — is what the attribute would have run into too
+        this.play().catch(() => undefined);
+      },
+      { once: true },
+    );
+  }
+
   @listen(Types.Command.pause)
   pause() {
     return this.videos[0].pause();
@@ -535,6 +559,7 @@ export class VideoContainer extends LitElement {
         dispatch(this, Types.Action.play);
         break;
       case "pause":
+        this.autoplayPending = false;
         dispatch(this, Types.Action.pause);
         break;
       case "timeupdate":
@@ -688,9 +713,18 @@ export class VideoContainer extends LitElement {
       );
     }
 
-    const [
-      { autoplay, muted, poster, volume, currentTime, playbackRate, title },
-    ] = this.videos;
+    const [video] = this.videos;
+    const { autoplay, muted, poster, volume, currentTime, playbackRate, title } =
+      video;
+
+    // `cloneNode` copies attributes, not playback state, so a copy of the page
+    // taken while this one plays starts the stream by itself, from the
+    // beginning. In WebKit a copy that never enters a document plays all the
+    // same, with sound nothing on the page can reach (CAT-2179). Turbo takes
+    // such a copy on every visit and on every frame render, and asks no one.
+    // The attribute goes; the player starts playback itself below
+    video.removeAttribute("autoplay");
+    this.autoplayPending = autoplay;
 
     this.initTime = Date.now();
 
@@ -715,6 +749,8 @@ export class VideoContainer extends LitElement {
           ? savedSettings.playbackRate
           : playbackRate,
     });
+
+    if (autoplay) this.startAutoplay(video);
 
     if (this.sources.isLazy()) return;
 

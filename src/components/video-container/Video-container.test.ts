@@ -214,3 +214,76 @@ describe("FairPlay initialisation", () => {
     expect(listeners.size).to.equal(1);
   });
 });
+
+describe("autoplay", () => {
+  const mount = async (player: VideoPlayer) => {
+    await elementUpdated(player);
+    const video = player.querySelector("video");
+    let plays = 0;
+    video.play = () => {
+      plays++;
+      return Promise.resolve();
+    };
+    return { player, video, plays: () => plays };
+  };
+
+  const mountAutoplay = () =>
+    fixture<VideoPlayer>(html`
+      <video-player>
+        <video slot="video" preload="none" muted autoplay>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `).then(mount);
+
+  const mountPlain = () =>
+    fixture<VideoPlayer>(html`
+      <video-player>
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `).then(mount);
+
+  // `cloneNode` copies attributes, not playback state: a copy of the page that
+  // carries `autoplay` starts the stream on its own, and WebKit plays it even
+  // though it is in no document (CAT-2179)
+  it("keeps the attribute out of the markup a copy would carry", async () => {
+    const { player, video } = await mountAutoplay();
+
+    expect(video.hasAttribute("autoplay")).to.equal(false);
+    expect(player.state.value.isAutoplay).to.equal(true);
+    const copy = player.cloneNode(true) as HTMLElement;
+    expect(copy.querySelector("video").hasAttribute("autoplay")).to.equal(
+      false,
+    );
+  });
+
+  it("starts playback itself once the video can play", async () => {
+    const { video, plays } = await mountAutoplay();
+
+    video.dispatchEvent(new Event("canplay"));
+
+    expect(plays()).to.equal(1);
+  });
+
+  it("leaves a video the markup never asked to autoplay alone", async () => {
+    const { player, video, plays } = await mountPlain();
+
+    video.dispatchEvent(new Event("canplay"));
+
+    expect(plays()).to.equal(0);
+    expect(player.state.value.isAutoplay).to.equal(false);
+  });
+
+  // The browser clears its autoplaying flag on the first pause, and a viewer
+  // who gets there before the first frame must not be overruled
+  it("gives up once the viewer has paused", async () => {
+    const { video, plays } = await mountAutoplay();
+
+    video.dispatchEvent(new Event("pause"));
+    video.dispatchEvent(new Event("canplay"));
+
+    expect(plays()).to.equal(0);
+  });
+});

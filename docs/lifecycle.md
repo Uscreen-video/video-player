@@ -33,6 +33,28 @@ If the chosen `<source>` carries only a `data-src`, startup describes the media
 in state and stops without loading anything. Firing the init command yourself is
 what starts the download — this is the lazy-loading path.
 
+## Autoplay
+
+A page asks for autoplay the usual way, with the attribute on the `<video>`.
+Startup reads it into `isAutoplay`, **removes it**, and starts playback itself
+on the first `canplay`.
+
+The attribute cannot stay. `cloneNode` copies attributes but not playback
+state, so a copy of the page that carries `autoplay` starts the stream by
+itself, from the beginning, and WebKit plays such a copy even though it is in
+no document — with sound nothing on the page can reach. Turbo takes a copy on
+every visit and on every frame render, and asks no one first. Without the
+attribute the copy stays paused at `readyState` 0.
+
+The player keeps the rest of the browser's behaviour: the first pause gives up
+on autoplay, as the browser's own autoplaying flag does, and a refusal — an
+unmuted autoplay the viewer never allowed — is left where the attribute would
+have left it.
+
+Keep `preload` off `auto` for the same reason: a copy with `preload="auto"`
+loads the whole stream and stays in `NETWORK_LOADING` for as long as the
+snapshot lives. `metadata` fetches once and goes idle.
+
 ## Readiness
 
 `canPlay` is the gate for `play`, `seek` and `setPlaybackRate`. It is set when
