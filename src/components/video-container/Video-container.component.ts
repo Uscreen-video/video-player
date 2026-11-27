@@ -114,31 +114,64 @@ export class VideoContainer extends LitElement {
   }
 
   /**
-   * What the browser's own autoplaying flag held: set when the markup asked
-   * for autoplay, cleared by the first pause, so a viewer who pauses before
-   * the first frame arrives is not overruled
+   * What the browser's own autoplaying flag held: set when the markup asks for
+   * autoplay, cleared by the first pause, so a viewer who pauses before
+   * playback has begun is not overruled
    */
   private autoplayPending = false;
 
-  /** The `autoplay` attribute is removed in `setup()`, so this takes its place */
-  private startAutoplay(video: HTMLVideoElement) {
-    video.addEventListener(
-      "canplay",
-      () => {
-        if (!this.autoplayPending || this.videos[0] !== video) return;
-        this.autoplayPending = false;
-        // The method, not `Command.play`: the command waits on `canPlay`,
-        // which iOS only sets once the engine reports back, and the attribute
-        // never waited for that. A refusal — an unmuted autoplay without
-        // interaction — is what the attribute would have run into too
-        this.play().catch(() => undefined);
-      },
-      { once: true },
-    );
+  /** Videos whose autoplay request has already been armed */
+  private autoplaySeen = new WeakSet<HTMLVideoElement>();
+
+  /**
+   * The `autoplay` attribute cannot stay in the markup: `cloneNode` copies
+   * attributes but not playback state, so a copy of the page starts the stream
+   * by itself, from the beginning, and WebKit plays such a copy even though it
+   * is in no document — with sound nothing on the page can reach (CAT-2179).
+   * Turbo takes a copy on every visit and on every frame render, and asks no
+   * one first.
+   *
+   * The request is kept as `data-autoplay`, which the browser ignores and only
+   * this player reads: `setup()` runs again on every `slotchange`, and a copy
+   * restored into the page has to be able to ask again.
+   */
+  private recordAutoplay(video: HTMLVideoElement) {
+    const requested =
+      video.hasAttribute("autoplay") || video.hasAttribute("data-autoplay");
+    if (!requested) return false;
+
+    video.removeAttribute("autoplay");
+    video.setAttribute("data-autoplay", "");
+
+    // Armed once per video: a later `setup()` must not restart playback the
+    // viewer has already stopped
+    if (!this.autoplaySeen.has(video)) {
+      this.autoplaySeen.add(video);
+      this.autoplayPending = true;
+    }
+
+    return true;
+  }
+
+  /** Takes the place of the attribute, once the engine has a source to play */
+  private startAutoplay() {
+    if (!this.autoplayPending) return;
+    this.autoplayPending = false;
+
+    // `play()`, not a wait for `canplay`: under `preload="none"` nothing loads
+    // until something asks to play, which is exactly what the attribute did.
+    // The method rather than `Command.play`, because the command waits on
+    // `canPlay`, which iOS only sets once the engine reports back. A refusal —
+    // an unmuted autoplay without interaction — is what the attribute would
+    // have run into too
+    this.play().catch(() => undefined);
   }
 
   @listen(Types.Command.pause)
   pause() {
+    // A pause before playback has begun cancels it: the video is paused
+    // already, so no `pause` event follows to do it
+    this.autoplayPending = false;
     return this.videos[0].pause();
   }
 
@@ -285,6 +318,8 @@ export class VideoContainer extends LitElement {
 
     // Init source after the video events are set
     this.sources.enableSource();
+
+    this.startAutoplay();
   }
 
   private useWebkitFairplay = false;
@@ -501,6 +536,8 @@ export class VideoContainer extends LitElement {
         // media is attached, and skips it when no rendition is loaded yet.
         this.hls.attachMedia(this.videos[0]);
 
+        this.startAutoplay();
+
         dispatch(this, Types.Action.setLevels, {
           qualityLevels: (levels as { width?: number; height?: number }[])
             // A rendition without RESOLUTION cannot be labelled or selected by
@@ -714,17 +751,8 @@ export class VideoContainer extends LitElement {
     }
 
     const [video] = this.videos;
-    const { autoplay, muted, poster, volume, currentTime, playbackRate, title } =
-      video;
-
-    // `cloneNode` copies attributes, not playback state, so a copy of the page
-    // taken while this one plays starts the stream by itself, from the
-    // beginning. In WebKit a copy that never enters a document plays all the
-    // same, with sound nothing on the page can reach (CAT-2179). Turbo takes
-    // such a copy on every visit and on every frame render, and asks no one.
-    // The attribute goes; the player starts playback itself below
-    video.removeAttribute("autoplay");
-    this.autoplayPending = autoplay;
+    const { muted, poster, volume, currentTime, playbackRate, title } = video;
+    const autoplay = this.recordAutoplay(video);
 
     this.initTime = Date.now();
 
@@ -749,8 +777,6 @@ export class VideoContainer extends LitElement {
           ? savedSettings.playbackRate
           : playbackRate,
     });
-
-    if (autoplay) this.startAutoplay(video);
 
     if (this.sources.isLazy()) return;
 
