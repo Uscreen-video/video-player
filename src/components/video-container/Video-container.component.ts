@@ -113,8 +113,71 @@ export class VideoContainer extends LitElement {
     }
   }
 
+  /**
+   * The video whose autoplay request is still waiting — what the browser's own
+   * autoplaying flag held, kept per video so that a request belonging to a
+   * video that has since been replaced cannot start the one that took its
+   * place. Cleared by the first pause, so a viewer who pauses before playback
+   * has begun is not overruled
+   */
+  private autoplayPending?: HTMLVideoElement;
+
+  /** Videos whose autoplay request has already been armed */
+  private autoplaySeen = new WeakSet<HTMLVideoElement>();
+
+  /**
+   * The `autoplay` attribute cannot stay in the markup: `cloneNode` copies
+   * attributes but not playback state, so a copy of the page starts the stream
+   * by itself, from the beginning, and WebKit plays such a copy even though it
+   * is in no document — with sound nothing on the page can reach (CAT-2179).
+   * Turbo takes a copy on every visit and on every frame render, and asks no
+   * one first.
+   *
+   * The request is kept as `data-autoplay`, which the browser ignores and only
+   * this player reads: `setup()` runs again on every `slotchange`, and a copy
+   * restored into the page has to be able to ask again.
+   */
+  private recordAutoplay(video: HTMLVideoElement) {
+    // A request left over from the video this one replaces is not this video's
+    // to honour
+    if (this.autoplayPending !== video) this.autoplayPending = undefined;
+
+    const requested =
+      video.hasAttribute("autoplay") || video.hasAttribute("data-autoplay");
+    if (!requested) return false;
+
+    video.removeAttribute("autoplay");
+    video.setAttribute("data-autoplay", "");
+
+    // Armed once per video: a later `setup()` must not restart playback the
+    // viewer has already stopped
+    if (!this.autoplaySeen.has(video)) {
+      this.autoplaySeen.add(video);
+      this.autoplayPending = video;
+    }
+
+    return true;
+  }
+
+  /** Takes the place of the attribute, once the engine has a source to play */
+  private startAutoplay() {
+    if (!this.autoplayPending || this.autoplayPending !== this.videos[0]) return;
+    this.autoplayPending = undefined;
+
+    // `play()`, not a wait for `canplay`: under `preload="none"` nothing loads
+    // until something asks to play, which is exactly what the attribute did.
+    // The method rather than `Command.play`, because the command waits on
+    // `canPlay`, which iOS only sets once the engine reports back. A refusal —
+    // an unmuted autoplay without interaction — is what the attribute would
+    // have run into too
+    this.play().catch(() => undefined);
+  }
+
   @listen(Types.Command.pause)
   pause() {
+    // A pause before playback has begun cancels it: the video is paused
+    // already, so no `pause` event follows to do it
+    this.autoplayPending = undefined;
     return this.videos[0].pause();
   }
 
@@ -261,6 +324,8 @@ export class VideoContainer extends LitElement {
 
     // Init source after the video events are set
     this.sources.enableSource();
+
+    this.startAutoplay();
   }
 
   private useWebkitFairplay = false;
@@ -477,6 +542,8 @@ export class VideoContainer extends LitElement {
         // media is attached, and skips it when no rendition is loaded yet.
         this.hls.attachMedia(this.videos[0]);
 
+        this.startAutoplay();
+
         dispatch(this, Types.Action.setLevels, {
           qualityLevels: (levels as { width?: number; height?: number }[])
             // A rendition without RESOLUTION cannot be labelled or selected by
@@ -535,6 +602,7 @@ export class VideoContainer extends LitElement {
         dispatch(this, Types.Action.play);
         break;
       case "pause":
+        this.autoplayPending = undefined;
         dispatch(this, Types.Action.pause);
         break;
       case "timeupdate":
@@ -688,9 +756,9 @@ export class VideoContainer extends LitElement {
       );
     }
 
-    const [
-      { autoplay, muted, poster, volume, currentTime, playbackRate, title },
-    ] = this.videos;
+    const [video] = this.videos;
+    const { muted, poster, volume, currentTime, playbackRate, title } = video;
+    const autoplay = this.recordAutoplay(video);
 
     this.initTime = Date.now();
 

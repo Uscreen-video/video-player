@@ -1,7 +1,7 @@
 import { html, fixture, expect, elementUpdated } from "@open-wc/testing";
 import type { VideoContainer } from "./Video-container.component";
 import type { VideoPlayer } from "../video-player/Video-player.component";
-import { KeySystems } from "../../types";
+import { Command, KeySystems } from "../../types";
 
 describe("video-container", () => {
   it("with default parameters", async () => {
@@ -212,5 +212,134 @@ describe("FairPlay initialisation", () => {
     await Promise.all([container.initNative(), container.initNative()]);
 
     expect(listeners.size).to.equal(1);
+  });
+});
+
+describe("autoplay", () => {
+  let container: VideoContainer;
+
+  afterEach(() => container?.hls?.destroy());
+
+  const mount = async (player: VideoPlayer) => {
+    await elementUpdated(player);
+    container = player.shadowRoot.querySelector("video-container");
+    const video = player.querySelector("video");
+    let plays = 0;
+    // Native playback is what `preload="none"` holds back, and the test
+    // browser plays no HLS natively, so the engine is started by hand
+    video.play = () => {
+      plays++;
+      return Promise.resolve();
+    };
+    return { player, video, plays: () => plays };
+  };
+
+  const mountAutoplay = () =>
+    fixture<VideoPlayer>(html`
+      <video-player>
+        <video slot="video" preload="none" muted autoplay>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `).then(mount);
+
+  const mountPlain = () =>
+    fixture<VideoPlayer>(html`
+      <video-player>
+        <video slot="video" preload="none" muted>
+          <source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />
+        </video>
+      </video-player>
+    `).then(mount);
+
+  // `cloneNode` copies attributes, not playback state: a copy of the page that
+  // carries `autoplay` starts the stream on its own, and WebKit plays it even
+  // though it is in no document (CAT-2179)
+  it("keeps the attribute out of the markup a copy would carry", async () => {
+    const { player, video } = await mountAutoplay();
+
+    expect(video.hasAttribute("autoplay")).to.equal(false);
+    expect(video.hasAttribute("data-autoplay")).to.equal(true);
+    expect(player.state.value.isAutoplay).to.equal(true);
+    const copy = player.cloneNode(true) as HTMLElement;
+    expect(copy.querySelector("video").hasAttribute("autoplay")).to.equal(
+      false,
+    );
+  });
+
+  // Under `preload="none"` nothing loads until something asks to play, so a
+  // wait for `canplay` would never end
+  it("starts playback once the source is enabled, without waiting to load", async () => {
+    const { video, plays } = await mountAutoplay();
+    expect(video.readyState, "the video loaded by itself").to.equal(0);
+
+    await container.initNative();
+
+    expect(plays()).to.equal(1);
+  });
+
+  it("leaves a video the markup never asked to autoplay alone", async () => {
+    const { player, plays } = await mountPlain();
+
+    await container.initNative();
+
+    expect(plays()).to.equal(0);
+    expect(player.state.value.isAutoplay).to.equal(false);
+  });
+
+  // The browser clears its autoplaying flag on the first pause, and a viewer
+  // who gets there before playback has begun must not be overruled
+  it("gives up once the viewer has paused", async () => {
+    const { player, plays } = await mountAutoplay();
+
+    player.command(Command.pause);
+    await container.initNative();
+
+    expect(plays()).to.equal(0);
+  });
+
+  // `setup()` runs again on every `slotchange`, and custom content added to a
+  // forwarded slot is enough to cause one
+  it("keeps the request through a repeated setup", async () => {
+    const { player, plays } = await mountAutoplay();
+
+    container.setup();
+
+    expect(player.state.value.isAutoplay).to.equal(true);
+    await container.initNative();
+    expect(plays()).to.equal(1);
+  });
+
+  // The request belongs to the video that made it: a lazy autoplay video can
+  // be swapped for one the page never asked to autoplay
+  it("drops the request with the video that made it", async () => {
+    const { player } = await mountAutoplay();
+    const replacement = document.createElement("video");
+    replacement.setAttribute("slot", "video");
+    replacement.muted = true;
+    let plays = 0;
+    replacement.play = () => {
+      plays++;
+      return Promise.resolve();
+    };
+    replacement.innerHTML =
+      '<source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />';
+
+    player.querySelector("video").replaceWith(replacement);
+    await elementUpdated(player);
+    await container.initNative();
+
+    expect(player.state.value.isAutoplay).to.equal(false);
+    expect(plays).to.equal(0);
+  });
+
+  it("does not play again after a repeated setup if the viewer paused", async () => {
+    const { player, plays } = await mountAutoplay();
+
+    player.command(Command.pause);
+    container.setup();
+    await container.initNative();
+
+    expect(plays()).to.equal(0);
   });
 });
