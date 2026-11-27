@@ -2,8 +2,12 @@ import { html, fixture, expect, elementUpdated } from "@open-wc/testing";
 import type { VideoMedia } from "./Video-media.component";
 import type { VideoPlayer } from "../video-player/Video-player.component";
 import type { VideoContainer } from "../video-container/Video-container.component";
+import { Action } from "../../types";
 
 const microtask = () => Promise.resolve();
+
+// `slotchange` is reported after the removal, on its own turn
+const slotChanged = () => new Promise((resolve) => setTimeout(resolve));
 
 const MARKUP = `
   <video-media slot="video" id="media" class="page" data-target="video"
@@ -154,6 +158,18 @@ describe("video-media", () => {
     expect(el.video.hasAttribute("data-later")).to.equal(false);
   });
 
+  it("follows attribute changes on a track", async () => {
+    const el = mount();
+
+    el.querySelector("track").setAttribute("src", "/mocks/captions_en.vtt");
+    el.querySelector("track").setAttribute("label", "English (CC)");
+    await microtask();
+
+    const track = el.video.querySelector("track");
+    expect(track.getAttribute("src")).to.equal("/mocks/captions_en.vtt");
+    expect(track.label).to.equal("English (CC)");
+  });
+
   it("dispatches the media events of the video on itself", () => {
     const el = mount();
     const seen: EventTarget[] = [];
@@ -234,6 +250,36 @@ describe("video-player with video-media", () => {
     expect(container.videos).to.eql([media.video]);
     expect(player.fullscreen.video).to.equal(media.video);
     expect(firstEngine).not.to.equal(undefined);
+  });
+
+  it("drops the engine when the media leaves the page on its own", async () => {
+    // The player stays: `<video-media>` reports its removal after it has left
+    // the page, where the event reaches no ancestor, so the slot is the only
+    // thing that can tell the container
+    const { player, media } = await mountPlayer();
+    await container.initHls();
+    expect(container.hls).to.not.equal(undefined);
+    player.state.setState(Action.update, { initialized: true, canPlay: true });
+
+    media.remove();
+    await microtask();
+    await slotChanged();
+
+    expect(container.hls).to.equal(undefined);
+    expect(container.videos).to.eql([]);
+    expect(player.state.value.initialized).to.equal(false);
+    expect(player.state.value.isPlaying).to.not.equal(true);
+  });
+
+  it("abandons a startup whose video is gone before the engine is built", async () => {
+    const { media } = await mountPlayer();
+
+    const startup = container.initHls();
+    media.remove();
+    await startup;
+    await slotChanged();
+
+    expect(container.hls).to.equal(undefined);
   });
 
   it("leaves a copy of the whole player without a video", async () => {

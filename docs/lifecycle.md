@@ -62,8 +62,11 @@ Three things differ from a plain `<video>`:
 - **Each return to the document creates a new video.** `<video-media>` fires
   `video-media-change` with the new video, or with `null` when the video is
   removed. The player starts up again on the first and drops the engine, the
-  DRM handlers, and the Mux monitor on the second. A move inside the document
-  keeps the video.
+  DRM handlers, the Mux monitor and the recorded readiness on the second. A
+  move inside the document keeps the video. Removing `<video-media>` itself
+  reports nothing — the element is already out of the page by then, so the
+  event reaches no ancestor — and the container drops the same things from the
+  `slotchange` instead.
 - **Page code talks to `<video-media>`.** The element dispatches the media
   events of the inner video on itself and proxies playback state
   (`currentTime`, `duration`, `paused`, `volume`, `muted`, and others) and

@@ -132,7 +132,14 @@ export class VideoMedia extends HTMLElement {
     this.video = video;
 
     this.observer = new MutationObserver(this.handleMutations);
-    this.observer.observe(this, { attributes: true, childList: true });
+    // `subtree` for the tracks: they are copied into the video, so an edit to
+    // one of them — a renewed caption URL, a corrected language or label —
+    // would otherwise never reach the copy
+    this.observer.observe(this, {
+      attributes: true,
+      childList: true,
+      subtree: true,
+    });
 
     this.emitChange({ video });
   }
@@ -173,8 +180,14 @@ export class VideoMedia extends HTMLElement {
     const video = this.video;
     if (!video) return;
 
-    records.forEach(({ type, attributeName, addedNodes, removedNodes }) => {
+    records.forEach(({ type, target, attributeName, addedNodes, removedNodes }) => {
       if (type === "attributes") {
+        // An attribute of a `<track>`, not of the host: the copies are rebuilt
+        // from the markup rather than patched one attribute at a time
+        if (target !== this) {
+          if ((target as Element).nodeName === "TRACK") this.copyTracks(video);
+          return;
+        }
         if (PAGE_ONLY_ATTRIBUTE_RE.test(attributeName)) return;
         const value = this.getAttribute(attributeName);
         if (value === null) video.removeAttribute(attributeName);

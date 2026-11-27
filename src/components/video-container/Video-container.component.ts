@@ -29,7 +29,7 @@ import { subtitlesController, SubtitlesController } from "./subtitles";
 import { sourcesController, SourcesController } from "./sources";
 import { audiosController } from "./audios";
 import type { AudiosController } from "./audios/types";
-import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
+import { device, INIT_NATIVE_HLS_RE } from "../../helpers/device";
 import { MediaChangeDetail, VideoMedia } from "../video-media";
 
 // In Safari on live streams video.duration = Infinity
@@ -56,6 +56,20 @@ export class VideoContainer extends LitElement {
 
   hls: Hls;
   initTime: number;
+
+  /**
+   * The video `setup()` last ran against. A slot that loses its video reports
+   * nothing — `<video-media>` emits its change event after it has left the
+   * page, where it reaches no ancestor — so this is what tells a slot that
+   * never had a video apart from one whose video has just gone
+   */
+  private attached?: HTMLVideoElement;
+
+  /**
+   * Bumped by every setup and teardown. `initHls()` waits twice before it is
+   * done, and the video it started for can be replaced or removed in between
+   */
+  private generation = 0;
 
   @queryAssignedElements({ flatten: true })
   slotted: HTMLElement[];
@@ -402,14 +416,21 @@ export class VideoContainer extends LitElement {
   @listen(Types.Command.initCustomHLS)
   @listen(Types.Command.init, { isSourceSupported: false })
   async initHls() {
+    const [video] = this.videos;
+    if (!video) return;
+    const generation = this.generation;
+
     const HLS = (await import("hls.js")).default;
 
-    if (!HLS.isSupported()) return;
+    // The import is a task of its own, and the player can be removed — or the
+    // video replaced — while it runs. An engine built here would attach to a
+    // video nothing owns any more, and nothing would ever destroy it
+    if (!HLS.isSupported() || !this.isCurrentMedia(generation, video)) return;
 
     this.hls?.destroy();
     this.licenseExchange = {};
 
-    this.hls = new HLS({
+    const hls = (this.hls = new HLS({
       // Without this, automatic selection climbs the whole ladder whenever
       // bandwidth allows — a 4K rendition pulled into a 400px window. Capping
       // keys off the element's size in device pixels, and constrains automatic
@@ -441,20 +462,28 @@ export class VideoContainer extends LitElement {
             },
           }
         : {},
-    });
+    }));
 
     if (this.muxData)
       await connectMuxData(
-        this.videos[0],
+        video,
         { ...this.muxData, player_init_time: this.initTime },
-        { Hls: HLS, hlsjs: this.hls },
+        { Hls: HLS, hlsjs: hls },
       );
 
-    this.hls.on(HLS.Events.LEVEL_LOADED, () => {
+    // A teardown during that wait has already cleared `this.hls`, and every
+    // registration below would throw on it
+    if (!this.isCurrentMedia(generation, video)) {
+      hls.destroy();
+      if (this.hls === hls) this.hls = undefined;
+      return;
+    }
+
+    hls.on(HLS.Events.LEVEL_LOADED, () => {
       dispatch(this, Types.Action.canPlay);
     });
 
-    this.hls.on(HLS.Events.ERROR, (_, error) => {
+    hls.on(HLS.Events.ERROR, (_, error) => {
       if (!error.fatal) return;
 
       if (error.type === HLS.ErrorTypes.KEY_SYSTEM_ERROR) {
@@ -472,7 +501,7 @@ export class VideoContainer extends LitElement {
     // LEVEL_SWITCHED, not LEVEL_UPDATED: the latter fires when a rendition
     // playlist is loaded or refreshed, and a VOD playlist loads once and never
     // refreshes, so it goes stale as soon as a level is replayed from cache.
-    this.hls.on(
+    hls.on(
       HLS.Events.LEVEL_SWITCHED,
       (_: unknown, { level }: { level: number }) => {
         // Only reflects what is playing — the user's selection lives in
@@ -481,18 +510,18 @@ export class VideoContainer extends LitElement {
         // Dispatched as a plain update rather than setQualityLevel, which is
         // reserved for a deliberate change and is reported as one downstream.
         dispatch(this, Types.Action.update, {
-          currentQualityLevel: this.hls.levels[level]?.height || -1,
+          currentQualityLevel: hls.levels[level]?.height || -1,
         });
       },
     );
 
-    this.hls.on(
+    hls.on(
       HLS.Events.MANIFEST_PARSED,
       (_: unknown, { levels }: { levels: unknown[] }) => {
         // Attaching only once the renditions are known is what makes automatic
         // selection respect the player size: hls.js measures the element when
         // media is attached, and skips it when no rendition is loaded yet.
-        this.hls.attachMedia(this.videos[0]);
+        hls.attachMedia(video);
 
         dispatch(this, Types.Action.setLevels, {
           qualityLevels: (levels as { width?: number; height?: number }[])
@@ -511,7 +540,7 @@ export class VideoContainer extends LitElement {
             ({ height }) => height === activeQualityLevel,
           );
           if (qualityLevelIdx >= 0) {
-            this.hls.nextLevel = qualityLevelIdx;
+            hls.nextLevel = qualityLevelIdx;
             dispatch(this, Types.Action.setQualityLevel, {
               activeQualityLevel,
             });
@@ -520,16 +549,17 @@ export class VideoContainer extends LitElement {
 
         this.subtitles = subtitlesController(
           this,
-          this.videos[0],
-          this.hls,
+          video,
+          hls,
           this._storageProvider.get().activeTextTrackId,
         );
 
         window.requestAnimationFrame(() => {
+          if (!this.isCurrentMedia(generation, video)) return;
           this.audios = audiosController(
             this,
-            this.videos[0],
-            this.hls,
+            video,
+            hls,
             this._storageProvider.get().activeAudioTrackId,
           );
         });
@@ -537,9 +567,13 @@ export class VideoContainer extends LitElement {
     );
 
     this.sources.enableSource();
-    this.hls.loadSource(this.sources.getSrc());
+    hls.loadSource(this.sources.getSrc());
 
     dispatch(this, Types.Action.update, { customHLS: true });
+  }
+
+  private isCurrentMedia(generation: number, video: HTMLVideoElement) {
+    return this.generation === generation && this.videos[0] === video;
   }
 
   @eventOptions({ capture: true })
@@ -676,16 +710,46 @@ export class VideoContainer extends LitElement {
   handleMediaChange(e: CustomEvent<MediaChangeDetail>) {
     if (e.detail.video) return this.setup();
 
+    this.teardownMedia(e.detail.previous);
+  }
+
+  /**
+   * The slot is the only report of a `<video-media>` leaving the page, and of
+   * a plain `<video>` being swapped for another, so the engine is torn down
+   * from here as well
+   */
+  handleSlotChange() {
+    const [video] = this.videos;
+    if (video === this.attached) return;
+
+    if (this.attached) this.teardownMedia(this.attached);
+    if (video) this.setup();
+  }
+
+  private teardownMedia(previous?: HTMLVideoElement) {
+    this.generation++;
+    this.attached = undefined;
+
     this.hls?.destroy();
     this.hls = undefined;
     this.teardownDRM();
-    (e.detail.previous as { mux?: { destroy?: () => void } }).mux?.destroy?.();
-    dispatch(this, Types.Action.update, { customHLS: false });
+    (previous as { mux?: { destroy?: () => void } })?.mux?.destroy?.();
+    dispatch(this, Types.Action.update, {
+      customHLS: false,
+      // A fresh video has no metadata yet, and readiness cannot be inherited:
+      // on iOS `canPlay` gates play, seek and setPlaybackRate, so a stale
+      // `true` lets them run against a video that cannot answer them
+      canPlay: !device.isIos,
+      initialized: false,
+    });
     dispatch(this, Types.Action.pause);
   }
 
   setup() {
     if (!this.videos[0]) return;
+
+    this.attached = this.videos[0];
+    this.generation++;
 
     // active quality level will be initialized in HLS callback
     const { activeQualityLevel, ...savedSettings } =
@@ -773,7 +837,7 @@ export class VideoContainer extends LitElement {
   render() {
     return html`
       <slot
-        @slotchange=${this.setup}
+        @slotchange=${this.handleSlotChange}
         @video-media-change=${this.handleMediaChange}
         @play=${this.handleVideoEvent}
         @pause=${this.handleVideoEvent}

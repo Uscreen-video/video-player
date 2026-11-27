@@ -77,8 +77,13 @@ export class FullscreenController implements ReactiveController {
     this.attachVideo(null);
   }
 
-  private fullscreenNodesMatching(target?: Element) {
-    return Boolean(target === this.video || target === this.container);
+  // A player can connect before `<video-media>` has built its video, so the
+  // attached video is null for a moment. Without this, `document.fullscreenElement`
+  // — null whenever nothing is fullscreen — would match that null video and
+  // report a fullscreen change on every connection
+  private fullscreenNodesMatching(target?: Element | null) {
+    if (!target) return false;
+    return target === this.video || target === this.container;
   }
 
   private handleFullscreenChange = (e?: Event & { target: Element }) => {
@@ -94,7 +99,7 @@ export class FullscreenController implements ReactiveController {
       );
 
       if (this.host.state.value?.isIos) {
-        this.toggleIosFullscreen(e.type === "webkitbeginfullscreen");
+        this.toggleIosFullscreen(e?.type === "webkitbeginfullscreen");
       }
 
       dispatch(this.host, Types.Action.fullscreenChange, { isFullscreen });
