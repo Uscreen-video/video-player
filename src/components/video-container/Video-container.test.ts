@@ -310,6 +310,29 @@ describe("autoplay", () => {
     expect(plays()).to.equal(1);
   });
 
+  // The request belongs to the video that made it: a lazy autoplay video can
+  // be swapped for one the page never asked to autoplay
+  it("drops the request with the video that made it", async () => {
+    const { player } = await mountAutoplay();
+    const replacement = document.createElement("video");
+    replacement.setAttribute("slot", "video");
+    replacement.muted = true;
+    let plays = 0;
+    replacement.play = () => {
+      plays++;
+      return Promise.resolve();
+    };
+    replacement.innerHTML =
+      '<source data-src="/mocks/master.m3u8" type="application/x-mpegURL" />';
+
+    player.querySelector("video").replaceWith(replacement);
+    await elementUpdated(player);
+    await container.initNative();
+
+    expect(player.state.value.isAutoplay).to.equal(false);
+    expect(plays).to.equal(0);
+  });
+
   it("does not play again after a repeated setup if the viewer paused", async () => {
     const { player, plays } = await mountAutoplay();
 

@@ -114,11 +114,13 @@ export class VideoContainer extends LitElement {
   }
 
   /**
-   * What the browser's own autoplaying flag held: set when the markup asks for
-   * autoplay, cleared by the first pause, so a viewer who pauses before
-   * playback has begun is not overruled
+   * The video whose autoplay request is still waiting — what the browser's own
+   * autoplaying flag held, kept per video so that a request belonging to a
+   * video that has since been replaced cannot start the one that took its
+   * place. Cleared by the first pause, so a viewer who pauses before playback
+   * has begun is not overruled
    */
-  private autoplayPending = false;
+  private autoplayPending?: HTMLVideoElement;
 
   /** Videos whose autoplay request has already been armed */
   private autoplaySeen = new WeakSet<HTMLVideoElement>();
@@ -136,6 +138,10 @@ export class VideoContainer extends LitElement {
    * restored into the page has to be able to ask again.
    */
   private recordAutoplay(video: HTMLVideoElement) {
+    // A request left over from the video this one replaces is not this video's
+    // to honour
+    if (this.autoplayPending !== video) this.autoplayPending = undefined;
+
     const requested =
       video.hasAttribute("autoplay") || video.hasAttribute("data-autoplay");
     if (!requested) return false;
@@ -147,7 +153,7 @@ export class VideoContainer extends LitElement {
     // viewer has already stopped
     if (!this.autoplaySeen.has(video)) {
       this.autoplaySeen.add(video);
-      this.autoplayPending = true;
+      this.autoplayPending = video;
     }
 
     return true;
@@ -155,8 +161,8 @@ export class VideoContainer extends LitElement {
 
   /** Takes the place of the attribute, once the engine has a source to play */
   private startAutoplay() {
-    if (!this.autoplayPending) return;
-    this.autoplayPending = false;
+    if (!this.autoplayPending || this.autoplayPending !== this.videos[0]) return;
+    this.autoplayPending = undefined;
 
     // `play()`, not a wait for `canplay`: under `preload="none"` nothing loads
     // until something asks to play, which is exactly what the attribute did.
@@ -171,7 +177,7 @@ export class VideoContainer extends LitElement {
   pause() {
     // A pause before playback has begun cancels it: the video is paused
     // already, so no `pause` event follows to do it
-    this.autoplayPending = false;
+    this.autoplayPending = undefined;
     return this.videos[0].pause();
   }
 
@@ -596,7 +602,7 @@ export class VideoContainer extends LitElement {
         dispatch(this, Types.Action.play);
         break;
       case "pause":
-        this.autoplayPending = false;
+        this.autoplayPending = undefined;
         dispatch(this, Types.Action.pause);
         break;
       case "timeupdate":
