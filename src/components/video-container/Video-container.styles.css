@@ -50,6 +50,16 @@ img {
   }
 }
 
+::slotted(video-media) {
+  position: absolute;
+  object-fit: contain;
+  background: var(--video-player-background, black);
+  top: 0;
+  left: 0;
+  height: 100% !important;
+  width: 100% !important;
+}
+
 ::slotted(video::cue) {
   font-size: 10px;
   color: red;

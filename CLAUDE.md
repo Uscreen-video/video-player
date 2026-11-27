@@ -46,6 +46,8 @@ src/
       subtitles.ts    text track controller
       audios/         audio track controller (hls + native implementations)
       sources.ts      <source> selection, lazy-src handling
+    video-media/      optional stand-in for <video slot="video">; builds the
+                      real <video> in its shadow root only while connected
     buttons/          one file per button, all extend VideoButton
     <other elements>/ Name.component.ts + Name.styles.css + Name.test.ts + index.ts
   helpers/        small, dependency-free utilities

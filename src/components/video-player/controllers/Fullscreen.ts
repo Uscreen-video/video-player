@@ -1,6 +1,7 @@
 import { ReactiveController } from "lit";
 import { dispatch, Types } from "../../../state";
 import { VideoPlayer } from "../Video-player.component";
+import type { VideoMedia } from "../../video-media";
 
 export class FullscreenController implements ReactiveController {
   container: Element;
@@ -23,8 +24,10 @@ export class FullscreenController implements ReactiveController {
         ? document.querySelector(fullscreenContainer)
         : this.host;
 
-    this.video = this.host.querySelector("video");
-    this.fullscreenProperties = this.getFullscreenProperties(this.video);
+    this.attachVideo(
+      this.host.querySelector<VideoMedia>(":scope > video-media")?.video ??
+        this.host.querySelector("video"),
+    );
 
     document.addEventListener("fullscreenchange", this.handleFullscreenChange);
     document.addEventListener(
@@ -35,15 +38,27 @@ export class FullscreenController implements ReactiveController {
       "mozfullscreenchange",
       this.handleFullscreenChange,
     );
-    this.video.addEventListener(
+    this.handleFullscreenChange();
+  }
+
+  attachVideo(video: HTMLVideoElement | null) {
+    this.video?.removeEventListener(
       "webkitbeginfullscreen",
       this.handleFullscreenChange,
     );
-    this.video.addEventListener(
+    this.video?.removeEventListener(
       "webkitendfullscreen",
       this.handleFullscreenChange,
     );
-    this.handleFullscreenChange();
+
+    this.video = video;
+    this.fullscreenProperties = this.getFullscreenProperties(video);
+
+    video?.addEventListener(
+      "webkitbeginfullscreen",
+      this.handleFullscreenChange,
+    );
+    video?.addEventListener("webkitendfullscreen", this.handleFullscreenChange);
   }
 
   hostDisconnected(): void {
@@ -59,18 +74,16 @@ export class FullscreenController implements ReactiveController {
       "mozfullscreenchange",
       this.handleFullscreenChange,
     );
-    this.video.removeEventListener(
-      "webkitbeginfullscreen",
-      this.handleFullscreenChange,
-    );
-    this.video.removeEventListener(
-      "webkitendfullscreen",
-      this.handleFullscreenChange,
-    );
+    this.attachVideo(null);
   }
 
-  private fullscreenNodesMatching(target?: Element) {
-    return Boolean(target === this.video || target === this.container);
+  // A player can connect before `<video-media>` has built its video, so the
+  // attached video is null for a moment. Without this, `document.fullscreenElement`
+  // — null whenever nothing is fullscreen — would match that null video and
+  // report a fullscreen change on every connection
+  private fullscreenNodesMatching(target?: Element | null) {
+    if (!target) return false;
+    return target === this.video || target === this.container;
   }
 
   private handleFullscreenChange = (e?: Event & { target: Element }) => {
@@ -86,7 +99,7 @@ export class FullscreenController implements ReactiveController {
       );
 
       if (this.host.state.value?.isIos) {
-        this.toggleIosFullscreen(e.type === "webkitbeginfullscreen");
+        this.toggleIosFullscreen(e?.type === "webkitbeginfullscreen");
       }
 
       dispatch(this.host, Types.Action.fullscreenChange, { isFullscreen });
@@ -109,7 +122,7 @@ export class FullscreenController implements ReactiveController {
     }
 
     // Safari on IOS allows to fullscreen only video element
-    if (video.webkitEnterFullScreen) {
+    if (video?.webkitEnterFullScreen) {
       return video.webkitEnterFullScreen({
         navigationUI: "hide",
       });
@@ -144,6 +157,7 @@ export class FullscreenController implements ReactiveController {
    * Safari resets video attributes when exiting from fullscreen by swiping video down
    */
   toggleIosFullscreen(isFullscreen: boolean) {
+    if (!this.video) return;
     this.video.setAttribute("controls", "true");
     this.video.removeAttribute("playsinline");
     setTimeout(() => {
@@ -155,12 +169,12 @@ export class FullscreenController implements ReactiveController {
       });
   }
 
-  getFullscreenProperties = (element: HTMLVideoElement) => {
+  getFullscreenProperties = (element: HTMLVideoElement | null) => {
     if (document.exitFullscreen) return null;
 
     const prefix = ["webkit", "moz", "ms"].find(
       (item) =>
-        !!(element as any)[`${item}ExitFullscreen`] ||
+        !!(element as any)?.[`${item}ExitFullscreen`] ||
         !!(document as any)[`${item}CancelFullScreen`],
     );
 

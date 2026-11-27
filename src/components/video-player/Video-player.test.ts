@@ -1,6 +1,6 @@
 import { html, fixture, expect, waitUntil } from "@open-wc/testing";
 import type { VideoPlayer } from "./Video-player.component";
-import { Command } from "../../types";
+import { Action, Command } from "../../types";
 
 describe.skip("video-player", () => {
   it("with default parameters", async () => {
@@ -65,6 +65,20 @@ describe("video-player playback errors", () => {
     el.removeAttribute("drm-help-url");
     await el.updateComplete;
     expect(el.state.value.drmHelpUrl).to.equal(undefined);
+  });
+});
+
+describe("video-player fullscreen on connection", () => {
+  it("reports no fullscreen change while the player has no video", async () => {
+    // `<video-media>` builds its video on its own connection, after the player
+    // has already connected, so the controller starts with a null video — and
+    // `document.fullscreenElement` is null whenever nothing is fullscreen
+    const el: VideoPlayer = await fixture(html`<video-player></video-player>`);
+    el.state.setState(Action.update, { isIos: true });
+
+    expect(() => el.fullscreen.hostConnected()).not.to.throw();
+    expect(el.fullscreen.video).to.equal(null);
+    expect(el.state.value.isFullscreen).to.not.equal(true);
   });
 });
 
