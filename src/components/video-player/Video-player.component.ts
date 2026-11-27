@@ -15,6 +15,7 @@ import { INIT_NATIVE_HLS_RE } from "../../helpers/device";
 import { Action, MuxParams, DRMOptions } from "../../types";
 import { watch } from "../../decorators/watch";
 import styles from "./Video-player.styles.css?inline";
+import { MEDIA_CHANGE_EVENT, MediaChangeDetail } from "../video-media";
 
 import "../video-controls";
 import "../video-container";
@@ -155,6 +156,10 @@ export class VideoPlayer extends LitElement {
     this.idleManager.reset();
   };
 
+  handleMediaChange = (e: CustomEvent<MediaChangeDetail>) => {
+    this.fullscreen.attachVideo(e.detail.video);
+  };
+
   connectedCallback(): void {
     this.recreateVideosOnce();
     super.connectedCallback();
@@ -164,6 +169,7 @@ export class VideoPlayer extends LitElement {
     this.addEventListener("touchstart", this.handleMove, { passive: true });
     this.addEventListener("mousemove", this.handleMove);
     this.addEventListener("mouseleave", this.handleMove);
+    this.addEventListener(MEDIA_CHANGE_EVENT, this.handleMediaChange);
 
     if (this.muxData?.env_key) {
       this.state.setState(Action.setMuxParams, { muxData: this.muxData });
