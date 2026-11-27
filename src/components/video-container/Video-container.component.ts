@@ -30,7 +30,7 @@ import { sourcesController, SourcesController } from "./sources";
 import { audiosController } from "./audios";
 import type { AudiosController } from "./audios/types";
 import { device, INIT_NATIVE_HLS_RE } from "../../helpers/device";
-import { MediaChangeDetail, VideoMedia } from "../video-media";
+import { MEDIA_CHANGE_EVENT, MediaChangeDetail, VideoMedia } from "../video-media";
 
 // In Safari on live streams video.duration = Infinity
 const getVideoDuration = (video: HTMLVideoElement): number => {
@@ -343,6 +343,9 @@ export class VideoContainer extends LitElement {
       // actually hands the element to the WebKit path
     }
 
+    // The video can leave the page while the key session is being detached
+    if (this.videos[0] !== video) return;
+
     this.useWebkitFairplay = true;
     this.initDRM();
     this.reload();
@@ -476,6 +479,9 @@ export class VideoContainer extends LitElement {
     if (!this.isCurrentMedia(generation, video)) {
       hls.destroy();
       if (this.hls === hls) this.hls = undefined;
+      // The teardown ran before this monitor existed, so it is this run's to
+      // remove — otherwise it keeps reporting on a video nothing owns
+      (video as { mux?: { destroy?: () => void } }).mux?.destroy?.();
       return;
     }
 
@@ -722,8 +728,31 @@ export class VideoContainer extends LitElement {
     const [video] = this.videos;
     if (video === this.attached) return;
 
-    if (this.attached) this.teardownMedia(this.attached);
-    if (video) this.setup();
+    const previous = this.attached;
+    if (previous) {
+      this.teardownMedia(previous);
+      this.reportMediaChange({ video: null, previous });
+    }
+    if (video) {
+      this.setup();
+      this.reportMediaChange({ video });
+    }
+  }
+
+  /**
+   * `<video-media>` reports its own removal from outside the page, where the
+   * event reaches no ancestor, and a plain `<video>` swapped for another
+   * reports nothing at all. Either way `<video-player>` still has to hear it:
+   * the fullscreen controller holds on to the video it was handed
+   */
+  private reportMediaChange(detail: MediaChangeDetail) {
+    this.dispatchEvent(
+      new CustomEvent<MediaChangeDetail>(MEDIA_CHANGE_EVENT, {
+        bubbles: true,
+        composed: true,
+        detail,
+      }),
+    );
   }
 
   private teardownMedia(previous?: HTMLVideoElement) {

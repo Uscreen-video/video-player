@@ -169,6 +169,19 @@ export class VideoMedia extends HTMLElement {
     video.remove();
   }
 
+  /** The copies keep the order of the markup, so the match is by position */
+  private syncTrack(track: HTMLTrackElement, attributeName: string) {
+    const index = Array.from(this.querySelectorAll(":scope > track")).indexOf(
+      track,
+    );
+    const copy = this.video?.querySelectorAll("track")[index];
+    if (!copy) return;
+
+    const value = track.getAttribute(attributeName);
+    if (value === null) copy.removeAttribute(attributeName);
+    else copy.setAttribute(attributeName, value);
+  }
+
   private copyTracks(video: HTMLVideoElement) {
     video.querySelectorAll("track").forEach((track) => track.remove());
     this.querySelectorAll(":scope > track").forEach((track) =>
@@ -182,10 +195,13 @@ export class VideoMedia extends HTMLElement {
 
     records.forEach(({ type, target, attributeName, addedNodes, removedNodes }) => {
       if (type === "attributes") {
-        // An attribute of a `<track>`, not of the host: the copies are rebuilt
-        // from the markup rather than patched one attribute at a time
+        // An attribute of a `<track>`, not of the host. Only that one copy is
+        // patched: rebuilding them all would hand the player new `TextTrack`
+        // objects with the same label and language, which it takes for the
+        // ones it already listens to, and the selected captions stop updating
         if (target !== this) {
-          if ((target as Element).nodeName === "TRACK") this.copyTracks(video);
+          if ((target as Element).nodeName === "TRACK")
+            this.syncTrack(target as HTMLTrackElement, attributeName);
           return;
         }
         if (PAGE_ONLY_ATTRIBUTE_RE.test(attributeName)) return;

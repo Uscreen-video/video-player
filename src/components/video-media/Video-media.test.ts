@@ -160,14 +160,17 @@ describe("video-media", () => {
 
   it("follows attribute changes on a track", async () => {
     const el = mount();
+    // The player listens to the `TextTrack` behind this element, so the copy
+    // has to be patched in place rather than replaced
+    const copy = el.video.querySelector("track");
 
     el.querySelector("track").setAttribute("src", "/mocks/captions_en.vtt");
     el.querySelector("track").setAttribute("label", "English (CC)");
     await microtask();
 
-    const track = el.video.querySelector("track");
-    expect(track.getAttribute("src")).to.equal("/mocks/captions_en.vtt");
-    expect(track.label).to.equal("English (CC)");
+    expect(el.video.querySelector("track")).to.equal(copy);
+    expect(copy.getAttribute("src")).to.equal("/mocks/captions_en.vtt");
+    expect(copy.label).to.equal("English (CC)");
   });
 
   it("dispatches the media events of the video on itself", () => {
@@ -269,6 +272,8 @@ describe("video-player with video-media", () => {
     expect(container.videos).to.eql([]);
     expect(player.state.value.initialized).to.equal(false);
     expect(player.state.value.isPlaying).to.not.equal(true);
+    // The player cannot have heard it from the media element itself
+    expect(player.fullscreen.video).to.equal(null);
   });
 
   it("abandons a startup whose video is gone before the engine is built", async () => {
